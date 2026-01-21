@@ -1,0 +1,142 @@
+{
+    "dag_id": "loyalty_activity_consistency_check",
+    "dag_schedule": "45 21 * * *",
+    "dag_sla_minutes": "60",
+    "prod_email_on_failure": "nap-marketing@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "jianyuan.gan@nordstrom.com",
+    "dag_dynamic_vars": {
+        "bucket": "eval('{\"test\": \"mock\",\"nonprod\": \"tf-das-marketing-nonprod-teradata-stage\", \"prod\": \"tf-das-marketing-prod-teradata-stage\"}[env]')",
+        "year": "eval('str(datetime.now().strftime(\"%Y\"))')",
+        "month": "eval('str(datetime.now().strftime(\"%m\"))')",
+        "day": "eval('str(datetime.now().strftime(\"%d\"))')",
+        "to_addresses": "eval('{\"test\": \"mock\",\"nonprod\": \"test-ooo-notification-aaaamfdfmbl3eawwoaybm5atpa@nordstrom.slack.com\", \"prod\": \"das-pod-crashing-loya-aaaaiak743vndt4xz4g5l2wzqe@nordstrom.slack.com\"}[env]')"
+    },
+    "stages": [
+        "refresh_om_table",
+        "refresh_dlq_table",
+        "compare_om_and_dlq_tables",
+        "check_missing_ids_presence",
+        "process_notification",
+        "end"
+    ],
+    "stage_dependencies": {
+        "refresh_om_table": "compare_om_and_dlq_tables",
+        "refresh_dlq_table": "compare_om_and_dlq_tables",
+        "compare_om_and_dlq_tables": "check_missing_ids_presence",
+        "check_missing_ids_presence": [
+            "process_notification",
+            "end"
+        ]
+    },
+    "refresh_om_table": {
+        "attach_partitions": {
+            "spark_engine": {
+                "spark_run_mode": "low",
+                "scripts": [
+                    "repair_loyalty_activity_table.sql"
+                ]
+            }
+        }
+    },
+    "refresh_dlq_table": {
+        "attach_partitions": {
+            "spark_engine": {
+                "spark_run_mode": "low",
+                "scripts": [
+                    "repair_DLQ_loyalty_activity_table.sql"
+                ]
+            }
+        }
+    },
+    "compare_om_and_dlq_tables": {
+        "job": {
+            "spark_engine": {
+                "spark_run_mode": "low",
+                "scripts": [
+                    "find_missing_ids.sql"
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__S3_MISSING_LOYALTY_ACTIVITY_CREATE_IDS_CSV_SINK__",
+                        "sql_table_reference": "missing_create_ids"
+                    }
+                ]
+            }
+        }
+    },
+    "check_missing_ids_presence": {
+        "branching": {
+            "branch_engine": {
+                "python_code": "utils/src/branching/loyalty_activity_missing_ids_notification_branching.py",
+                "callable_function_name": "check_missing_ids_presence",
+                "provide_context": "False",
+                "callable_return_vars": {
+                    "task1_name": "process_notification",
+                    "task2_name": "end"
+                }
+            }
+        }
+    },
+    "process_notification": {
+        "copy_list_of_ids_to_incremental_folder": {
+            "python_executor": {
+                "module": "python/utils",
+                "version": "1.3.22",
+                "args": [
+                    "python/utils/src/bulk_s3_copy.py",
+                    "--s3_source_bucket_env_name",
+                    "S3_MKTG_BUCKET",
+                    "--s3_target_bucket_env_name",
+                    "S3_MKTG_BUCKET",
+                    "--source_to_target_path_pair",
+                    "{'source': 'missing_ids/loyalty_activity/missing_create_ids/', 'target': 'missing_ids/loyalty_activity/incremental/year=<year>/month=<month>/day=<day>/'}"
+                ]
+            }
+        },
+        "send_notification_to_slack": {
+            "python_executor": {
+                "module": "python/utils",
+                "version": "1.3.18",
+                "args": [
+                    "python/utils/src/send_email.py",
+                    "--vault_host_env_var",
+                    "VAULT_PATH",
+                    "--vault_port_env_var",
+                    "VAULT_PORT",
+                    "--k8s_vault_role_id_env_var",
+                    "VAULT_ROLE_ID",
+                    "--k8s_vault_secret_id_env_var",
+                    "VAULT_SECRET",
+                    "--vault_email_key_env_var",
+                    "MAIL_SA_VAULT_PATH",
+                    "--vault_email_value_user_key",
+                    "user",
+                    "--vault_email_value_password_key",
+                    "password",
+                    "--mail_subject",
+                    "Missing LoylatyActivity Create Event IDs notification",
+                    "--mail_body",
+                    "Missing LoylatyActivity Create detected! The CSV file with IDs could be found in the following folder: s3://<bucket>/missing_ids/loyalty_activity/incremental/year=<year>/month=<month>/day=<day>",
+                    "--from_address",
+                    "das_marketing_isf_mb_auto@nordstrom.com",
+                    "--to_addresses",
+                    "<to_addresses>",
+                    "--replace_mapping",
+                    "{{\"year\": \"?year?\", \"month\": \"?month?\", \"day\": \"?day?\", \"bucket\": \"?bucket?\", \"to_addresses\": \"?to_addresses?\"}}"
+                ]
+            }
+        }
+    },
+    "end": {
+        "dummy": {
+            "python_executor": {
+                "module": "python/utils",
+                "version": "1.3.22",
+                "args": [
+                    "python/utils/src/dummy.py",
+                    "?trigger_operator?"
+                ]
+            }
+        }
+    }
+}

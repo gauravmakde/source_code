@@ -1,0 +1,61 @@
+{
+  "dag_id": "wfm_work_shift_load",
+  "dag_schedule": "57 1,13,16,19,22 * * *",
+  "stages": [
+    "wfm_work_shift_0"
+  ],
+  "wfm_work_shift_0": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "medium",
+        "scripts": [
+          "wfm_work_shift_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__WFM_WORK_SHIFT_KAFKA__",
+            "sql_table_reference": "kafka_wfm_work_shift_input",
+            "data_source_name": "customer-work-shift-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__WFM_WORK_SHIFT_KAFKA_TO_S3_ORC__",
+            "sql_table_reference": "wfm_work_shift_orc_output"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_shift_stg_table",
+            "data_source_name": "SHIFT_STG"
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_shift_job_stg_table",
+            "data_source_name": "SHIFT_JOB_STG"
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_shift_job_detail_stg_table",
+            "data_source_name": "SHIFT_JOB_DETAIL_STG"
+          }
+
+        ]
+      }
+    },
+    "load_1_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "wfm_work_shift_load_fact.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+
+

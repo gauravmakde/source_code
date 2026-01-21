@@ -1,0 +1,43 @@
+{
+  "dag_id": "pay_period_data_onetime_load",
+  "dag_schedule": "0 9 * * *",
+  "stages": [
+    "s3_csv_pay_period_data_load"
+  ],
+  "s3_csv_pay_period_data_load": {
+    "load_0_pay_period_stg_tables": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "pay_period_load_s3_to_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__EMPLOYEE_PAY_PERIOD_S3__",
+            "sql_table_reference": "pay_period_s3_input"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "pay_period_ldg",
+            "data_source_name": "PAY_PERIOD_LDG"
+          }
+        ]
+      }
+    },
+    "load_td_stg_to_dims": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "pay_period_load_stg_to_dim.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+

@@ -1,0 +1,41 @@
+{
+    "dag_id": "merch_main_npg_scorecard",
+    "dag_schedule": "00 06 2 * *",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "dsa-app08908-merchcustomerreporting@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "rasagnya.avala@nordstrom.com",
+    "stages": [
+        "run_teradata_sql_stg_00"
+    ],
+    "sql_env_vars": {
+        "environment_schema": "T2DL_DAS_CUS"
+    },
+    "run_teradata_sql_stg_00": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_CUS_BATCH__",
+                        "scripts": [
+                            "merch_customer_reporting/ma_pipeline_main_merch_npg_scorecard.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_0_refresh_tableau": {
+            "tableau_engine": {
+                "sensor_timeout_seconds": 10800,
+                "input_details": [
+                    {
+                        "conn_name": "__TABLEAU_MA__",
+                        "source_type": "datasource",
+                        "datasource_name": "NPG Scorecard (DNU)",
+                        "project_name": "Data Sources"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    }
+}

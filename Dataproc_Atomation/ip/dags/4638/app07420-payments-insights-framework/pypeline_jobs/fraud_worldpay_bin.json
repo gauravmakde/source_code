@@ -1,0 +1,93 @@
+{
+  "dag_id": "fraud_worldpay_bin",
+  "dag_schedule": "0 10 * * 3",
+  "stages": [
+    "read_s3_write_td_stage",
+    "read_td_write_td_stage",
+    "read_s3_write_s3_stage"
+  ],
+  "stage_dependencies": {
+    "read_s3_write_td_stage": "read_td_write_td_stage",
+    "read_td_write_td_stage": "read_s3_write_s3_stage"
+  },
+  "read_s3_write_td_stage": {
+    "s3_csv_to_td_stg_job": {
+      "tpt_engine": {
+        "retries": 2,
+        "input_details": [
+          {
+            "conn_name": "__S3_NAP_WORLDPAY_BIN_TPT_LOAD__",
+            "table_name": "WORLDPAY_BIN_LDG",
+            "job_name": "WORLDPAY_BIN_LDG_TPT_ENGINE_JOB",
+            "s3_file_path": "s3://tf-nap-{env}-master-merchant-bin-files/raw/*",
+            "iam_role": "TD-UTILITIES-EC2"
+          }
+        ],
+        "output_details": []
+      }
+    },
+    "td_stg_to_td_dim_job": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_PYMNT_FRAUD_BASE_VWS__",
+            "scripts": [
+              "teradata/fraud_worldpay_bin_dim.sql"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "read_td_write_td_stage": {
+    "td_dim_to_td_stg_job": {
+      "spark_engine": {
+        "spark_run_mode": "medium",
+        "scripts": [
+          "sparkSql/fraud_worldpay_rollup_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_PYMNT_FRAUD_BASE_VWS__",
+            "sql_table_reference": "WORLDPAY_BIN_DIM",
+            "data_source_name": "WORLDPAY_BIN_DIM"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_FRAUD_NAP_STG__",
+            "sql_table_reference": "WORLDPAY_BIN_ROLLUP_LDG",
+            "data_source_name": "WORLDPAY_BIN_ROLLUP_LDG"
+          }
+        ]
+      }
+    },
+    "td_stg_to_td_dim_job": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_PYMNT_FRAUD_BASE_VWS__",
+            "scripts": [
+              "teradata/fraud_worldpay_rollup_dim.sql"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "read_s3_write_s3_stage": {
+    "s3_raw_to_s3_processed_job": {
+      "python_executor": {
+        "module": "python/fraud_worldpay_bin",
+        "version": "1.1.0",
+        "k8s_cpu_limit": 1,
+        "k8s_cpu_request": 1,
+        "k8s_memory_limit": "1Gi",
+        "k8s_memory_request": "1Gi",
+        "args": [
+          "python/fraud_worldpay_bin/main.py"
+        ]
+      }
+    }
+  }
+}

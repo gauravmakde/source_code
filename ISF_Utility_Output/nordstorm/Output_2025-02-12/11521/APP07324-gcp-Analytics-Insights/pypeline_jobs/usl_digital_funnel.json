@@ -1,0 +1,59 @@
+{
+    "dag_id": "usl_digital_funnel",
+    "dag_schedule": "0 8 * * *",
+    "prod_email_on_failure": "dsa-app08818-universal-semantic-layer@nordstrom.pagerduty.com, rathin.deshpande@nordstrom.com",
+    "nonprod_email_on_failure": "rathin.deshpande@nordstrom.com",
+    "stages": [
+        "speed_hive_to_td"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-4",
+        "end_date": "current_date()-3"
+    },
+    "speed_hive_to_td": {
+        "job_1_usl_digital_funnel_hive_data_to_output": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "universal_semantic_layer/usl_digital_funnel_load.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TPT_CSV_OUTPUT",
+                        "sql_table_reference": "usl_digital_funnel_ldg_output",
+                        "data_source_name": "usl_digital_funnel_ldg"
+                    }
+                ]
+            }
+        },
+        "tpt_usl_digital_funnel_ldg": {
+            "tpt_engine": {
+                "retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TPT_USL",
+                        "delimiter": "1F",
+                        "table_name": "usl_digital_funnel_ldg",
+                        "s3_file_path": "s3://{tpt_path}/usl_digital_funnel_ldg_output/*.csv.gz",
+                        "job_name": "usl_digital_funnel_ldg"
+                    }
+                ],
+                "output_details": []
+            }
+        },
+        "job_2_usl_digital_funnel_t2_table_from_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_USL",
+                        "scripts": [
+                            "universal_semantic_layer/usl_digital_funnel.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

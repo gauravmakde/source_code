@@ -1,0 +1,39 @@
+{
+    "dag_id": "flash_attribution_rcom",
+    "dag_schedule": "0 21 * * *",
+    "prod_email_on_failure": "sean.larkin@nordstrom.com, cia-app09142-customer-and-merch-attributes-to-object@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "sean.larkin@nordstrom.com",
+    "dependencies": {
+        "upstream": {
+            "dags": [
+                {
+                    "external_dag_id": "session_product_discovery_funnel_analytical_11521_ACE_ENG",
+                    "retries": 3,
+                    "poke_interval": 120,
+                    "timeout": 3600
+                }
+            ]
+        }
+    },
+    "sql_env_vars": {
+        "start_date": "current_date()-15",
+        "end_date": "current_date()-1"
+    },
+    "stages": [
+        "run_hive_hive_fal_Rcom_sql"
+    ],
+    "run_hive_hive_fal_Rcom_sql": {
+        "job_0": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "flash_attribution/flash_attribution_rcom.sql"
+                ],
+                "input_details": [],
+                "output_details": []
+            }
+        }
+    }
+}

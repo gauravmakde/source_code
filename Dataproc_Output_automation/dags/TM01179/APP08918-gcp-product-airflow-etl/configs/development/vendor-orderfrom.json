@@ -1,0 +1,285 @@
+{
+  "domain": "merch",
+  "name" : "vendor_orderfrom",
+  "sources" : [
+    {
+      "name" : "mainDataTable",
+      "description" : "Ultimate Source of data for daily incremental loads",
+      "type" : "KAFKA",
+      "cache" : "MEMORY_AND_DISK",
+      "enable" : true,
+      "properties" : {
+        "kafka.bootstrap.servers": "meadow.prod.us-west-2.aws.proton.nordstrom.com:9093",
+        "schemaRegistryUrl": "https://schema-registry.prod.us-west-2.aws.proton.nordstrom.com",
+        "group.id": "vendor_load",
+        "subscribe": "nap-vendor-order-from-object-model",
+        "headers" : "",
+        "enable.auto.commit": "false",
+        "proton_accessKey":"APP09392.SSSO748MV19KX9ENZ",
+       "proton_secret":"Hj1zhGbJlrZLqhm9jKVYEjQInKlBd8XzVJon7tB8saRmcAkls2se6snWZF2v437C9ScCtKFVQTRr6Ky5iUgSqtnVbE9tzTlXATpr3ZE.PVB8MQHZihEKiIU09C70zK6B",
+        "kafka.security.protocol": "sasl_ssl",
+        "sasl.kerberos.service.name": "kafka",
+        "kafka.sasl.mechanism": "SCRAM-SHA-512"
+      }
+    }
+  ],
+  "dags" : [
+    {
+      "name" : "Main_dag",
+      "upstream" : ["mainDataTable"],
+      "operators" : [
+        {
+          "name": "VENDOR_ORDERFROM_LDG_final",
+          "description": "Extract data for VENDOR_ORDERFROM_LDG",
+          "select": [ "CAST(EventSequence.member0 AS INT)  eventsequence", "EventCreateDate eventcreatedate", "VendorNumber vendornumber", "VendorName vendorname"
+            , "VendorLanguage vendorlanguage", "VendorRole.RoleName vendorrole_rolename"
+            , "VendorRole.VendorType vendorrole_vendortype"
+            , "VendorRole.VendorCategory vendorrole_vendorcategory"
+            , "InventoryManagementInfoLevel inventorymanagementinfolevel", "DebitMemo debitmemo", "InvoiceCurrency invoicecurrency"
+            , "ResourceId resourceid", "IsNPG isnpg", "IsAutomaticInvoiceApproval isautomaticinvoiceapproval"
+            , "IsDefectiveClaimAgreement isdefectiveclaimagreement", "IsFreightCharge isfreightcharge", "IsPrepaidInvoice isprepaidinvoice"
+            , "PaymentTerms paymentterms", "PaymentTermsDateBasis paymenttermsdatebasis", "VendorStatus vendorstatus"
+            , "ClassificationType classificationtype", "InactiveDate inactivedate", "LadingPort ladingport"
+            , "ManufacturerPrincipleCountry manufacturerprinciplecountry", "PartnerGroup partnergroup", "PaymentMethod paymentmethod"
+            , "array_join(transform(array_sort(vendoraltname),x->x['altname']),',') AS vendoraltname_altname"
+            , "array_join(transform(array_sort(vendoraltname),x->x['vendornametype']),',') AS vendoraltname_vendornametype"]
+        },
+        {
+          "name" : "VENDOR_ORDERFROM_LDG_count",
+          "description" : "Count of VENDOR_ORDERFROM_LDG records generated",
+          "from" : ["VENDOR_ORDERFROM_LDG_final"],
+          "select" : [ "count(*)" ]
+        },
+        {
+          "name": "VENDOR_ORDERFROM_MARKET_LDG_st1",
+          "description": "Level 1 frame for VENDOR_ORDERFROM_MARKET_DIM extract",
+          "select": [ "EventSequence.member0", "EventCreateDate",
+            "explode_outer(VendorMarket) VendorMarket" ]
+        },
+        {
+          "name": "VENDOR_ORDERFROM_MARKET_LDG_final",
+          "description": "Extract data for VENDOR_ORDERFROM_MARKET_LDG",
+          "select": [ "CAST(member0 AS INT) as EventSequence", "EventCreateDate eventcreatedate"
+            , "VendorMarket.VendorNumber vendormarket_vendornumber"
+            , "VendorMarket.MarketCode vendormarket_marketcode"
+            , "VendorMarket.CurrencyUsageType vendormarket_currencyusagetype"
+            , "VendorMarket.DischargePort vendormarket_dischargeport"
+            , "VendorMarket.FreightPaymentMethod vendormarket_freightpaymentmethod"
+            , "VendorMarket.ImportStatus vendormarket_importstatus"
+            , "VendorMarket.ImportStatusDetail vendormarket_importstatusdetail"
+            , "VendorMarket.IsDoNotRefuseDelivery vendormarket_isdonotrefusedelivery"
+            , "VendorMarket.IsPreTicket vendormarket_ispreticket"
+            , "VendorMarket.IsPremark vendormarket_ispremark"
+            , "VendorMarket.IsRestrictedFromIntnlShipping vendormarket_isrestrictedfromintnlshipping"
+            , "VendorMarket.IsReturnAllowed vendormarket_isreturnallowed"
+            , "VendorMarket.IsReturnAuthorizedRequired vendormarket_isreturnauthorizedrequired"
+            , "VendorMarket.IsReturnOnly vendormarket_isreturnonly"
+            , "VendorMarket.MarketStatus vendormarket_marketstatus"
+            , "VendorMarket.PurchaseType vendormarket_purchasetype"
+            , "VendorMarket.ShippingMethod vendormarket_shippingmethod"
+            , "VendorMarket.TitlePass vendormarket_titlepass"
+            , "VendorMarket.TransportationResponsibility vendormarket_transportationresponsibility"
+            , "VendorMarket.EdiCharacteristics.EDISalesReportFrequency vendormarket_edicharacteristics_edisalesreportfrequency"
+            , "VendorMarket.EdiCharacteristics.EdiPastCompliantDate vendormarket_edicharacteristics_edipastcompliantdate"
+            , "VendorMarket.EdiCharacteristics.IsEdiAdvancedShipmentNotification vendormarket_edicharacteristics_isediadvancedshipmentnotification"
+            , "VendorMarket.EdiCharacteristics.IsEdiAvailable vendormarket_edicharacteristics_isediavailable"
+            , "VendorMarket.EdiCharacteristics.IsEdiContract vendormarket_edicharacteristics_isedicontract"
+            , "VendorMarket.EdiCharacteristics.IsEdiDestroyInField vendormarket_edicharacteristics_isedidestroyinfield"
+            , "VendorMarket.EdiCharacteristics.IsEdiDomesticPurchaseOrderFormat vendormarket_edicharacteristics_isedidomesticpurchaseorderformat"
+            , "VendorMarket.EdiCharacteristics.IsEdiInventory vendormarket_edicharacteristics_isediinventory"
+            , "VendorMarket.EdiCharacteristics.IsEdiInvoice vendormarket_edicharacteristics_isediinvoice"
+            , "VendorMarket.EdiCharacteristics.IsEdiPartnerPurchaseOrder vendormarket_edicharacteristics_isedipartnerpurchaseorder"
+            , "VendorMarket.EdiCharacteristics.IsEdiPartnerPurchaseOrderChange vendormarket_edicharacteristics_isedipartnerpurchaseorderchange"
+            , "VendorMarket.EdiCharacteristics.IsEdiPurchaseOrder vendormarket_edicharacteristics_isedipurchaseorder"
+            , "VendorMarket.EdiCharacteristics.IsEdiPurchaseOrderChange vendormarket_edicharacteristics_isedipurchaseorderchange"
+            , "VendorMarket.EdiCharacteristics.IsEdiPurchaseOrderConfirmed vendormarket_edicharacteristics_isedipurchaseorderconfirmed"
+            , "VendorMarket.EdiCharacteristics.IsEdiPurchaseOrderFullReplacementSetup vendormarket_edicharacteristics_isedipurchaseorderfullreplacementsetup"
+            , "VendorMarket.AuthorizationNumber vendormarket_authorizationnumber"
+            , "VendorMarket.OrderPaymentMethod vendormarket_orderpaymentmethod"
+            , "VendorMarket.HtsClassificationStatus vendormarket_htsclassificationstatus"
+            , "VendorMarket.FreightTerms vendormarket_freightterms"
+          ],
+          "from": [ "VENDOR_ORDERFROM_MARKET_LDG_st1" ]
+        },
+        {
+          "name" : "VENDOR_ORDERFROM_MARKET_LDG_count",
+          "description" : "Count of VENDOR_ORDERFROM_MARKET_LDG records generated",
+          "from" : ["VENDOR_ORDERFROM_MARKET_LDG_final"],
+          "select" : [ "count(*)" ]
+        },
+        {
+          "name": "VENDOR_RELATIONSHIP_LDG_st1",
+          "description": "Level 1 frame for VENDOR_RELATIONSHIP_DIM extract",
+          "select": [ "EventSequence.member0", "EventCreateDate",
+            "explode_outer(VendorRelationship) VendorRelationship" ]
+        },
+        {
+          "name": "VENDOR_RELATIONSHIP_LDG_final",
+          "description": "Extract data for VENDOR_RELATIONSHIP_LDG",
+          "select": [ "CAST(member0 AS INT) as EventSequence", "EventCreateDate eventcreatedate"
+            , "VendorRelationship.VendorNumber vendorrelationship_vendornumber"
+            , "VendorRelationship.FromVendorCategory vendorrelationship_fromvendorcategory"
+            , "VendorRelationship.FromVendorType vendorrelationship_fromvendortype"
+            , "VendorRelationship.IsRelationshipAssociated vendorrelationship_isrelationshipassociated"
+            , "VendorRelationship.IsRelationshipPrimary vendorrelationship_isrelationshipprimary"
+            , "VendorRelationship.VendorRelationshipType vendorrelationship_vendorrelationshiptype"
+            , "VendorRelationship.RelatedVendorId vendorrelationship_relatedvendorid"
+            , "VendorRelationship.RelatedVendorName vendorrelationship_relatedvendorname"
+            , "VendorRelationship.ToVendorCategory vendorrelationship_tovendorcategory"
+            , "VendorRelationship.ToVendorType vendorrelationship_tovendortype"
+            , "VendorRelationship.RelatedVendorNumber vendorrelationship_relatedvendornumber"
+            , "VendorRelationship.VendorRelationshipTicketType vendorrelationship_vendorrelationshiptickettype"
+          ],
+          "from": [ "VENDOR_RELATIONSHIP_LDG_st1" ]
+        },
+        {
+          "name" : "VENDOR_RELATIONSHIP_LDG_count",
+          "description" : "Count of VENDOR_RELATIONSHIP_LDG records generated",
+          "from" : ["VENDOR_RELATIONSHIP_LDG_final"],
+          "select" : [ "count(*)" ]
+        },
+        {
+          "name": "VENDOR_SITE_LDG_st1",
+          "description": "Level 1 frame for VENDOR_SITE_DIM extract",
+          "select": [ "EventSequence.member0", "EventCreateDate",
+            "VendorNumber", "explode_outer(VendorSite) VendorSite" ]
+        },
+        {
+          "name": "VENDOR_SITE_LDG_final",
+          "description": "Extract data for VENDOR_SITE_DIM",
+          "select": [ "CAST(member0 AS INT) as EventSequence", "EventCreateDate eventcreatedate"
+            , "VendorNumber vendornumber"
+            , "VendorSite.ResourceId vendorsite_resourceid"
+            , "VendorSite.VendorPostalAddress.PostalStandardCode vendorsite_vendorpostaladdress_postalstandardcode"
+            , "CAST(VendorSite.VendorPostalAddress.IsPrimaryVendorPostalAddress AS STRING) vendorsite_vendorpostaladdress_isprimaryvendorpostaladdress"
+            , "VendorSite.VendorPostalAddress.ResourceId vendorsite_vendorpostaladdress_resourceid"
+            , "VendorSite.VendorPostalAddress.PostalOriginalCode vendorsite_vendorpostaladdress_postaloriginalcode"
+            , "VendorSite.VendorPostalAddress.Country vendorsite_vendorpostaladdress_country"
+            , "substring(VendorSite.Currency,1,10) vendorsite_currency"
+            , "VendorSite.OperatingUnit vendorsite_operatingunit"
+            , "VendorSite.PaymentMethod vendorsite_paymentmethod"
+            , "VendorSite.PaymentTerms vendorsite_paymentterms"
+            , "VendorSite.SiteName vendorsite_sitename"
+            , "VendorSite.VendorLanguage vendorsite_vendorlanguage"
+            , "VendorSite.VendorSiteStatus vendorsite_vendorsitestatus"
+            , "VendorSite.VendorSiteUsage vendorsite_vendorsiteusage"
+          ],
+          "from": [ "VENDOR_SITE_LDG_st1" ]
+        },
+        {
+          "name" : "VENDOR_SITE_LDG_count",
+          "description" : "Count of VENDOR_SITE_LDG records generated",
+          "from" : ["VENDOR_SITE_LDG_final"],
+          "select" : [ "count(*)" ]
+        },
+        {
+          "name": "VENDOR_ORDERFROM_POSTALADDRESS_XREF_LDG_st1",
+          "description": "Level 1 frame for VENDOR_ORDERFROM_POSTALADDRESS_XREF extract",
+          "select": [ "EventSequence.member0", "EventCreateDate",
+            "VendorNumber", "explode_outer(VendorSite) VendorSite"]
+        },
+        {
+          "name": "VENDOR_ORDERFROM_POSTALADDRESS_XREF_LDG_st2",
+          "description": "Level 2 frame for VENDOR_ORDERFROM_POSTALADDRESS_XREF extract",
+          "select": [ "CAST(member0 AS INT) as EventSequence", "EventCreateDate",
+            "VendorNumber", "VendorSite.VendorPostalAddress.ResourceId", "explode_outer(VendorSite.VendorPostalAddress.PostalAddressAddressType) PostalAddressAddressType"],
+          "from": ["VENDOR_ORDERFROM_POSTALADDRESS_XREF_LDG_st1"]
+        },
+        {
+          "name": "VENDOR_ORDERFROM_POSTALADDRESS_XREF_LDG_final",
+          "description": "Extract data for VENDOR_ORDERFROM_POSTALADDRESS_XREF_LDG",
+          "select": [ "CAST(EventSequence AS INT) eventsequence", "EventCreateDate eventcreatedate"
+            , "VendorNumber vendornumber"
+            , "ResourceId vendorpostaladdress_resourceid"
+            , "PostalAddressAddressType.VendorAddressTypeShortDescription vendorpostaladdress_postaladdressaddresstype_vendoraddresstypeshortdescription"
+            , "PostalAddressAddressType.VendorAddressTypeDescription vendorpostaladdress_postaladdressaddresstype_vendoraddresstypedescription"
+            , "PostalAddressAddressType.VendorAddressTypeCode vendorpostaladdress_postaladdressaddresstype_vendoraddresstypecode"
+          ],
+          "from": ["VENDOR_ORDERFROM_POSTALADDRESS_XREF_LDG_st2"]
+        },
+        {
+          "name": "VENDOR_ORDERFROM_POSTALADDRESS_XREF_LDG_count",
+          "description": "Count of VENDOR_ORDERFROM_POSTALADDRESS_XREF_LDG records generated",
+          "from": ["VENDOR_ORDERFROM_POSTALADDRESS_XREF_LDG_final"],
+          "select": ["count(*)"]
+        }
+      ]
+    }
+  ],
+  "sinks" : [
+    {
+      "name" : "VENDOR_ORDERFROM_LDG_sink",
+      "description" : "Output VENDOR_ORDERFROM_LDG records (normally CSV-GZIP format)",
+      "type" : "bigquery",
+      "upstream" : "VENDOR_ORDERFROM_LDG_final",
+      "active" : true,
+      "properties" : {
+        "project": "jwn-nap-user1-nonprod-zmnb",
+        "dataset": "DEV_NAP_STG",
+        "table": "VENDOR_ORDERFROM_LDG",
+        "temp_bucket": "test-data-datametica",
+        "mode": "overwrite"
+      }
+    },
+
+    {
+      "name" : "VENDOR_ORDERFROM_MARKET_LDG_sink",
+      "description" : "Output VENDOR_ORDERFROM_MARKET_LDG records (normally CSV-GZIP format)",
+      "type" : "bigquery",
+      "upstream" : "VENDOR_ORDERFROM_MARKET_LDG_final",
+      "active" : true,
+      "properties" : {
+        "project": "jwn-nap-user1-nonprod-zmnb",
+        "dataset": "DEV_NAP_STG",
+        "table": "VENDOR_ORDERFROM_MARKET_LDG",
+        "temp_bucket": "test-data-datametica",
+        "mode": "overwrite"
+      }
+    },
+
+    {
+      "name" : "VENDOR_RELATIONSHIP_LDG_sink",
+      "description" : "Output VENDOR_RELATIONSHIP_LDG records (normally CSV-GZIP format)",
+      "type" : "bigquery",
+      "upstream" : "VENDOR_RELATIONSHIP_LDG_final",
+      "active" : true,
+      "properties" : {
+        "project": "jwn-nap-user1-nonprod-zmnb",
+        "dataset": "DEV_NAP_STG",
+        "table": "VENDOR_RELATIONSHIP_ORDER_FROM_LDG",
+        "temp_bucket": "test-data-datametica",
+        "mode": "overwrite"
+      }
+    },
+
+    {
+      "name" : "VENDOR_SITE_LDG_sink",
+      "description" : "Output VENDOR_SITE_LDG records (normally CSV-GZIP format)",
+      "type" : "bigquery",
+      "upstream" : "VENDOR_SITE_LDG_final",
+      "active" : true,
+      "properties" : {
+        "project": "jwn-nap-user1-nonprod-zmnb",
+        "dataset": "DEV_NAP_STG",
+        "table": "VENDOR_SITE_ORDER_FROM_LDG",
+        "temp_bucket": "test-data-datametica",
+        "mode": "overwrite"
+      }
+    },
+
+    {
+      "name" : "VENDOR_ORDERFROM_POSTALADDRESS_XREF_LDG_sink",
+      "description" : "OutputVENDOR_ORDERFROM_POSTALADDRESS_XREF_LDG records (normally CSV-GZIP format)",
+      "type" : "bigquery",
+      "upstream" : "VENDOR_ORDERFROM_POSTALADDRESS_XREF_LDG_final",
+      "active" : true,
+      "properties" : {
+        "project": "jwn-nap-user1-nonprod-zmnb",
+        "dataset": "DEV_NAP_STG",
+        "table": "VENDOR_ORDERFROM_POSTALADDRESS_XREF_LDG",
+        "temp_bucket": "test-data-datametica",
+        "mode": "overwrite"
+      }
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "dag_id": "wfm_ideal_hours_load",
+  "dag_schedule": "30 21 * * *",
+  "stages": [
+    "wfm_ideal_hours"
+  ],
+  "wfm_ideal_hours": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "high",
+        "scripts": [
+          "wfm_ideal_hours_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__WFM_LABOR_DEMAND_AND_IDEAL_HOURS_KAFKA__",
+            "sql_table_reference": "kafka_wfm_labor_demand_and_ideal_hours_input",
+            "data_source_name": "customer-labor-demand-and-ideal-hours-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__WFM_IDEAL_DEMAND_HOURS_KAFKA_TO_S3_ORC__",
+            "sql_table_reference": "wfm_ondemand_hours_orc_output"
+
+          },
+
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_ideal_labor_hours_stg_table" ,
+            "data_source_name": "IDEAL_LABOR_HOURS_STG"
+
+          }
+        ]
+      }
+    },
+    "load_1_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "wfm_ideal_hours_load_fact.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+
+

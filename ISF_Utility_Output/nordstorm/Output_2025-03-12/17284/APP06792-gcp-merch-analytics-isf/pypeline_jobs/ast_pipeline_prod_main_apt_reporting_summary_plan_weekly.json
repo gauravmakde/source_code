@@ -1,0 +1,62 @@
+{
+    "dag_id": "merch_apt_summary_plan_weekly_main",
+    "dag_schedule": "40 07 * * *",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "ACE.Promo@nordstrom.com, dsa-app08557-apt-reporting@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "ACE.Promo@nordstrom.com",
+    "dependencies": {
+        "upstream": {
+            "dags": [
+                {
+                    "external_dag_id": "merch_main_apt_reporting_mfp_cp_cost_17284_MERCH_ANALYTICS_insights_framework"
+                }
+            ]
+        }
+    },
+    "stages": [
+        "run_teradata_sql_stg_0"
+    ],
+    "sql_env_vars": {
+        "environment_schema": "t2dl_das_apt_cost_reporting"
+    },
+    "run_teradata_sql_stg_0": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_MAO_BATCH__",
+                        "scripts": [
+                            "apt_summary_plan/ast_pipeline_prod_main_apt_reporting_summary_plan_weekly.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_0_refresh_tableau": {
+            "tableau_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TABLEAU_MA__",
+                        "source_type": "datasource",
+                        "datasource_name": "APT Summary Category DNU - Not Self Service",
+                        "project_name": "Data Sources"
+                    }
+                ],
+                "output_details": []
+            }
+        },
+        "job_1_refresh_tableau": {
+            "tableau_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TABLEAU_MA__",
+                        "source_type": "datasource",
+                        "datasource_name": "APT Summary Supplier DNU - Not Self Service",
+                        "project_name": "Data Sources"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    }
+}

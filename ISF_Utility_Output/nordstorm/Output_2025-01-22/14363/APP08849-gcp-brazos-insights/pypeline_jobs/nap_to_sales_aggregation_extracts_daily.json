@@ -1,0 +1,46 @@
+{
+    "dag_id": "nap_to_sales_aggregation_extracts_daily",
+    "dag_schedule": "00 04 * * 1-6",
+    "nonprod_email_on_failure": "smrt-monitors-notific-aaaanfliddshcxlct5q5knoeua@nordstrom.slack.com",
+    "prod_email_on_failure": "smrt-monitors-notific-aaaabw6x2peuniphsvtcd6hoqa@nordstrom.slack.com",
+    "timezone": "US/Pacific",
+    "dependencies": {
+        "upstream": {
+            "dags": [
+                {
+                    "external_dag_id": "nap_to_allocation_sales_extracts_daily_14363_?env?_brazos_brazos_dags",
+                    "retries": 1,
+                    "poke_interval": 120,
+                    "timeout": 1800,
+                    "execution_delta": "timedelta(minutes=10)"
+                }
+            ]
+        }
+    },
+    "stages": [
+        "aggregate_sales"
+    ],
+    "dag_dynamic_vars": {
+        "env": "eval('{\"nonprod\": \"dev\",\"test\": \"dev\", \"prod\": \"prod\"}[env]')"
+    },
+    "aggregate_sales": {
+        "aggregation": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "scripts": [
+                    "sip/allocation_demand_to_aggregated_sales.sql"
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "S3_AGGREGATED_SALES",
+                        "sql_table_reference": "aggregated_sales"
+                    },
+                    {
+                        "conn_name": "S3_AGGREGATED_SALES_AUDIT",
+                        "sql_table_reference": "sales_aggregation_audit"
+                    }
+                ]
+            }
+        }
+    }
+}

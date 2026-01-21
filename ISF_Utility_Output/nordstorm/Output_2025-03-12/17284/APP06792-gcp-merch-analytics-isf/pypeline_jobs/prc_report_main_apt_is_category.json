@@ -1,0 +1,40 @@
+{
+    "dag_id": "prc_main_apt_is_category",
+    "dag_schedule": "00 15 * * SUN",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "dsa-app08557-apt-reporting@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "ACE.MerchPriceAlerts@nordstrom.com",
+    "stages": [
+        "run_teradata_sql_stg_0"
+    ],
+    "sql_env_vars": {
+        "environment_schema": "t2dl_das_apt_cost_reporting"
+    },
+    "run_teradata_sql_stg_0": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_AIS_BATCH__",
+                        "scripts": [
+                            "apt_is/main_apt_is_category.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_0_refresh_tableau": {
+            "tableau_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TABLEAU_MA__",
+                        "source_type": "datasource",
+                        "datasource_name": "APT Self Service - Category",
+                        "project_name": "APT Self Service"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    }
+}

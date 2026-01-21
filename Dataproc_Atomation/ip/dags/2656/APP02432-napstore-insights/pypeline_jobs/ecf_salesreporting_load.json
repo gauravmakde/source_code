@@ -1,0 +1,43 @@
+{
+  "dag_id": "ecf_sales_reporting_load_v2",
+  "dag_schedule": "0 12 * * *",
+  "stages": [
+    "m"
+  ],
+  "m": {
+    "load_fact": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "ecf_salesreporting/ecf_salesreporting_load_fact_v2.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "load_postgres": {
+      "spark_engine": {
+        "spark_run_mode": "medium",
+        "scripts": [
+          "ecf_salesreporting/ecf_salesreporting_to_postgres_extract.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_BASE_VWS__",
+            "sql_table_reference": "ecf_salesreporting_vw",
+            "data_source_name": "ECF_SALESREPORTING_V2_FACT_VW"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__POSTGRES_NAP__",
+            "sql_table_reference": "ecf_salesreporting_postgres",
+            "data_source_name": "ECF_SALESREPORTING"
+          }
+        ]
+      }
+    }
+  }
+}

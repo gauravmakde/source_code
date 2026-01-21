@@ -1,0 +1,60 @@
+{
+    "dag_id": "cust_service",
+    "dag_schedule": "0 8 * * 3",
+    "prod_email_on_failure": "dsa-app08159-service-engagement-customer-pipeline@nordstrom.pagerduty.com, rebecca.liao@nordstrom.com, niharika.srivastava@nordstrom.com",
+    "nonprod_email_on_failure": "rebecca.liao@nordstrom.com",
+    "stages": [
+        "run_terdata_sql_stg_0"
+    ],
+    "run_terdata_sql_stg_0": {
+        "job_0_run_cust_service_month": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_SVE",
+                        "scripts": [
+                            "cust_service/cust_service_month.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_1_run_cust_service_3mo": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_SVE",
+                        "scripts": [
+                            "cust_service/cust_service_3mo.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_2_run_cust_service_6mo": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_SVE",
+                        "scripts": [
+                            "cust_service/cust_service_6mo.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_3_run_cust_service_yr": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 7200,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_SVE",
+                        "scripts": [
+                            "cust_service/cust_service_yr.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

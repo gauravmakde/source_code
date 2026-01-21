@@ -1,0 +1,165 @@
+{
+  "domain": "merch",
+  "name" : "vendor_payto",
+  "sources" : [
+    {
+      "name" : "mainDataTable",
+      "description" : "Ultimate Source of data for daily incremental loads",
+      "type" : "KAFKA",
+      "cache" : "MEMORY_AND_DISK",
+      "enable" : true,
+      "properties" : {
+        "kafka.bootstrap.servers": "meadow.prod.us-west-2.aws.proton.nordstrom.com:9093",
+        "schemaRegistryUrl": "https://schema-registry.prod.us-west-2.aws.proton.nordstrom.com",
+        "group.id": "vendor_load",
+        "subscribe": "nap-vendor-pay-to-object-model",
+        "headers" : "",
+        "enable.auto.commit": "false",
+        "proton_accessKey":"APP09392.SSSO748MV19KX9ENZ",
+       "proton_secret":"Hj1zhGbJlrZLqhm9jKVYEjQInKlBd8XzVJon7tB8saRmcAkls2se6snWZF2v437C9ScCtKFVQTRr6Ky5iUgSqtnVbE9tzTlXATpr3ZE.PVB8MQHZihEKiIU09C70zK6B",
+        "kafka.security.protocol": "sasl_ssl",
+        "sasl.kerberos.service.name": "kafka",
+        "kafka.sasl.mechanism": "SCRAM-SHA-512"
+      }
+    }
+  ],
+  "dags" : [
+    {
+      "name" : "Main_dag",
+      "upstream" : ["mainDataTable"],
+      "operators" : [
+        {
+          "name": "VENDOR_PAYTO_LDG_final",
+          "description": "Extract data for VENDOR_PAYTO_LDG",
+          "select": [ "CAST(EventSequence.member0 AS INT) EventSequence", "EventCreateDate eventcreatedate", "VendorNumber vendornumber", "VendorName vendorname"
+            , "VendorLanguage vendorlanguage", "cast(CodeOfConduct as string)", "CodeOfConductUpdateDate codeofconductupdatedate"
+            , "VendorStatus vendorstatus", "VendorRole.RoleName vendorrole_rolename"
+            , "VendorRole.VendorType vendorrole_vendortype"
+            , "VendorRole.VendorCategory vendorrole_vendorcategory", "IsFreightCharge isfreightcharge"
+            , "IsPrepaidInvoice isprepaidinvoice", "DebitMemoCode debitmemocode", "InvoiceCurrency invoicecurrency"
+            , "DropShipPaymentTerms dropshippaymentterms", "PaymentTermsDateBasis paymenttermsdatebasis", "PaymentMethod paymentmethod"
+            , "PaymentTerms paymentterms", "ResourceId resourceid"
+            , "array_join(transform(array_sort(vendoraltname),x->x['altname']),',') AS vendoraltname_altname"
+            , "array_join(transform(array_sort(vendoraltname),x->x['vendornametype']),',') AS vendoraltname_vendornametype"]
+        },
+        {
+          "name" : "VENDOR_PAYTO_LDG_count",
+          "description" : "Count of VENDOR_PAYTO_LDG records generated",
+          "from" : ["VENDOR_PAYTO_LDG_final"],
+          "select" : [ "count(*)" ]
+        },
+        {
+          "name": "VENDOR_SITE_LDG_st1",
+          "description": "Level 1 frame for VENDOR_SITE_DIM extract",
+          "select": [ "EventSequence.member0", "EventCreateDate",
+            "VendorNumber", "explode_outer(VendorSite) VendorSite" ]
+        },
+        {
+          "name": "VENDOR_SITE_LDG_final",
+          "description": "Extract data for VENDOR_SITE_DIM",
+          "select": [ "cast(member0 as INT) as EventSequence", "EventCreateDate"
+            , "VendorNumber"
+            , "VendorSite.ResourceId vendorsite_resourceid"
+            , "VendorSite.VendorPostalAddress.PostalStandardCode vendorsite_vendorpostaladdress_postalstandardcode"
+            , "CAST(VendorSite.VendorPostalAddress.IsPrimaryVendorPostalAddress AS STRING) vendorsite_vendorpostaladdress_isprimaryvendorpostaladdress"
+            , "VendorSite.VendorPostalAddress.ResourceId vendorsite_vendorpostaladdress_resourceid"
+            , "VendorSite.VendorPostalAddress.PostalOriginalCode vendorsite_vendorpostaladdress_postaloriginalcode"
+            , "VendorSite.VendorPostalAddress.Country vendorsite_vendorpostaladdress_country"
+            , "substring(VendorSite.Currency,1,10) vendorsite_currency"
+            , "VendorSite.OperatingUnit vendorsite_operatingunit"
+            , "VendorSite.PaymentMethod vendorsite_paymentmethod"
+            , "VendorSite.PaymentTerms vendorsite_paymentterms"
+            , "VendorSite.SiteName vendorsite_sitename"
+            , "VendorSite.VendorLanguage vendorsite_vendorlanguage"
+            , "VendorSite.VendorSiteStatus vendorsite_vendorsitestatus"
+            , "VendorSite.VendorSiteUsage vendorsite_vendorsiteusage"
+          ],
+          "from": [ "VENDOR_SITE_LDG_st1" ]
+        },
+        {
+          "name" : "VENDOR_SITE_LDG_count",
+          "description" : "Count of VENDOR_SITE_LDG records generated",
+          "from" : ["VENDOR_SITE_LDG_final"],
+          "select" : [ "count(*)" ]
+        },
+        {
+          "name": "VENDOR_RELATIONSHIP_LDG_st1",
+          "description": "Level 1 frame for VENDOR_RELATIONSHIP_DIM extract",
+          "select": [ "EventSequence.member0", "EventCreateDate",
+            "explode_outer(VendorRelationship) VendorRelationship" ]
+        },
+        {
+          "name": "VENDOR_RELATIONSHIP_LDG_final",
+          "description": "Extract data for VENDOR_RELATIONSHIP_LDG",
+          "select": [ "cast(member0 as INT) as EventSequence", "EventCreateDate eventcreatedate"
+            , "VendorRelationship.VendorNumber vendorrelationship_vendornumber"
+            , "VendorRelationship.FromVendorCategory vendorrelationship_fromvendorcategory"
+            , "VendorRelationship.FromVendorType vendorrelationship_fromvendortype"
+            , "VendorRelationship.IsRelationshipAssociated vendorrelationship_isrelationshipassociated"
+            , "VendorRelationship.IsRelationshipPrimary vendorrelationship_isrelationshipprimary"
+            , "VendorRelationship.VendorRelationshipType vendorrelationship_vendorrelationshiptype"
+            , "VendorRelationship.RelatedVendorId vendorrelationship_relatedvendorid"
+            , "VendorRelationship.RelatedVendorName vendorrelationship_relatedvendorname"
+            , "VendorRelationship.ToVendorCategory vendorrelationship_tovendorcategory"
+            , "VendorRelationship.ToVendorType vendorrelationship_tovendortype"
+            , "VendorRelationship.RelatedVendorNumber vendorrelationship_relatedvendornumber"
+            , "VendorRelationship.VendorRelationshipTicketType vendorrelationship_vendorrelationshiptickettype"
+          ],
+          "from": [ "VENDOR_RELATIONSHIP_LDG_st1" ]
+        },
+        {
+          "name" : "VENDOR_RELATIONSHIP_LDG_count",
+          "description" : "Count of VENDOR_RELATIONSHIP_LDG records generated",
+          "from" : ["VENDOR_RELATIONSHIP_LDG_final"],
+          "select" : [ "count(*)" ]
+        }
+      ]
+    }
+  ],
+  "sinks" : [
+    {
+      "name" : "VENDOR_PAYTO_LDG_sink",
+      "description" : "Output VENDOR_PAYTO_LDG records (normally CSV-GZIP format)",
+      "type" : "bigquery",
+      "upstream" : "VENDOR_PAYTO_LDG_final",
+      "active" : true,
+      "properties" : {
+        "project": "jwn-nap-user1-nonprod-zmnb",
+        "dataset": "DEV_NAP_STG",
+        "table": "VENDOR_PAYTO_LDG",
+        "temp_bucket": "test-data-datametica",
+        "mode": "overwrite"
+      }
+    },
+ 
+    {
+      "name" : "VENDOR_SITE_LDG_sink",
+      "description" : "Output VENDOR_SITE_LDG records (normally CSV-GZIP format)",
+      "type" : "bigquery",
+      "upstream" : "VENDOR_SITE_LDG_final",
+      "active" : true,
+      "properties" : {
+        "project": "jwn-nap-user1-nonprod-zmnb",
+        "dataset": "DEV_NAP_STG",
+        "table": "VENDOR_SITE_PAY_TO_LDG",
+        "temp_bucket": "test-data-datametica",
+        "mode": "overwrite"
+      }
+    },
+
+    {
+      "name" : "VENDOR_RELATIONSHIP_LDG_sink",
+      "description" : "Output VENDOR_RELATIONSHIP_LDG records (normally CSV-GZIP format)",
+      "type" : "bigquery",
+      "upstream" : "VENDOR_RELATIONSHIP_LDG_final",
+      "active" : true,
+      "properties" : {
+        "project": "jwn-nap-user1-nonprod-zmnb",
+        "dataset": "DEV_NAP_STG",
+        "table": "VENDOR_RELATIONSHIP_PAY_TO_LDG",
+        "temp_bucket": "test-data-datametica",
+        "mode": "overwrite"
+      }
+    }
+  ]
+}

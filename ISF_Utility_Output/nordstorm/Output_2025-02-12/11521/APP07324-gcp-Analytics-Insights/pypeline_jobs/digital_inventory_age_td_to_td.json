@@ -1,0 +1,23 @@
+{
+    "dag_id": "digital_inventory_age_table",
+    "dag_schedule": "0 12 * * 1",
+    "prod_email_on_failure": "cia-app09142-customer-and-merch-attributes-to-object@nordstrom.pagerduty.com, jingnan.miao@nordstrom.com, sean.larkin@nordstrom.com",
+    "nonprod_email_on_failure": "jingnan.miao@nordstrom.com, sean.larkin@nordstrom.com",
+    "stages": [
+        "run_terdata_sql"
+    ],
+    "run_terdata_sql": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_DMF",
+                        "scripts": [
+                            "digital_merch/digital_inventory_age_td_to_td.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

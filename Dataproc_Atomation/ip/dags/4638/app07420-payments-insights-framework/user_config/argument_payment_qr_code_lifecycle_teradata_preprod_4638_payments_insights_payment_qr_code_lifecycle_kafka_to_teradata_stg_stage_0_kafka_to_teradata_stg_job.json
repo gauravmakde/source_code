@@ -1,0 +1,11 @@
+--app_config_file s3://tf-nap-prod-credit-payments-isf-airflow/apps/etl_framework/prod/application_config/emr_application_prod.json   
+--app_id app07420 
+--source_tables_details 'kafka_payment_qr_code_lifecycle_analytical_avro={"source_type": "KAFKA", "kafka.sasl.mechanism": "OAUTHBEARER", "vault_connection_name": "nordsecrets/application/APP07420/4638/payments/insights/prod/kafka_oauth_credentials", "kafka_cluster_name": "columbia-prod", "identity_pool_id": "pool-ngyx", "reset_offset_to_latest": "false", "retry.backoff.ms": "500", "request.timeout.ms": "20000","data_source_name":"customer-payments-qr-code-lifecycle-analytical-avro-preprod"}' 
+--target_tables_details 'payment_qr_code_lifecycle_stg={"vault_connection_name": "nordsecrets/application/APP07420/4638/payments/insights/preprod/teradata/teradata_db_credentials", "hostname": "tdnapprodcop1.nordstrom.net", "port": "1025", "source_type": "TERADATA", "database_name": "PREPROD_NAP_STG","data_source_name":"PAYMENT_QR_CODE_LIFECYCLE_LDG"}'  
+--sql_file_location s3://tf-nap-prod-credit-payments-isf-airflow/apps/etl_framework/airflow_nsk_dag_job_artifacts/prod/4638/payments/insights/sql/sparkSql/payment_qr_code_lifecycle_teradata_preprod_4638_payments_insights_payment_qr_code_lifecycle_kafka_to_teradata_stg_stage_0_payment_qr_code_lifecycle_kafka_to_teradata_stg_preprod.sql  
+--stage_task_name payment_qr_code_lifecycle_teradata_preprod_4638_payments_insights_payment_qr_code_lifecycle_kafka_to_teradata_stg_stage_0_kafka_to_teradata_stg_job  
+--hive_offset_table nap_credit_and_payments_isf_kafka_offsets.kafka_consumer_offset_batch_details   
+--consumer_group_name customer-payments-qr-code-lifecycle-analytical-avro-preprod_payment_qr_code_lifecycle_teradata_preprod_4638_payments_insights_payment_qr_code_lifecycle_kafka_to_teradata_stg_stage_0_kafka_to_teradata_stg_job   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:594668836985:secret:VAULT_APPROLE_ROLE_ID  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:594668836985:secret:VAULT_APPROLE_SECRET_ID  
+--aws_user_role_arn arn:aws:iam::594668836985:role/big_data/tf-nap-prod-payments-big-data 

@@ -1,0 +1,26 @@
+{
+    "dag_id": "f2dd_product_cvr",
+    "dag_schedule": "0 14 * * *",
+    "prod_email_on_failure": "yan.zhang@nordstrom.com",
+    "nonprod_email_on_failure": "yan.zhang@nordstrom.com",
+    "sql_env_vars": {
+        "start_date": "current_date()-3",
+        "end_date": "current_date()-3"
+    },
+    "stages": [
+        "run_hive_sql"
+    ],
+    "run_hive_sql": {
+        "job_0": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "f2dd/f2dd_product_cvr.sql"
+                ],
+                "input_details": [],
+                "output_details": []
+            }
+        }
+    }
+}

@@ -1,0 +1,1 @@
+TRUNCATE TABLE {{params.bq_project_id}}.{{params.dbenv}}_nap_stg.item_supplier_size_ldg;

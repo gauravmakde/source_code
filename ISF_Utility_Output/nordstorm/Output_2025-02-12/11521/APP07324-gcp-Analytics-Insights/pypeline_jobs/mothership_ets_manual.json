@@ -1,0 +1,59 @@
+{
+    "dag_id": "mothership_ets_manual",
+    "prod_email_on_failure": "dsa-app09037-et-scorecard@nordstrom.pagerduty.com, tech_ffp_analytics@nordstrom.com",
+    "nonprod_email_on_failure": "charlie.taylor@nordstrom.com",
+    "dependencies": {
+        "downstream": {
+            "dags": [
+                "mothership_ets_primary_11521_ACE_ENG"
+            ]
+        }
+    },
+    "stages": [
+        "read_write_s3_td"
+    ],
+    "read_write_s3_td": {
+        "job_1_create_td_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTS",
+                        "scripts": [
+                            "mothership/ddl/ddl_ets_manual_ldg.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_2_load_s3_data_to_output": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "mothership/ets_manual_load.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTS",
+                        "sql_table_reference": "ets_manual_output",
+                        "data_source_name": "ets_manual_ldg"
+                    }
+                ]
+            }
+        },
+        "job_3_update_t2_table_from_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTS",
+                        "scripts": [
+                            "mothership/ets_manual.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

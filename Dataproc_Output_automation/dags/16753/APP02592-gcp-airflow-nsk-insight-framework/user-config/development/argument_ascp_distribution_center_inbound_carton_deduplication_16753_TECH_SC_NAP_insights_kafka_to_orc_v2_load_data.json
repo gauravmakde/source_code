@@ -1,0 +1,13 @@
+--app_config_file gs://test-data-datametica/app09392/isf-artifacts/app-config/emr_application_dev.json
+--app_id APP02592 
+--source_tables_details 'kafka_src={"source_type": "KAFKA", "kafka_cluster_name": "meadow", "vault_connection_name": "nordsecrets/application/APP02592/meadow/onix/oauth", "kafka.sasl.mechanism": "OAUTHBEARER","data_source_name":"inventory-distribution-center-inbound-carton-v2-analytical-avro"}' 
+--target_tables_details 'ascp_inventory_distribution_center_inbound_carton_orc_kafka={"source_type": "BIGQUERY", "dataset": "ascp","table":"inventory_distribution_center_inbound_carton_orc_kafka", "project": "jwn-nap-user1-nonprod-zmnb", "mode": "overwrite"}'
+--sql_file_location gs://test-data-datametica/app09392/isf-artifacts/sql/ascp_distribution_center_inbound_carton_dedup/kafka_to_orc.sql  
+--stage_task_name ascp_distribution_center_inbound_carton_deduplication_16753_TECH_SC_NAP_insights_kafka_to_orc_v2_load_data  
+--offset_table '`jwn-nap-user1-nonprod-zmnb.onehop_etl_app_db.kafka_consumer_offset_batch_details`'
+--consumer_group_name onix-inventory-distribution-center-inbound-carton-v2-analytical-avro_ascp_distribution_center_inbound_carton_deduplication_16753_TECH_SC_NAP_insights_kafka_to_orc_v2_load_data   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_ROLE_ID-Psikfr
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_SECRET_ID-themT6
+--aws_user_role_arn arn:aws:iam::290445963451:role/APP09392_AWS_Secrets_Role
+--aws_user_role_external_id=testUser
+--gcp_project_id jwn-nap-user1-nonprod-zmnb

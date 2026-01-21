@@ -1,0 +1,27 @@
+{
+    "dag_id": "campaign_attributed_daily_fact",
+    "dag_schedule": "0 18 * * *",
+    "prod_email_on_failure": "t3-app08162-nordstrom-media-network-campaign-recap-dashboard-email.81bi2i3s@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "angelina.allen@nordstrom.com",
+    "stages": [
+        "run_terdata_sql_stg_0"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-4",
+        "end_date": "current_date()-1"
+    },
+    "run_terdata_sql_stg_0": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_NMN",
+                        "scripts": [
+                            "nmn/campaign_attributed_daily_fact.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

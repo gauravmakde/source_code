@@ -1,0 +1,9 @@
+--app_config_file gs://prod-nap-dataplex-internal/app09203/isf-artifacts/app-config/emr_application_prod.json   
+--app_id APP08849  
+--target_tables_details 'dept_tab={"source_type": "S3", "format": "csv", "sep": "|", "quoteAll": "false", "compression": "none", "header": "false", "path": "s3://allocation-by-prod-lambda/Common/Dept/"},dept_audit={"source_type": "S3", "format": "csv", "sep": "/ ", "quoteAll": "false", "compression": "none", "header": "false", "path": "s3://allocation-by-prod-lambda/Common/Dept/"}'  
+--sql_file_location s3://tf-idp-isf-prod-common-etl/apps/etl_framework/airflow_nsk_dag_job_artifacts/prod/14363/prod_brazos/brazos_dags/sql/nap_to_allocation_product_location_calender_extracts_14363_prod_brazos_brazos_dags_nap_to_allocation_2_nap_to_allocation_dept_extract.sql  
+--stage_task_name nap_to_allocation_product_location_calender_extracts_14363_prod_brazos_brazos_dags_nap_to_allocation_2_dept_extract  
+--offset_table '`jwn-nap-dataplex-prod-emue.onehop_etl_app_db.kafka_consumer_offset_batch_details`'
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:095038826246:secret:APP08849_ISF_VAULT_APPROLE_ROLE_ID_PROD-nlXiyc  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:095038826246:secret:APP08849_ISF_VAULT_APPROLE_SECRET_ID_PROD-Dndold  
+--aws_user_role_arn arn:aws:iam::095038826246:role/isf-spark-engine-bdp-secret-manager-role-prod 

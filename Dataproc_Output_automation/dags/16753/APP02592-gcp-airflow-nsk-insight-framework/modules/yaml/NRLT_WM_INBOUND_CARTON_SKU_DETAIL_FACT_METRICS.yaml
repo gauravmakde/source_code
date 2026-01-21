@@ -1,0 +1,293 @@
+- subject: WM_INBOUND_CARTON_SKU_DETAIL_FACT
+  metric_name: napdw.stg_distinct_count
+  sql: "SELECT job_name, subj_area, src_db_name, src_tb_name,  'src', COALESCE(src_metric, 0)
+        FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        WHERE job_name='WM_INBOUND_CARTON_SKU_DETAIL_FACT_LDG_TO_BASE'
+        AND dw_batch_id = (SELECT batch_id FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'WM_INBOUND_CARTON_SKU_DETAIL_FACT')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+- subject: WM_INBOUND_CARTON_SKU_DETAIL_FACT
+  metric_name: napdw.base_distinct_count
+  sql: "SELECT job_name, subj_area, tgt_db_name, tgt_tb_name, 'tgt', COALESCE(tgt_metric, 0)
+        FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        WHERE job_name='WM_INBOUND_CARTON_SKU_DETAIL_FACT_LDG_TO_BASE'
+        AND dw_batch_id = (SELECT batch_id FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'WM_INBOUND_CARTON_SKU_DETAIL_FACT')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+- subject: WM_INBOUND_CARTON_SKU_DETAIL_FACT
+  metric_name: napdw.stg_distinct_count
+  sql: "SELECT job_name, subj_area, src_db_name, src_tb_name,  'src', COALESCE(src_metric, 0)
+        FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        WHERE job_name='WM_INBOUND_CARTON_RECEIVED_LDG_TO_BASE'
+        AND dw_batch_id = (SELECT batch_id FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'WM_INBOUND_CARTON_SKU_DETAIL_FACT')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+- subject: WM_INBOUND_CARTON_SKU_DETAIL_FACT
+  metric_name: napdw.base_distinct_count
+  sql: "SELECT job_name, subj_area, tgt_db_name, tgt_tb_name, 'tgt', COALESCE(tgt_metric, 0)
+        FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        WHERE job_name='WM_INBOUND_CARTON_RECEIVED_LDG_TO_BASE'
+        AND dw_batch_id = (SELECT batch_id FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'WM_INBOUND_CARTON_SKU_DETAIL_FACT')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+- subject: WM_INBOUND_CARTON_SKU_DETAIL_FACT
+  metric_name: napdw.stg_distinct_count
+  sql: "SELECT job_name, subj_area, src_db_name, src_tb_name,  'src', COALESCE(src_metric, 0)
+        FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        WHERE job_name='WM_INBOUND_CARTON_SPLIT_LDG_TO_BASE'
+        AND dw_batch_id = (SELECT batch_id FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'WM_INBOUND_CARTON_SKU_DETAIL_FACT')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+- subject: WM_INBOUND_CARTON_SKU_DETAIL_FACT
+  metric_name: napdw.base_distinct_count
+  sql: "SELECT job_name, subj_area, tgt_db_name, tgt_tb_name, 'tgt', COALESCE(tgt_metric, 0)
+        FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        WHERE job_name='WM_INBOUND_CARTON_SPLIT_LDG_TO_BASE'
+        AND dw_batch_id = (SELECT batch_id FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'WM_INBOUND_CARTON_SKU_DETAIL_FACT')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+- subject: WM_INBOUND_CARTON_SKU_DETAIL_FACT
+  metric_name: napdw.stg_distinct_count
+  sql: "SELECT job_name, subj_area, src_db_name, src_tb_name,  'src', COALESCE(src_metric, 0)
+        FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        WHERE job_name='WM_INBOUND_CARTON_ADJUSTED_LDG_TO_BASE'
+        AND dw_batch_id = (SELECT batch_id FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'WM_INBOUND_CARTON_SKU_DETAIL_FACT')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+- subject: WM_INBOUND_CARTON_SKU_DETAIL_FACT
+  metric_name: napdw.base_distinct_count
+  sql: "SELECT job_name, subj_area, tgt_db_name, tgt_tb_name, 'tgt', COALESCE(tgt_metric, 0)
+        FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        WHERE job_name='WM_INBOUND_CARTON_ADJUSTED_LDG_TO_BASE'
+        AND dw_batch_id = (SELECT batch_id FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'WM_INBOUND_CARTON_SKU_DETAIL_FACT')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+- subject: WM_INBOUND_CARTON_SKU_DETAIL_FACT
+  metric_name: napdw.stg_distinct_count
+  sql: "SELECT job_name, subj_area, src_db_name, src_tb_name,  'src', COALESCE(src_metric, 0)
+        FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        WHERE job_name='WM_INBOUND_CARTON_INVENTORY_SPLIT_LDG_TO_BASE'
+        AND dw_batch_id = (SELECT batch_id FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'WM_INBOUND_CARTON_SKU_DETAIL_FACT')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+- subject: WM_INBOUND_CARTON_SKU_DETAIL_FACT
+  metric_name: napdw.base_distinct_count
+  sql: "SELECT job_name, subj_area, tgt_db_name, tgt_tb_name, 'tgt', COALESCE(tgt_metric, 0)
+        FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        WHERE job_name='WM_INBOUND_CARTON_INVENTORY_SPLIT_LDG_TO_BASE'
+        AND dw_batch_id = (SELECT batch_id FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'WM_INBOUND_CARTON_SKU_DETAIL_FACT')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+- subject: WM_INBOUND_CARTON_SKU_DETAIL_FACT
+  metric_name: napdw.stg_distinct_count
+  sql: "SELECT job_name, subj_area, src_db_name, src_tb_name,  'src', COALESCE(src_metric, 0)
+        FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        WHERE job_name='WM_INBOUND_CARTON_AUDIT_LDG_TO_BASE'
+        AND dw_batch_id = (SELECT batch_id FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'WM_INBOUND_CARTON_SKU_DETAIL_FACT')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+- subject: WM_INBOUND_CARTON_SKU_DETAIL_FACT
+  metric_name: napdw.base_distinct_count
+  sql: "SELECT job_name, subj_area, tgt_db_name, tgt_tb_name, 'tgt', COALESCE(tgt_metric, 0)
+        FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        WHERE job_name='WM_INBOUND_CARTON_AUDIT_LDG_TO_BASE'
+        AND dw_batch_id = (SELECT batch_id FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'WM_INBOUND_CARTON_SKU_DETAIL_FACT')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+- subject: WM_INBOUND_CARTON_SKU_DETAIL_FACT
+  metric_name: napdw.stg_distinct_count
+  sql: "SELECT job_name, subj_area, src_db_name, src_tb_name,  'src', COALESCE(src_metric, 0)
+        FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        WHERE job_name='WM_INBOUND_CARTON_ALL_AUDITS_COMPLETED_LDG_TO_BASE'
+        AND dw_batch_id = (SELECT batch_id FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'WM_INBOUND_CARTON_SKU_DETAIL_FACT')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+- subject: WM_INBOUND_CARTON_SKU_DETAIL_FACT
+  metric_name: napdw.base_distinct_count
+  sql: "SELECT job_name, subj_area, tgt_db_name, tgt_tb_name, 'tgt', COALESCE(tgt_metric, 0)
+        FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        WHERE job_name='WM_INBOUND_CARTON_ALL_AUDITS_COMPLETED_LDG_TO_BASE'
+        AND dw_batch_id = (SELECT batch_id FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'WM_INBOUND_CARTON_SKU_DETAIL_FACT')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+- subject: WM_INBOUND_CARTON_SKU_DETAIL_FACT
+  metric_name: spark_processed_messages
+  sql: "
+  select 
+           ISF_DAG_NM,
+           CAST(ISF_DAG_START_TMSTP as VARCHAR(19)),
+           CAST(ISF_DAG_END_TMSTP as VARCHAR(19)),
+           CAST(SPARK_JOB_START_TMSTP as VARCHAR(19)),
+           CAST(SPARK_JOB_END_TMSTP as VARCHAR(19)),
+           CAST(TERADATA_JOB_START_TMSTP as VARCHAR(19)),
+           CAST(TERADATA_JOB_END_TMSTP as VARCHAR(19)),
+           SUBSTRING(ISF_DAG_START_TMSTP,12,2),
+           CAST(SPARK_PROCESSED_MESSAGE_CNT as INTEGER)
+        from 
+         (
+           select ISF_DAG_NM, BATCH_ID, METRIC_NM, METRIC_VALUE from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG 
+           where isf_dag_nm = 'nrlt_wm_inbound_carton_sku_detail_fact_16753_TECH_SC_NAP_insights'
+           and METRIC_NM not in ('TERADATA_JOB_START_TMSTP', 'TERADATA_JOB_END_TMSTP')
+           and batch_id = (SELECT BATCH_ID FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE SUBJECT_AREA_NM ='WM_INBOUND_CARTON_SKU_DETAIL_FACT')
+           union all 
+           select ISF_DAG_NM, BATCH_ID, METRIC_NM, MAX(METRIC_VALUE) as METRIC_VALUE from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG 
+           where isf_dag_nm = 'nrlt_wm_inbound_carton_sku_detail_fact_16753_TECH_SC_NAP_insights'
+           and METRIC_NM in ('TERADATA_JOB_END_TMSTP')
+           and batch_id = (SELECT BATCH_ID FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE SUBJECT_AREA_NM ='WM_INBOUND_CARTON_SKU_DETAIL_FACT')
+           group by ISF_DAG_NM, BATCH_ID, METRIC_NM
+           union all
+           select ISF_DAG_NM, BATCH_ID, METRIC_NM, MIN(METRIC_VALUE) as METRIC_VALUE from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG 
+           where isf_dag_nm = 'nrlt_wm_inbound_carton_sku_detail_fact_16753_TECH_SC_NAP_insights'
+           and METRIC_NM in ('TERADATA_JOB_START_TMSTP')
+           and batch_id = (SELECT BATCH_ID FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE SUBJECT_AREA_NM ='WM_INBOUND_CARTON_SKU_DETAIL_FACT')
+           group by ISF_DAG_NM, BATCH_ID, METRIC_NM
+        ) src 
+        PIVOT (min(METRIC_VALUE) FOR METRIC_NM in ('SPARK_PROCESSED_MESSAGE_CNT' as SPARK_PROCESSED_MESSAGE_CNT , 
+                                                   'ISF_DAG_START_TMSTP' as ISF_DAG_START_TMSTP , 
+                                                   'ISF_DAG_END_TMSTP' as ISF_DAG_END_TMSTP,
+                                                   'TERADATA_JOB_START_TMSTP' as TERADATA_JOB_START_TMSTP,
+                                                   'TERADATA_JOB_END_TMSTP' as TERADATA_JOB_END_TMSTP,
+                                                   'SPARK_JOB_START_TMSTP' as SPARK_JOB_START_TMSTP,
+                                                   'SPARK_JOB_END_TMSTP' as SPARK_JOB_END_TMSTP
+                                                  )
+        ) metrics"
+  metric_value_position: 8
+  tags:
+    - isf_dag_nm: 0
+    - isf_dag_start_tmstp: 1
+    - isf_dag_end_tmstp: 2
+    - spark_job_start_tmstp: 3
+    - spark_job_end_tmstp: 4
+    - teradata_job_start_tmstp: 5
+    - teradata_job_end_tmstp: 6
+    - execution_hour: 7
+
+- subject: WM_INBOUND_CARTON_SKU_DETAIL_FACT
+  metric_name: ldg_loaded_cnt
+  sql: "
+  select 
+           ISF_DAG_NM,
+           TBL_NM,
+           CAST(SPARK_JOB_END_TMSTP as VARCHAR(19)),
+           SUBSTRING(ISF_DAG_START_TMSTP,12,2),
+           batch_id,
+           CAST(LOADED_TO_LDG_CNT as INTEGER)
+        from 
+         (
+           select batch_id, ISF_DAG_NM, METRIC_NM, METRIC_VALUE, COALESCE(TBL_NM, '{DBENV}_NAP_STG.WM_INBOUND_CARTON_LIFECYCLE_EVENT_FACT_LDG') as TBL_NM
+           from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG          
+           where isf_dag_nm = 'nrlt_wm_inbound_carton_sku_detail_fact_16753_TECH_SC_NAP_insights'
+           and batch_id = (SELECT BATCH_ID FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE SUBJECT_AREA_NM ='WM_INBOUND_CARTON_SKU_DETAIL_FACT')
+           and (TBL_NM = '{DBENV}_NAP_STG.WM_INBOUND_CARTON_LIFECYCLE_EVENT_FACT_LDG' or metric_nm in ('ISF_DAG_START_TMSTP', 'SPARK_JOB_END_TMSTP'))
+         ) src 
+        PIVOT (min(METRIC_VALUE) FOR METRIC_NM in ('LOADED_TO_LDG_CNT' as LOADED_TO_LDG_CNT , 
+                                                   'ISF_DAG_START_TMSTP' as ISF_DAG_START_TMSTP , 
+                                                   'SPARK_JOB_END_TMSTP' as SPARK_JOB_END_TMSTP
+                                                  )                               
+        ) metrics"
+  metric_value_position: 5
+  tags:
+    - isf_dag_nm: 0
+    - ldg_tbl_nm: 1
+    - loading_tmstp: 2
+    - execution_hour: 3
+    - batch_id: 4
+    
+
+- subject: WM_INBOUND_CARTON_SKU_DETAIL_FACT
+  metric_name: ldg_table_cnt
+  sql: "select 
+           'nrlt_wm_inbound_carton_sku_detail_fact_16753_TECH_SC_NAP_insights' as ISF_DAG_NM,
+           '{DBENV}_NAP_STG.WM_INBOUND_CARTON_LIFECYCLE_EVENT_FACT_LDG' as TBL_NM,
+           (SELECT BATCH_ID FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE SUBJECT_AREA_NM ='WM_INBOUND_CARTON_SKU_DETAIL_FACT') as BATCH_ID,
+           COUNT(*)
+        from {DBENV}_NAP_BASE_VWS.WM_INBOUND_CARTON_LIFECYCLE_EVENT_FACT_LDG"
+  metric_value_position: 3
+  tags:
+    - isf_dag_nm: 0
+    - ldg_tbl_nm: 1
+    - batch_id: 2

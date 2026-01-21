@@ -1,0 +1,82 @@
+{
+  "domain": "merch",
+  "name" : "product_choice",
+  "sources" : [
+    {
+      "name" : "mainDataTable",
+      "description" : "Ultimate Source of data for daily incremental loads",
+      "type" : "KAFKA",
+      "cache" : "MEMORY_AND_DISK",
+      "enable" : true,
+      "properties" : {
+        "kafka.bootstrap.servers":"meadow.prod.us-west-2.aws.proton.nordstrom.com:9093",
+        "schemaRegistryUrl" : "https://schema-registry.prod.us-west-2.aws.proton.nordstrom.com",
+        "group.id": "nordlytics_001",
+        "subscribe": "nap-product-choice-object-model",
+        "headers" : "",
+        "enable.auto.commit": "false",
+        "kms.keyId" : "2d5fdb5f-a491-40cf-9424-e256f5a055b7",
+        "proton_accessKey" : "APP04108.NQ95GWQDJ0GYKAJT1",
+        "proton_secret" :"AQICAHgXmQm0PrO+7auc2nPn2bgLUSxu6Q3UnrSihlRyWbiEZQG59P8mVX78gzwlO95E0GifAAAA4zCB4AYJKoZIhvcNAQcGoIHSMIHPAgEAMIHJBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDNaL5iytccuce06x0wIBEICBm19+m1Q5YPdP8yzvq+c1ZQ6nxmV42vA0HQwAUjZb23nuunNlRlUeCQ4FFjXOGttpG/hnZEJzOs6SNZHLsv1TA7Cj2yTDTrek6vt0+V7wqAvFomeAdHEKAGA8KZTIvwJt6mu3YBe/GLZHrSj6P+KFSFNxxxyWpsmSzrd8WciW51ge3Xm8eUU772/JEwr2sqEewYkMXhG8E5glN2ep",
+        "kafka.security.protocol": "sasl_ssl",
+        "sasl.kerberos.service.name": "kafka",
+        "kafka.sasl.mechanism": "SCRAM-SHA-512",
+        "pathPattern" : ""
+      }
+    }
+  ],
+  "dags" : [
+    {
+      "name" : "Main_dag",
+      "upstream" : ["mainDataTable"],
+      "operators" : [
+        {
+          "name": "PRODUCT_CHOICE_final",
+          "description": "Final data frame for PRODUCT_CHOICE extract",
+          "select": [
+            "Id"
+            , "MarketCode"
+            , "SourcePublishTimestamp"
+            , "Description"
+            , "ShortDescription"
+            , "element_at(Colors, 1).Code colors_code"
+            , "element_at(Colors, 1).Description colors_description"
+            , "element_at(Colors, 1).NrfColorCode colors_nrfcolorcode"
+            , "element_at(Colors, 1).NrfColorDescription colors_nrfcolordescription"
+            , "to_json(LegacyRmsStyleIds)"
+            , "NordstromDisplayColor"
+            , "ParentEPMStyleId"
+            , "ProductAction"
+            , "ProductActionTimestamp"
+            , "RmsStyleGroupId"
+            , "ProductActionUser"
+            , "LegacyRmsSkuId"
+          ]
+        },
+        {
+          "name" : "PRODUCT_CHOICE_count",
+          "description" : "Count of PRODUCT_CHOICE records generated",
+          "from" : ["PRODUCT_CHOICE_final"],
+          "select" : [ "count(*)" ]
+        }
+      ]
+    }
+  ],
+  "sinks" : [
+     {
+      "name" : "PRODUCT_CHOICE_sink",
+      "description" : "Output PRODUCT_CHOICE records (normally CSV-GZIP format)",
+      "type" : "bigquery",
+      "upstream" : "PRODUCT_CHOICE_final",
+      "active" : true,
+      "properties" : {
+        "project": "jwn-nap-user1-nonprod-zmnb",
+        "dataset": "PRD_NAP_STG",
+        "table": "PRODUCT_CHOICE_LDG",
+        "temp_bucket": "test-data-datametica",
+        "mode": "overwrite"
+      }
+    }
+    
+  ]
+}

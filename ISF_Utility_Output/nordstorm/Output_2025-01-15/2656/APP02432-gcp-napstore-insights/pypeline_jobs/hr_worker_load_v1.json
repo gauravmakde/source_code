@@ -1,0 +1,54 @@
+{
+  "dag_id":"hr_worker_load_v1",
+  "dag_schedule":"20 1,7,13,19 * * *",
+  "stages":[
+    "hr_worker_v2"
+  ],
+  "hr_worker_v2": {
+    "load_orc_td_stg": {
+      "spark_engine": {
+        "spark_run_mode":"high",
+        "scripts": [
+          "hr_worker_load_orc_and_teradata_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__HR_WORKER_KAFKA__",
+            "sql_table_reference": "kafka_linear_worker_analytical_avro",
+            "data_source_name": "linear-worker-analytical-avro"
+          }
+        ],
+        "output_details":[
+          {
+            "conn_name": "__HR_WORKER_S3_ORC_SINK__",
+            "sql_table_reference": "hr_worker_orc_output"
+          },
+          {
+            "conn_name": "__TERADATA_NAP_HR_STG__",
+            "sql_table_reference": "hr_worker_v1_ldg",
+            "data_source_name": "hr_worker_v1_ldg"
+          }
+        ]
+      }
+    },
+    "load_td_stg_to_dims": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__NEW_VAULT_TERADATA_NAP_HR_STG__",
+            "scripts": [
+              "hr_worker_load_teradata_stg_to_dim.sql"
+            ,"hr_on_going_job_details_load_dim.sql"
+            ,"hr_on_going_employee_status_details_load_dim.sql"
+            ,"hr_on_going_line_position_details_load_dim.sql"
+            ,"hr_on_going_org_details_load_dim.sql"
+            ,"hr_on_going_work_contact_details_load_dim.sql"
+
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+

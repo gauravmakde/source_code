@@ -1,0 +1,51 @@
+{
+  "dag_id": "wfm_employee_schedule_constraint_load",
+  "dag_schedule": "40 15 * * *",
+  "stages": [
+    "wfm_employee_schedule_constraint"
+  ],
+  "wfm_employee_schedule_constraint": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "wfm_employee_schedule_constraint_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__WFM_EMPLOYEE_SCHEDULE_CONSTRAINT_KAFKA__",
+            "sql_table_reference": "kafka_wfm_employee_schedule_constraint_input",
+            "data_source_name": "customer-employee-schedule-constraint-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__WFM_EMPLOYEE_SCHEDULE_CONSTRAINT_KAFKA_TO_S3_ORC__",
+            "sql_table_reference": "wfm_employee_schedule_constraint_orc_output"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_employee_schedule_constraint_stg_table" ,
+            "data_source_name": "EMPLOYEE_SCHEDULE_CONSTRAINT_STG"
+          }
+
+        ]
+      }
+    },
+    "load_1_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "wfm_employee_schedule_constraint_load_fact.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+
+

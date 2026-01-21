@@ -1,0 +1,60 @@
+{
+    "dag_id": "APP08076_size_curves_eval_metrics_main",
+    "dag_schedule": "30 10 * * SUN",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "TECH_ACE_AST_ISF_ALERTS@nordstrom.com, dsa-app08076-size-curves@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "TECH_ACE_AST_ISF_ALERTS@nordstrom.com, dsa-app08076-size-curves@nordstrom.pagerduty.com",
+    "dependencies": {
+        "upstream": {
+            "dags": [
+                {
+                    "external_dag_id": "app08076_size_curves_eval_base_tables_main_17284_MERCH_ANALYTICS_insights_framework"
+                }
+            ]
+        }
+    },
+    "stages": [
+        "run_teradata_sql_stg_0"
+    ],
+    "sql_env_vars": {
+        "environment_schema": "t2dl_das_size"
+    },
+    "run_teradata_sql_stg_0": {
+        "model_recs": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_SZE_BATCH__",
+                        "scripts": [
+                            "size_evaluation/APP08076_model_recs_main.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "actuals": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_SZE_BATCH__",
+                        "scripts": [
+                            "size_evaluation/APP08076_size_eval_actuals_main.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "accuracy": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_SZE_BATCH__",
+                        "scripts": [
+                            "size_evaluation/APP08076_accuracy_main.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,370 @@
+{
+  "dag_id": "wfm_scheduling_data_load",
+  "dag_schedule": "30 15 * * *",
+  "stages": [
+    "wfm_scheduling_department",
+    "wfm_scheduling_forecast_group",
+    "wfm_scheduling_labor_role",
+    "wfm_scheduling_metric",
+    "wfm_scheduling_workgroup",
+    "wfm_store_operating_hours",
+    "wfm_store_scheduling_event",
+    "wfm_store_department_operating_hours"
+  ],
+  "stage_dependencies": {
+    "wfm_scheduling_department": "wfm_scheduling_forecast_group",
+    "wfm_scheduling_forecast_group": "wfm_scheduling_labor_role",
+    "wfm_scheduling_labor_role": "wfm_scheduling_metric",
+    "wfm_scheduling_workgroup": "wfm_store_operating_hours",
+    "wfm_store_operating_hours": "wfm_store_scheduling_event",
+    "wfm_store_scheduling_event": "wfm_store_department_operating_hours"
+
+  },
+  "wfm_scheduling_department": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "wfm_scheduling_department_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__WFM_SCHEDULING_DEPARTMENT_KAFKA__",
+            "sql_table_reference": "kafka_wfm_scheduling_department_input",
+            "data_source_name": "customer-scheduling-department-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__WFM_SCHEDULING_DEPARTMENT_KAFKA_TO_S3_ORC__",
+            "sql_table_reference": "wfm_scheduling_department_orc_output"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_scheduling_department_stg_table" ,
+            "data_source_name": "SCHEDULING_DEPARTMENT_STG"
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_scheduling_job_stg_table" ,
+            "data_source_name": "SCHEDULING_JOB_STG"
+          }
+        ]
+      }
+    },
+    "load_1_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "wfm_scheduling_department_load_fact.sql"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "wfm_scheduling_forecast_group": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "wfm_scheduling_forecast_group_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__WFM_SCHEDULING_FORECAST_GROUP_KAFKA__",
+            "sql_table_reference": "kafka_wfm_scheduling_forecast_group_input",
+            "data_source_name": "customer-scheduling-forecast-group-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__WFM_SCHEDULING_FORECAST_GROUP_KAFKA_TO_S3_ORC__",
+            "sql_table_reference": "wfm_scheduling_forecast_group_orc_output"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_scheduling_forecast_group_stg_table",
+            "data_source_name": "SCHEDULING_FORECAST_GROUP_STG"
+          }
+        ]
+      }
+    },
+    "load_1_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "wfm_scheduling_forecast_group_load_fact.sql"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "wfm_scheduling_labor_role": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "wfm_scheduling_labor_role_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__WFM_SCHEDULING_LABOR_ROLE_KAFKA__",
+            "sql_table_reference": "kafka_wfm_scheduling_labor_role_input",
+            "data_source_name": "customer-scheduling-labor-role-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__WFM_SCHEDULING_LABOR_ROLE_KAFKA_TO_S3_ORC__",
+            "sql_table_reference": "wfm_scheduling_labor_role_orc_output"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_scheduling_labor_role_stg_table" ,
+            "data_source_name": "SCHEDULING_LABOR_ROLE_STG"
+          }
+        ]
+      }
+    },
+    "load_1_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "wfm_scheduling_labor_role_load_fact.sql"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "wfm_scheduling_metric": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "wfm_scheduling_metric_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__WFM_SCHEDULING_METRIC_KAFKA__",
+            "sql_table_reference": "kafka_wfm_scheduling_metric_input",
+            "data_source_name": "customer-scheduling-metric-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__WFM_SCHEDULING_METRIC_KAFKA_TO_S3_ORC__",
+            "sql_table_reference": "wfm_scheduling_metric_orc_output"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_scheduling_metric_stg_table",
+            "data_source_name": "SCHEDULING_METRIC_STG"
+          }
+        ]
+      }
+    },
+    "load_1_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "wfm_scheduling_metric_load_fact.sql"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "wfm_scheduling_workgroup": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "wfm_scheduling_workgroup_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__WFM_SCHEDULING_WORKGROUP_KAFKA__",
+            "sql_table_reference": "kafka_wfm_scheduling_workgroup_input",
+            "data_source_name": "customer-scheduling-workgroup-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__WFM_SCHEDULING_WORKGROUP_KAFKA_TO_S3_ORC__",
+            "sql_table_reference": "wfm_scheduling_workgroup_orc_output"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_scheduling_workgroup_stg_table" ,
+            "data_source_name": "SCHEDULING_WORKGROUP_STG"
+          }
+        ]
+      }
+    },
+    "load_1_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "wfm_scheduling_workgroup_load_fact.sql"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "wfm_store_operating_hours": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "wfm_store_operating_hours_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__WFM_STORE_OPERATING_HOURS_KAFKA__",
+            "sql_table_reference": "kafka_wfm_store_operating_hours_input",
+            "data_source_name": "customer-store-operating-hours-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__WFM_STORE_OPERATING_HOURS_KAFKA_TO_S3_ORC__",
+            "sql_table_reference": "wfm_store_operating_hours_orc_output"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_store_operating_hours_stg_table",
+            "data_source_name": "STORE_OPERATING_HOURS_STG"
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_store_operating_hours_details_stg_table",
+            "data_source_name": "STORE_OPERATING_HOURS_DETAILS_STG"
+          }
+
+        ]
+      }
+    },
+    "load_1_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "wfm_store_operating_hours_load_fact.sql"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "wfm_store_scheduling_event": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "high",
+        "scripts": [
+          "wfm_store_scheduling_event_load_stg.sql"
+        ],
+        "input_details": [
+          {
+
+            "conn_name": "__WFM_STORE_SCHEDULING_EVENT_KAFKA__",
+            "sql_table_reference": "kafka_wfm_store_scheduling_event_input",
+            "data_source_name": "customer-store-scheduling-event-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__WFM_STORE_SCHEDULING_EVENT_KAFKA_TO_S3_ORC__",
+            "sql_table_reference": "wfm_store_scheduling_event_orc_output"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_store_scheduling_event_stg_table",
+            "data_source_name": "STORE_SCHEDULING_EVENT_STG"
+          }
+
+        ]
+      }
+    },
+    "load_1_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "wfm_store_scheduling_event_load_fact.sql"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "wfm_store_department_operating_hours": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "wfm_store_department_operating_hours_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__WFM_STORE_DEPARTMENT_OPERATING_HOURS_KAFKA__",
+            "sql_table_reference": "kafka_wfm_store_department_operating_hours_input",
+            "data_source_name": "linear-store-department-operating-hours-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__WFM_STORE_DEPARTMENT_OPERATING_HOURS_KAFKA_TO_S3_ORC__",
+            "sql_table_reference": "wfm_store_department_operating_hours_orc_output"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_store_department_operating_hours_stg_table",
+            "data_source_name": "STORE_DEPARTMENT_OPERATING_HOURS_STG"
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_store_department_operating_hours_details_stg_table",
+            "data_source_name": "STORE_DEPARTMENT_OPERATING_HOURS_DETAILS_STG"
+          }
+
+        ]
+      }
+    },
+    "load_1_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "wfm_store_department_operating_hours_load_fact.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

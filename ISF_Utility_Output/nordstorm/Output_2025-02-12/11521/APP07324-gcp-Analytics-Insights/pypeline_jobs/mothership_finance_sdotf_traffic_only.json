@@ -1,0 +1,39 @@
+{
+    "dag_id": "mothership_finance_sdotf_traffic_only",
+    "dag_schedule": "20 15 * * *",
+    "nonprod_email_on_failure": "matthew.bond@nordstrom.com",
+    "prod_email_on_failure": "dsa-app08176-e2e-finance-t2dl-das-mothership@nordstrom.pagerduty.com, tech_ffp_analytics@nordstrom.com, fin_e2e_sales@nordstrom.com",
+    "dependencies": {
+        "upstream": {
+            "dags": [
+                {
+                    "external_dag_id": "rack_store_traffic_11521_ACE_ENG",
+                    "retries": 3,
+                    "poke_interval": 120,
+                    "timeout": 3600
+                }
+            ]
+        }
+    },
+    "stages": [
+        "run_sdotf_traffic_only"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-55",
+        "end_date": "current_date()"
+    },
+    "run_sdotf_traffic_only": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTS",
+                        "scripts": [
+                            "mothership/sdotf_traffic_only.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

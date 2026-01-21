@@ -1,0 +1,68 @@
+{
+    "dag_id": "speed_content_asset_summary_tpt",
+    "prod_email_on_failure": "dsa-app08742-session-path-expanded-events-data-pipelines@nordstrom.pagerduty.com, soren.stime1@nordstrom.com",
+    "nonprod_email_on_failure": "soren.stime1@nordstrom.com",
+    "sql_env_vars": {
+        "start_date": "current_date()-4",
+        "end_date": "current_date()-3"
+    },
+    "stages": [
+        "load_to_csv",
+        "ldg_to_t2",
+        "tpt_load_ldg"
+    ],
+    "stage_dependencies": {
+        "load_to_csv": "tpt_load_ldg",
+        "tpt_load_ldg": "ldg_to_t2"
+    },
+    "load_to_csv": {
+        "job_1_load_data_to_csv": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "speed/speed_content_asset_summary_load.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TPT_CSV_OUTPUT",
+                        "sql_table_reference": "speed_content_asset_summary_ldg_output"
+                    }
+                ]
+            }
+        }
+    },
+    "tpt_load_ldg": {
+        "job_2_load_data_to_t2_ldg": {
+            "tpt_engine": {
+                "retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TPT_DEG",
+                        "delimiter": "1F",
+                        "table_name": "speed_content_asset_summary_ldg",
+                        "s3_file_path": "s3://{tpt_path}/speed_content_asset_summary_ldg_output/*.csv.gz",
+                        "job_name": "speed_content_asset_summary_ldg"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    },
+    "ldg_to_t2": {
+        "job_3_update_t2_tables_from_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_DEG",
+                        "scripts": [
+                            "speed/speed_content_asset_summary.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

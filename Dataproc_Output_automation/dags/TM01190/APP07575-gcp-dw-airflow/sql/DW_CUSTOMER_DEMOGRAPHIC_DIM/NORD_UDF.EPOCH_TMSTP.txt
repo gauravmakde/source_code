@@ -1,0 +1,8 @@
+CREATE OR REPLACE FUNCTION nord_udf.epoch_tmstp(tmstp_val INT64)
+  RETURNS TIMESTAMP
+  AS (
+    CASE
+      WHEN tmstp_val > 2.0E9 THEN CAST(date_add(DATE '1970-01-01', interval div(tmstp_val, 86400000) DAY) as TIMESTAMP) + INTERVAL 1 SECOND * CAST(div(mod(tmstp_val, 86400000), 1000) * NUMERIC '100' as INT64) / 100 + INTERVAL 1 MILLISECOND * CAST(mod(tmstp_val, 1000) * NUMERIC '100' as INT64) / 100
+      WHEN tmstp_val >= 0 THEN CAST(date_add(DATE '1970-01-01', interval div(tmstp_val, 86400) DAY) as TIMESTAMP) + INTERVAL 1 SECOND * CAST(mod(tmstp_val, 86400) * NUMERIC '100' as INT64) / 100
+    END
+  );

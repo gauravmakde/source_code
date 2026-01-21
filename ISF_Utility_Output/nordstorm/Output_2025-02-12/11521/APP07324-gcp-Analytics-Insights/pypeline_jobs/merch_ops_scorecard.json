@@ -1,0 +1,41 @@
+{
+    "dag_id": "merch_ops_scorecard",
+    "dag_schedule": "00 10 * * 1",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "dsa-app08866-ops-scorecard@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "shaila.karole@nordstrom.com",
+    "stages": [
+        "run_teradata_sql_stg_0"
+    ],
+    "sql_env_vars": {
+        "start_date": "CURRENT_DATE",
+        "end_date": "CURRENT_DATE"
+    },
+    "run_teradata_sql_stg_0": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CLARITY",
+                        "scripts": [
+                            "ops_scorecard/main/merch_ops_scorecard.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_0_refresh_tableau": {
+            "tableau_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TABLEAU_NAP__",
+                        "source_type": "workbook",
+                        "workbook_name": "Ops Scorecard - Merch",
+                        "project_name": "Ops Scorecard"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    }
+}

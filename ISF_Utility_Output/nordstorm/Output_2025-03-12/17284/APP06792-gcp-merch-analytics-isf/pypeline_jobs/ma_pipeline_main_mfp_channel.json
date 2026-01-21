@@ -1,0 +1,27 @@
+{
+    "dag_id": "merch_main_mfp_channel",
+    "dag_schedule": "00 04 * * 1",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "dsa-app08199-financial-review@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "asiyah.fox@nordstrom.com",
+    "stages": [
+        "run_teradata_sql_stg_00"
+    ],
+    "sql_env_vars": {
+        "environment_schema": "T2DL_DAS_ACE_MFP"
+    },
+    "run_teradata_sql_stg_00": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_AIS_BATCH__",
+                        "scripts": [
+                            "mfp_report/ma_pipeline_main_mfp_channel.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

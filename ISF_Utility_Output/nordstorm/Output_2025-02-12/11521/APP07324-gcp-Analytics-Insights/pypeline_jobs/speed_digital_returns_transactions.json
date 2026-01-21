@@ -1,0 +1,33 @@
+{
+    "dag_id": "digital_returns_transactions",
+    "prod_email_on_failure": "dsa-app08742-session-path-expanded-events-data-pipelines@nordstrom.pagerduty.com, soren.stime1@nordstrom.com",
+    "nonprod_email_on_failure": "soren.stime1@nordstrom.com",
+    "dependencies": {
+        "downstream": {
+            "dags": [
+                "session_sales_returns_transactions_11521_ACE_ENG"
+            ]
+        }
+    },
+    "stages": [
+        "run_hive_hive_digital_returns_transactions_sql"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-4",
+        "end_date": "current_date()-3"
+    },
+    "run_hive_hive_digital_returns_transactions_sql": {
+        "job_0": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "speed/digital_returns_transactions.sql"
+                ],
+                "input_details": [],
+                "output_details": []
+            }
+        }
+    }
+}

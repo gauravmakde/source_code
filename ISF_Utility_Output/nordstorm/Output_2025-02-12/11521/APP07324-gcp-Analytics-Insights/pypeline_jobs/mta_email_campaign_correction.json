@@ -1,0 +1,97 @@
+{
+    "dag_id": "mta_email_campaign_correction",
+    "prod_email_on_failure": "dsa--app08300-email-performance-dashboard-pipeline@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "nhan.le@nordstrom.com",
+    "stages": [
+        "email_campaign_category_correction_stage1",
+        "email_campaign_id_correction_stage2"
+    ],
+    "email_campaign_category_correction_stage1": {
+        "job_1_create_td_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTA",
+                        "scripts": [
+                            "mta/ddl/ddl_mta_email_campaign_category_correction_ldg.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_2_load_s3_data_to_output": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+             "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "mta/mta_email_campaign_category_correction_load.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTA",
+                        "sql_table_reference": "mta_email_campaign_category_correction_ldg_output",
+                        "data_source_name": "mta_email_campaign_category_correction_ldg"
+                    }
+                ]
+            }
+        },
+        "job_3_update_t2_table_from_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTA",
+                        "scripts": [
+                            "mta/mta_email_campaign_category_correction.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "email_campaign_id_correction_stage2": {
+        "job_1_create_td_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTA",
+                        "scripts": [
+                            "mta/ddl/ddl_mta_email_campaign_id_correction_ldg.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_2_load_s3_data_to_output": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+             "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "mta/mta_email_campaign_id_correction_load.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTA",
+                        "sql_table_reference": "mta_email_campaign_id_correction_ldg_output",
+                        "data_source_name": "mta_email_campaign_id_correction_ldg"
+                    }
+                ]
+            }
+        },
+        "job_3_update_t2_table_from_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTA",
+                        "scripts": [
+                            "mta/mta_email_campaign_id_correction.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}    

@@ -1,0 +1,50 @@
+{
+    "dag_id": "mothership_clarity_finance_sales_demand_margin_traffic_fact_weekend",
+    "nonprod_email_on_failure": "matthew.bond@nordstrom.com",
+    "prod_email_on_failure": "dsa-app08176-e2e-finance-t2dl-das-mothership@nordstrom.pagerduty.com, tech_ffp_analytics@nordstrom.com, fin_e2e_sales@nordstrom.com",
+    "dependencies": {
+        "downstream": {
+            "dags": [
+                "mothership_clarity_finance_sales_demand_price_band_agg_weekend_11521_ACE_ENG"
+            ]
+        }
+    },
+    "stage_dependencies": {
+        "fsdf_dq_check": "run_clarity_finance_sales_demand_margin_traffic_fact"
+    },
+    "stages": [
+        "fsdf_dq_check",
+        "run_clarity_finance_sales_demand_margin_traffic_fact"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-60",
+        "end_date": "current_date()"
+    },
+    "fsdf_dq_check": {
+        "check_clarity_demand_opgmv": {
+            "branch_engine": {
+                "python_code": "mothership_fsdf_downstream_check.py",
+                "callable_function_name": "callable_func_name",
+                "provide_context": "True",
+                "callable_return_vars": {
+                    "task1": "run_clarity_finance_sales_demand_margin_traffic_fact",
+                    "task2": "run_clarity_finance_sales_demand_margin_traffic_fact"
+                }
+            }
+        }
+    },
+    "run_clarity_finance_sales_demand_margin_traffic_fact": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CLARITY",
+                        "scripts": [
+                            "clarity/clarity_finance_sales_demand_margin_traffic_fact.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

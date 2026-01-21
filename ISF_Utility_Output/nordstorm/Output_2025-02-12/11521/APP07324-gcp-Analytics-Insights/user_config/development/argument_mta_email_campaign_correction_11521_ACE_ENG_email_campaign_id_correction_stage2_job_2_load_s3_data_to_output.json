@@ -1,0 +1,11 @@
+--app_config_file gs://test-data-datametica/app09392/isf-artifacts/app-config/emr_application_dev.json
+--app_id APP07324  
+--target_tables_details 'mta_email_campaign_id_correction_ldg_output={"source_type": "TERADATA", "hostname": "tdnapprod.nordstrom.net", "port": "1025", "vault_connection_name": "nordsecrets/application/APP07324/ace/ae-isf-central/prod/mta/teradata/teradta_db_credentials", "database_name": "T2DL_DAS_MTA","data_source_name":"mta_email_campaign_id_correction_ldg"}'  
+--sql_file_location gs://test-data-datametica/app09392/isf-artifacts/sql/mta_email_campaign_id_correction_load.sql  
+--stage_task_name mta_email_campaign_correction_11521_ACE_ENG_email_campaign_id_correction_stage2_job_2_load_s3_data_to_output  
+--offset_table '`jwn-nap-user1-nonprod-zmnb.onehop_etl_app_db.kafka_consumer_offset_batch_details`'
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_ROLE_ID-Psikfr
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_SECRET_ID-themT6
+--aws_user_role_arn arn:aws:iam::290445963451:role/APP09392_AWS_Secrets_Role
+--aws_user_role_external_id=testUser
+--gcp_project_id jwn-nap-user1-nonprod-zmnb

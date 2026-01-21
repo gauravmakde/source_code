@@ -1,0 +1,27 @@
+{
+    "dag_id": "camelot_data_dedup",
+    "dag_schedule": "0 18 7 * *",
+    "prod_email_on_failure": "Aditi.Gupta@nordstrom.com",
+    "nonprod_email_on_failure": "isha.rankawat@nordstrom.com",
+    "sql_env_vars": {
+        "start_date": "current_date()-7",
+        "end_date": "current_date()-1"
+    },
+    "stages": [
+        "run_terdata_sql"
+    ],
+    "run_terdata_sql": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MMM",
+                        "scripts": [
+                            "mmm/mmm_data_optimine/camelot_data_dedup.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

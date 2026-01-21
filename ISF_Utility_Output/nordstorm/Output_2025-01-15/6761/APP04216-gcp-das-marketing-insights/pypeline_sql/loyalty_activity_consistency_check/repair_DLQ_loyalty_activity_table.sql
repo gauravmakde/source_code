@@ -1,0 +1,1 @@
+MSCK REPAIR TABLE acp_etl_landing.loyaltyactivity_object_model_dlq;

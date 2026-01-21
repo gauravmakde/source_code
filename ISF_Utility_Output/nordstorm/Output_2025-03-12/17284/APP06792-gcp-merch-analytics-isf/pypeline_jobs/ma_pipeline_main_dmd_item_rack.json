@@ -1,0 +1,43 @@
+{
+    "dag_id": "ma_pipeline_main_dmd_item_rack",
+    "dag_schedule": "30 12 * * 1-6",
+    "dag_retries": "0",
+    "prod_email_on_failure": "das-bi-coe-email-notification@nordstrom.pagerduty.com ,TECH_INSIGHTS_STORE_BI@nordstrom.com",
+    "nonprod_email_on_failure": "soutrik.saha@nordstrom.com ,vineet.nilawar@nordstrom.com, aritra.banerjee@nordstrom.com",
+    "dependencies": {
+        "upstream": {
+            "other_app_id": {
+                "dags": [
+                    {
+                        "external_dag_id": "merch_nap_mri_transaction_fact_to_day_aggregate_daily_load_10976_tech_nap_merch",
+                        "conn_id": "okta-conn-to-app04070",
+                        "retries": 2,
+                        "poke_interval": 60,
+                        "timeout": 1800
+                    }
+                ]
+            }
+        }
+    },
+    "stages": [
+        "run_teradata_sql"
+    ],
+    "sql_env_vars": {
+        "environment_schema": "T2DL_DAS_IN_SEASON_MANAGEMENT_REPORTING"
+    },
+    "run_teradata_sql": {
+        "main_dmd_rack": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 10800,
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_AIS_BATCH__",
+                        "scripts": [
+                            "store_reporting/dmd/rack/ma_pipeline_main_dmd_item_rack.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "cf-nordstrom",
+  "private_key_id": "793c00e3d63629c1bf138281932b4f085d12f75d",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC475q4VZIUxaH7\nrWlEaiQaZ+f7TZDb1pOvOLVM5QOCj4/ZKVjeNCT/bSLmdorGKXb5vL4m2Lwi2SP3\n2p9/NVk+MQtW1k+j/+IfB6acoYOFAU8IyTf9Am8ThI7zPfSoVsZGkNm7ljq43YNK\nDhNKKlH0KAAJsw/ustuSKCf9Xusa8YmLGSAYYlbuLbQ0QqgXLvO7xuyo0a0wyKxU\npCEy3BVfJDjJy4X4wTqfnmkufd0tBtL131M6SM2jfohrvY1vztSRysgaFTz6GO+T\nhq4e2/e6FNwG5CiMF1g2hZK4xD6vsdKmAoDL379QQSuMApdu7qR3bPD+tUsCOu+U\n/7Ojgq39AgMBAAECggEABT0gXGVsKHN6xbbhWwNIt4jG/Qry9g9LirSoCiAYq9um\nPwgZUN4YSDYOvYmRH9Dv4l4y4sXT+oa9KpnCV+eqegUIpbKXefVXMfrVAO3gXGWv\nl/efQucNP3fLVt+j7RrcLgaPbG1yh2ca/3+Lk1fEj46MhbnRUzk02ByUGWzVayNt\nDS9s4D7Wk4koKpxqjBjHj0rqvUJsFzd7A0dv39kKCpWH+fWYbpjtDukt8bc0E2CS\nzE0cYR+BshV9WKFkvQG/sUMmdqfSaFlI9lewPkwezuEXsv3++tUS5s0tac6hF6Ke\n7HYx+9mQF7G/oy4dW6o6GYACBUHlrfeDsWzAWCwsXwKBgQD3D7NgrjJln09NslNd\nvOMGYbhSh3bCRcUyqWbkB7lpYGUEyT41/tq5haiwnYBU11QIblYgQydjrkCQaEOq\nlXg2D6DkM599eyF9x6UoIBztr+ikjbzO6xKqcALkoO0YYGR3jhQaHFgyJze6HKrJ\nWYDnfLAzmqnWSkgnVE2OXu0hjwKBgQC/oH59wPZCM0IAOOiUrPzkcpr5QLQn2RPa\nXZyj7dp/68bHaXq2MqnPPaQ+47TSgrM/5Pi69yVwFO6e2T9eSBqJ9fJ+pNogRiCz\napN2sNrhFdakiR9bK2MsPccdYCjvQO6LsJA6I8SCKYqamyiSMv7EHl418UJqU4jt\nN3bztJ7ZswKBgQCEPaQvAK67FE23cdcLmpoOBWpKynV3wS6vUltffP7yd4U6zZj9\n/98FZJSJjJRvVR6GsMBq3mcMBO5MHXLysLS6gx0EaNlaqfigQaeWVbIGS50Dz1Yb\nj1nbXr89ryGZZacBE0yROVC/75v1g3iq87x6q5QI2yVDLVl3q7kjlo3o4wKBgAUu\nZb0otn/buvEemMtMUhorLx2GLljVeb/xwAZ+q+XBjkJeC79ZZ1X/KK26omz+s7IK\nkt8bR5vcNQd+gEQgVvdb+w6JjoxI2SGAxDP1XDWxzXftbTed2LSdhwC4VOMDMm/8\neinYRbvvO5wqjdJGJrVOzOVQfKc7Uvx2/3RfcdwZAoGBAI6FG9xI1OZLr37VhLPd\nGrVYX29ibzWY6+4ZBpVx3rPrgt8+sz3vSf9LSlJ4rLZJvFtDttU1+iE9jSSZARLM\nxmCRoTX0aqZLXVGL7JpPbQ70tzCggAbird3aEx/R5f4XUToI4e9FTZ9lHG0+H9vP\nSb87R0OyRo5CP7U90IUwZIrE\n-----END PRIVATE KEY-----\n",
+  "client_email": "sa-bq-user@cf-nordstrom.iam.gserviceaccount.com",
+  "client_id": "104089672954813017547",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sa-bq-user%40cf-nordstrom.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

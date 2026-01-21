@@ -1,0 +1,8 @@
+--app_config_file s3://tf-nap-prod-credit-payments-isf-airflow/apps/etl_framework/prod/application_config/emr_application_prod.json   
+--app_id app07420    
+--sql_file_location s3://tf-nap-prod-credit-payments-isf-airflow/apps/etl_framework/airflow_nsk_dag_job_artifacts/prod/4638/payments/insights/sql/delta/session_event_delta_4638_payments_insights_customer_activity_removed_from_bag_session_delta_removed_from_bag_session_delta.sql  
+--stage_task_name session_event_delta_4638_payments_insights_customer_activity_removed_from_bag_session_delta_removed_from_bag_session_delta  
+--hive_offset_table nap_credit_and_payments_isf_kafka_offsets.kafka_consumer_offset_batch_details   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:594668836985:secret:VAULT_APPROLE_ROLE_ID  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:594668836985:secret:VAULT_APPROLE_SECRET_ID  
+--aws_user_role_arn arn:aws:iam::594668836985:role/big_data/tf-nap-prod-payments-big-data 

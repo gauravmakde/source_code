@@ -1,0 +1,48 @@
+{
+    "dag_id": "merch_se_all_daily_full",
+    "dag_schedule": "01 21 * * *",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "ACE.Promo@nordstrom.com, dsa-app08204-scaledevents@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "manuela.hurtadogonzalez@nordstrom.com",
+    "stages": [
+        "run_terdata_sql_00"
+    ],
+    "sql_env_vars": {
+        "start_date": "'2024-07-08'",
+        "end_date": "CURRENT_DATE - 1",
+        "start_date_middle": "DATE '2024-07-08' + ((((CURRENT_DATE - 1) - DATE '2024-07-08')/2) + 1)",
+        "end_date_middle": "DATE '2024-07-08' + (((CURRENT_DATE - 1) - DATE '2024-07-08')/2)",
+        "date_event_type": "Anniversary",
+        "start_date_partition": "2023-01-01",
+        "end_date_partition": "2025-01-01",
+        "environment_schema": "T2DL_DAS_SCALED_EVENTS"
+    },
+    "run_terdata_sql_00": {
+        "job_1": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_ASE_BATCH__",
+                        "scripts": [
+                            "scaled_events/ma_pipeline_prod_main_se_all_daily_full.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_2": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_ASE_BATCH__",
+                        "scripts": [
+                            "scaled_events/ma_pipeline_prod_main_se_all_daily_clk_rms_full.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

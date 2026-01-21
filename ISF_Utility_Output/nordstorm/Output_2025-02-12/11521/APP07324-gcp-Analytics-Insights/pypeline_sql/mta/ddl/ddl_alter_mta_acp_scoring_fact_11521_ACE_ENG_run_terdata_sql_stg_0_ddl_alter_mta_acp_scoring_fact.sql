@@ -1,0 +1,12 @@
+SET QUERY_BAND = 'App_ID=APP08047;
+     DAG_ID=ddl_alter_mta_acp_scoring_fact_11521_ACE_ENG;
+     Task_Name=ddl_alter_mta_acp_scoring_fact_11521_ACE_ENG;'
+     FOR SESSION VOLATILE;
+
+
+ALTER TABLE T2DL_DAS_MTA.mta_acp_scoring_fact
+ADD   is_marketplace  VARCHAR(1) CHARACTER SET UNICODE NOT CASESPECIFIC,
+ADD   partner_relationship_id VARCHAR(50) CHARACTER SET UNICODE NOT CASESPECIFIC,
+ADD   partner_relationship_type VARCHAR(100) CHARACTER SET UNICODE NOT CASESPECIFIC;
+
+SET QUERY_BAND = NONE FOR SESSION;

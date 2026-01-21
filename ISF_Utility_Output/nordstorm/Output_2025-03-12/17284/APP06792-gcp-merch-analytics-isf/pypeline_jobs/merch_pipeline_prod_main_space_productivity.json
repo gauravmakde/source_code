@@ -1,0 +1,40 @@
+{
+    "dag_id": "merch_main_space_productivity",
+    "dag_schedule": "00 23 * * SUN",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "TECH_INSIGHTS_STORE_BI@nordstrom.com, dsa-app09300-space-productivity@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "TECH_INSIGHTS_STORE_BI@nordstrom.com",
+    "stages": [
+        "run_teradata_sql_stg_00"
+    ],
+    "sql_env_vars": {
+        "environment_schema": "T2DL_DAS_IN_SEASON_MANAGEMENT_REPORTING"
+    },
+    "run_teradata_sql_stg_00": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_AIS_BATCH__",
+                        "scripts": [
+                            "space_productivity/merch_pipeline_main_space_productivity.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_0_refresh_tableau": {
+            "tableau_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TABLEAU_MA__",
+                        "source_type": "workbook",
+                        "workbook_name": "Space Productivity",
+                        "project_name": "Store"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    }
+}

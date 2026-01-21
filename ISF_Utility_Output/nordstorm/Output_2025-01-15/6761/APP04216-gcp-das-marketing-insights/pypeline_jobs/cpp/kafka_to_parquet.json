@@ -1,0 +1,74 @@
+{
+    "dag_id": "cpp-avro-to-parquet",
+    "dag_schedule": "30 11 * * *",
+    "prod_email_on_failure": "nap-marketing@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "oleh.kuzminskyi@nordstrom.com",
+    "stages": [
+        "cpp_kafka_to_parquet",
+        "copy_from_temp_folder",
+        "remove_temp_folder"
+    ],
+    "cpp_kafka_to_parquet": {
+        "merge_data": {
+            "spark_engine": {
+                "spark_run_mode": "low",
+                "scripts": [
+                    "cpp_kafka_to_parquet.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "KAFKA_DAS_SINK",
+                        "sql_table_reference": "kafka_tbl",
+                        "data_source_name": "cpp_object_model_avro"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__CPP_TARGET_S3__",
+                        "sql_table_reference": "s3_merged_data"
+                    }
+                ]
+            }
+        },
+        "copy_from_temp_folder": {
+            "spark_engine": {
+                "spark_run_mode": "low",
+                "scripts": [
+                    "cpp_copy_from_temp_folder.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "__CPP_TARGET_S3_RO__",
+                        "sql_table_reference": "s3_merged_data"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__CPP_TARGET_S3__",
+                        "sql_table_reference": "parquet"
+                    }
+                ]
+            }
+        },
+        "remove_temp_folder": {
+            "spark_engine": {
+                "spark_run_mode": "low",
+                "scripts": [
+                    "cpp_delete_temp_folder.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "__CPP_TARGET_S3_RO__",
+                        "sql_table_reference": "not-used"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__CPP_TARGET_S3__",
+                        "sql_table_reference": "s3_merged_data"
+                    }
+                ]
+            }
+        }
+    }
+}

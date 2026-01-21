@@ -1,10 +1,0 @@
-﻿SELECT * FROM T2DL_DAS_PO_VISIBILITY.tpt_control_tbl;
-
-3 Rows returned. DBS time = 00:00:01
-
-BLOB/CLOB files written to: C:\Users\x0tf\Documents
-
-job_name,database_name,object_name,object_type,batchusername,truncateindicator,errorlimit,textdelimiter_hexa_flag,textdelimiter,AcceptExcessColumns,AcceptMissingColumns,QuotedData,OpenQuoteMark,s3bucket,s3prefix,s3singlepartfile,s3connectioncount,collist_indicator_flag,collist,rcd_load_tmstp,rcd_update_tmstp,HeaderRcdIndicator,AllFilesHeaderRcdIndicator,APP_ID,DAG_ID,TASK_NAME
-POW_ACTIVE_LDG,T2DL_DAS_PO_VISIBILITY,POW_ACTIVE_LDG,T,T2DL_NAP_DAS_BATCH,Y,   1,Y,e2909f,N  ,Y  ,Y,"  ,?,?,?,  20,N,?,12/2/2020 13:12:39.000000,12/2/2020 13:12:39.000000,Y,Y,?,?,?
-PO_AB_OTB_LDG,T2DL_DAS_PO_VISIBILITY,PO_AB_OTB_LDG,T,T2DL_NAP_DAS_BATCH,Y,   1,Y,2c,N  ,Y  ,Y,"  ,?,?,?,  20,N,?,11/30/2020 14:37:36.000000,11/30/2020 14:37:36.000000,N,N,?,?,?
-POW_AB_LDG,T2DL_DAS_PO_VISIBILITY,POW_AB_LDG,T,T2DL_NAP_DAS_BATCH,Y,   1,Y,2c,N  ,Y  ,Y,"  ,?,?,?,  20,N,?,12/1/2020 15:29:36.000000,12/1/2020 15:29:36.000000,Y,Y,?,?,?

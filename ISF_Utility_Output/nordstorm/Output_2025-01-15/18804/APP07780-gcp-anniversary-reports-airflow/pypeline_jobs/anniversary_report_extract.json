@@ -1,0 +1,127 @@
+{
+    "dag_id": "anniversary_report_extract",
+    "dag_schedule": "0 9 * * *",
+    "timezone": "US/Pacific",
+    "dependencies": {
+        "upstream": {
+            "other_app_id": {
+                "dags": [
+                    {
+                        "external_dag_id": "merch_se_all_daily_full_17284_MERCH_ANALYTICS_insights_framework",
+                        "conn_id": "okta-token-connection-app06792",
+                        "retries": 4,
+                        "poke_interval": 600
+                    }
+                ]
+            }
+        }
+    },
+    "dag_alert_email_on_retry": "False",
+    "dag_alert_email_on_failure": "True",
+    "dag_sla_minutes": 80,
+    "prod_email_on_failure": "ds-vendor@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "npse_vendor_alerts_no-aaaai4f7jfhzbuh6mwmamck5ma@nordstrom.slack.com",
+    "_metadata": {
+        "version": "1.0",
+        "sla": "12:00AM PT",
+        "slo": "11:05AM PT",
+        "sla_weekday": "0",
+        "extract_name": "Anniversary Report Extract"
+    },
+    "stages": [
+        "JOB_0_1",
+        "JOB_0_2",
+        "JOB_1_1",
+        "JOB_1_2"
+    ],
+    "stage_dependencies": {
+        "JOB_0_1": "JOB_0_2",
+        "JOB_1_1": "JOB_1_2"
+    },
+    "JOB_0_1": {
+        "TPT_EXPORT_TERADATA_TO_S3_ITEM_REPORT_DATA": {
+            "tpt_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TPT_SOURCE__",
+                        "text_delimiter_hexa_flag": "'N'",
+                        "text_delimiter": "'|'",
+                        "quoted_flag": "N",
+                        "quoted_data": "''",
+                        "database_name": "T2DL_DAS_SCALED_EVENTS",
+                        "table_name": "anniversary_item_vw",
+                        "s3_file_path": "s3://{tpt_bucket_name}/anniversary/item_report/s3_item_report.csv",
+                        "sql_file_name": "read_from_nap_write_to_s3_item_view.sql"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    },
+    "JOB_0_2": {
+        "SPARK_READ_S3_WRITE_POSTGRES_ITEM_REPORT": {
+            "spark_engine": {
+                "spark_run_mode": "high",
+                "scripts": [
+                    "read_from_s3_write_to_postgres_item_view.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "S3_REPORTING_READ_HUB_ITEM",
+                        "sql_table_reference": "s3_item_report"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "POSTGRES_CONN",
+                        "sql_table_reference": "item_report",
+                        "data_source_name": "item_report"
+                    }
+                ]
+            }
+        }
+    },
+    "JOB_1_1": {
+        "TPT_EXPORT_TERADATA_TO_S3_SUPPLIER_REPORT_DATA": {
+            "tpt_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TPT_SOURCE__",
+                        "text_delimiter_hexa_flag": "'N'",
+                        "text_delimiter": "'|'",
+                        "quoted_flag": "N",
+                        "quoted_data": "''",
+                        "database_name": "T2DL_DAS_SCALED_EVENTS",
+                        "table_name": "anniversary_supplier_classs_test",
+                        "s3_file_path": "s3://{tpt_bucket_name}/anniversary/supplier_report/s3_supplier_report.csv",
+                        "sql_file_name": "read_from_nap_write_to_s3_supplier_view.sql"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    },
+    "JOB_1_2": {
+        "SPARK_READ_S3_WRITE_POSTGRES_TYLY_REPORT": {
+            "spark_engine": {
+                "spark_run_mode": "high",
+                "scripts": [
+                    "read_from_s3_write_to_postgres_supplier_view.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "S3_REPORTING_READ_HUB_SUPPLIER",
+                        "sql_table_reference": "s3_supplier_report"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "POSTGRES_CONN",
+                        "sql_table_reference": "tyly_report",
+                        "data_source_name": "tyly_report"
+                    }
+                ]
+            }
+        }
+    }
+}

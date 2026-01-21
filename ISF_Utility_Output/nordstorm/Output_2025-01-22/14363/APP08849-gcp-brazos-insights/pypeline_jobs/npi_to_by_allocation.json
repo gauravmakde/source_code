@@ -1,0 +1,270 @@
+{
+    "dag_id": "npi_to_by_allocation",
+    "dag_schedule": "0 17 * * SUN",
+    "dependencies": {
+        "upstream": {
+            "other_app_id": {
+                "dags": [
+                    {
+                        "external_dag_id": "npi_processor_dag",
+                        "conn_id": "OKTA_CONN_TO_APP09215",
+                        "retries": 1,
+                        "poke_interval": 120,
+                        "timeout": 3600,
+                        "python_query_code": "upstream_dependency.py",
+                        "date_query_function_name": "upstream_dependency.date_query_function"
+                    }
+                ]
+            }
+        }
+    },
+    "stages": [
+        "process_npi",
+        "truncate_fp",
+        "truncate_op",
+        "process_fp",
+        "process_op",
+        "populate_fp",
+        "populate_op"
+    ],
+    "stage_dependencies": {
+        "process_npi": [
+            "process_fp",
+            "process_op",
+            "truncate_fp",
+            "truncate_op"
+        ],
+        "truncate_fp": [
+            "populate_fp"
+        ],
+        "truncate_op": [
+            "populate_op"
+        ],
+        "process_fp": [
+            "populate_fp"
+        ],
+        "process_op": [
+            "populate_op"
+        ]
+    },
+    "process_npi": {
+        "versions": {
+            "python_executor": {
+                "module": "python/copy_s3_file",
+                "version": "0.0.4",
+                "k8s_cpu_limit": 1,
+                "k8s_cpu_request": 1,
+                "k8s_memory_limit": "1Gi",
+                "k8s_memory_request": "1Gi",
+                "args": [
+                    "python/copy_s3_file/src/main.py",
+                    "--s3_source_bucket_env_variable",
+                    "NPI_S3_BUCKET",
+                    "--s3_source_key",
+                    "dimensions/NPI_PROJECTION_VERSION_DIM.csv",
+                    "--s3_destination_bucket_env_variable",
+                    "BY_S3_BUCKET",
+                    "--s3_destination_key",
+                    "npi-versions/NPI_PROJECTION_VERSION_DIM.csv"
+                ]
+            }
+        },
+        "two_years_calendar": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "npi/two_years_calendar_creating.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "S3_CALENDAR",
+                        "sql_table_reference": "calendar"
+                    }
+                ]
+            }
+        },
+        "data": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "scripts": [
+                    "npi/npi_splitting.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "S3_NPI_SOURCE_TODAY",
+                        "sql_table_reference": "npi_source_today"
+                    },
+                    {
+                        "conn_name": "TERADATA_NAP_USR_VIEWS",
+                        "sql_table_reference": "store_dim",
+                        "data_source_name": "STORE_DIM"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "S3_NPI_WRITE",
+                        "sql_table_reference": "npi_by_allocation"
+                    }
+                ]
+            }
+        }
+    },
+    "process_fp": {
+        "data": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "scripts": [
+                    "npi/npi_fp_aggregating.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "S3_NPI_RESULT",
+                        "sql_table_reference": "npi_by_allocation_fp_result"
+                    }
+                ]
+            }
+        }
+    },
+    "process_op": {
+        "data": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "scripts": [
+                    "npi/npi_op_aggregating.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "S3_NPI_RESULT",
+                        "sql_table_reference": "npi_by_allocation_op_result"
+                    }
+                ]
+            }
+        }
+    },
+    "truncate_fp": {
+        "table": {
+            "python_executor": {
+                "module": "python/truncate_oracle_table",
+                "version": "0.0.6",
+                "k8s_cpu_limit": 4,
+                "k8s_cpu_request": 3,
+                "k8s_memory_limit": "6Gi",
+                "k8s_memory_request": "2Gi",
+                "args": [
+                    "python/truncate_oracle_table/src/main.py",
+                    "--business_unit",
+                    "fp",
+                    "--table",
+                    "NPI_STG"
+                ]
+            }
+        }
+    },
+    "truncate_op": {
+        "table": {
+            "python_executor": {
+                "module": "python/truncate_oracle_table",
+                "version": "0.0.6",
+                "k8s_cpu_limit": 4,
+                "k8s_cpu_request": 3,
+                "k8s_memory_limit": "6Gi",
+                "k8s_memory_request": "2Gi",
+                "args": [
+                    "python/truncate_oracle_table/src/main.py",
+                    "--business_unit",
+                    "op",
+                    "--table",
+                    "NPI_STG"
+                ]
+            }
+        }
+    },
+    "populate_fp": {
+        "data": {
+            "python_executor": {
+                "module": "python/populate_oracle_table",
+                "version": "0.0.8",
+                "k8s_cpu_limit": 8,
+                "k8s_cpu_request": 6,
+                "k8s_memory_limit": "16Gi",
+                "k8s_memory_request": "8Gi",
+                "args": [
+                    "python/populate_oracle_table/src/main.py",
+                    "--business_unit",
+                    "fp",
+                    "--s3_bucket_env_var",
+                    "BY_S3_BUCKET",
+                    "--s3_prefix",
+                    "result/npi_by_allocation_fp_result",
+                    "--sql",
+                    "INSERT INTO NPI_STG (LOCATION, NPI_MONTH, DEPT, CLASS, SUBCLASS, RETURNS_WEEK1, RETURNS_WEEK2, RETURNS_WEEK3, RETURNS_WEEK4, RETURNS_WEEK5, NPI_WEEK1, NPI_WEEK2, NPI_WEEK3, NPI_WEEK4, NPI_WEEK5) VALUES(:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12, :13, :14, :15) "
+                ]
+            }
+        },
+        "trigger_file": {
+            "python_executor": {
+                "module": "python/create_s3_trigger_file",
+                "version": "0.0.2",
+                "k8s_cpu_limit": 1,
+                "k8s_cpu_request": 1,
+                "k8s_memory_limit": "1Gi",
+                "k8s_memory_request": "1Gi",
+                "args": [
+                    "python/create_s3_trigger_file/src/main.py",
+                    "--s3_destination_bucket_env_variable",
+                    "BY_LAMBDA_S3_BUCKET",
+                    "--s3_destination_trigger_key",
+                    "Trigger/FP/STG_NPIFLSW"
+                ]
+            }
+        }
+    },
+    "populate_op": {
+        "data": {
+            "python_executor": {
+                "module": "python/populate_oracle_table",
+                "version": "0.0.8",
+                "k8s_cpu_limit": 8,
+                "k8s_cpu_request": 6,
+                "k8s_memory_limit": "16Gi",
+                "k8s_memory_request": "8Gi",
+                "args": [
+                    "python/populate_oracle_table/src/main.py",
+                    "--business_unit",
+                    "op",
+                    "--s3_bucket_env_var",
+                    "BY_S3_BUCKET",
+                    "--s3_prefix",
+                    "result/npi_by_allocation_op_result",
+                    "--sql",
+                    "INSERT INTO NPI_STG (LOCATION, NPI_MONTH, DEPT, CLASS, SUBCLASS, RETURNS_WEEK1, RETURNS_WEEK2, RETURNS_WEEK3, RETURNS_WEEK4, RETURNS_WEEK5, NPI_WEEK1, NPI_WEEK2, NPI_WEEK3, NPI_WEEK4, NPI_WEEK5) VALUES(:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12, :13, :14, :15) "
+                ]
+            }
+        },
+        "trigger_file": {
+            "python_executor": {
+                "module": "python/create_s3_trigger_file",
+                "version": "0.0.2",
+                "k8s_cpu_limit": 1,
+                "k8s_cpu_request": 1,
+                "k8s_memory_limit": "1Gi",
+                "k8s_memory_request": "1Gi",
+                "args": [
+                    "python/create_s3_trigger_file/src/main.py",
+                    "--s3_destination_bucket_env_variable",
+                    "BY_LAMBDA_S3_BUCKET",
+                    "--s3_destination_trigger_key",
+                    "Trigger/OP/STG_NPIW"
+                ]
+            }
+        }
+    }
+}

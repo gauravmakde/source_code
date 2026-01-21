@@ -1,0 +1,13 @@
+--app_config_file gs://test-data-datametica/app09392/isf-artifacts/app-config/emr_application_dev.json
+--app_id APP02560 
+--source_tables_details 'routing_decision_lifecycle_avro={"source_type": "KAFKA", "kafka_cluster_name": "meadow", "vault_connection_name": "nordsecrets/application/APP09392/meadow/onix/oauth", "kafka.sasl.mechanism": "OAUTHBEARER", "retry.backoff.ms": "500", "request.timeout.ms": "20000", "schema_name": "inventory-routing-decision-lifecycle-analytical-avro", "batch_limit": "300000", "data_source_name": "inventory-routing-decision-lifecycle-analytical-avro"}' 
+--target_tables_details 'order_line_routing_assignment_ldg={"source_type": "BIGQUERY", "dataset": "PRD_NAP_STG", "table": "ORDER_LINE_ROUTING_ASSIGNMENT_LDG", "project": "jwn-nap-user1-nonprod-zmnb", "mode": "overwrite", "temp_bucket": "test-data-datametica"}'  
+--sql_file_location gs://test-data-datametica/app09392/isf-artifacts/sql/order_line_routing_assignment/20_kafka_avro_to_bq_stg.sql  
+--stage_task_name sco_order_line_routing_assignment_17421_DAS_SC_OUTBOUND_APP02560_insights_v2_kafka_job_20_kafka_avro_to_td_stg  
+--offset_table '`jwn-nap-user1-nonprod-zmnb.onehop_etl_app_db.kafka_consumer_offset_batch_details`'
+--consumer_group_name onix-inventory-routing-decision-lifecycle-analytical-avro_sco_order_line_routing_assignment_17421_DAS_SC_OUTBOUND_APP02560_insights_v2_kafka_job_20_kafka_avro_to_td_stg   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_ROLE_ID-Psikfr
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_SECRET_ID-themT6
+--aws_user_role_arn arn:aws:iam::290445963451:role/APP09392_AWS_Secrets_Role
+--aws_user_role_external_id=testUser
+--gcp_project_id jwn-nap-user1-nonprod-zmnb

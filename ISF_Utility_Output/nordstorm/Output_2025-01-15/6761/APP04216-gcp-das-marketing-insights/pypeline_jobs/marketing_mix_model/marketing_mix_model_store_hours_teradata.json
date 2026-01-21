@@ -1,0 +1,126 @@
+{
+    "dag_id": "marketing_mix_model_store_hrs_teradata",
+    "dag_schedule": "00 12 * * 3",
+    "dag_sla_minutes": "90",
+    "prod_email_on_failure": "nap-marketing@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "varun.miranda@nordstrom.com",
+    "dependencies": {
+        "upstream": {
+            "other_app_id": {
+                "dags": [
+                    {
+                        "external_dag_id": "hr_outoforder_worker_data_daily_load_2656_napstore_insights",
+                        "conn_id": "okta_connection_app02432",
+                        "external_task_id": "job_details_stage_load_5_job_details_dim_tables",
+                        "upstream_lookback_days": 1,
+                        "allowed_states": [
+                            "success"
+                        ],
+                        "failed_states": [
+                            "failed"
+                        ],
+                        "timeout": 7200,
+                        "poke_interval": 60
+                    },
+                    {
+                        "external_dag_id": "hr_worker_load_v1_2656_napstore_insights",
+                        "conn_id": "okta_connection_app02432",
+                        "external_task_id": "hr_worker_v2_load_td_stg_to_dims",
+                        "upstream_lookback_days": 1,
+                        "allowed_states": [
+                            "success"
+                        ],
+                        "failed_states": [
+                            "failed"
+                        ],
+                        "timeout": 7200,
+                        "poke_interval": 60
+                    },
+                    {
+                        "external_dag_id": "hr_outoforder_worker_data_daily_load_2656_napstore_insights",
+                        "conn_id": "okta_connection_app02432",
+                        "external_task_id": "org_details_stage_load_3_org_details_dim_tables",
+                        "upstream_lookback_days": 1,
+                        "allowed_states": [
+                            "success"
+                        ],
+                        "failed_states": [
+                            "failed"
+                        ],
+                        "timeout": 7200,
+                        "poke_interval": 60
+                    },
+                    {
+                        "external_dag_id": "hr_job_events_load_2656_napstore_insights",
+                        "conn_id": "okta_connection_app02432",
+                        "upstream_lookback_days": 1,
+                        "external_task_id": "hr_job_events_load_1_dim_table",
+                        "allowed_states": [
+                            "success"
+                        ],
+                        "failed_states": [
+                            "failed"
+                        ],
+                        "timeout": 7200,
+                        "poke_interval": 60
+                    },
+                    {
+                        "external_dag_id": "hr_timeblock_load_2656_napstore_insights",
+                        "conn_id": "okta_connection_app02432",
+                        "upstream_lookback_days": 1,
+                        "external_task_id": "hr_timeblock_load_load_1_fct_table",
+                        "allowed_states": [
+                            "success"
+                        ],
+                        "failed_states": [
+                            "failed"
+                        ],
+                        "timeout": 7200,
+                        "poke_interval": 60
+                    }
+                ]
+            }
+        }
+    },
+    "stages": [
+        "marketing_mix_model_store_hrs"
+    ],
+    "dag_dynamic_vars": {
+        "database_env": "eval('{\"nonprod\": \"PROTO_DSA_AI_DB\",\"test\": \"PROTO_DSA_AI_DB\", \"prod\": \"PRD_NAP_DSA_AI_STG\"}[env]')",
+        "year": "eval('str(datetime.now().strftime(\"%Y\"))')",
+        "month": "eval('str(datetime.now().strftime(\"%m\"))')",
+        "day": "eval('str(datetime.now().strftime(\"%d\"))')"
+    },
+    "marketing_mix_model_store_hrs": {
+        "teradata_job": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__MMM_TERADATA_STAGE__",
+                        "scripts": [
+                            "marketing_mix_model_store_hrs_teradata.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_export": {
+            "tpt_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__MMM_TPT_EXPORT__",
+                        "database_name": "?database_env?",
+                        "table_name": "MMM_STORE_HRS_LDG",
+                        "s3_file_path": "s3://{mmm_s3_data_bucket}/Nordstrom/Outbound/delta_load/weekly_refresh/year=?year?/month=?month?/day=?day?/mmm_store_hrs_export_?year?_?month?_?day?.csv",
+                        "sql_file_name": "marketing_mix_model_store_hrs_tpt_export.sql",
+                        "text_delimiter_hexa_flag": "N",
+                        "text_delimiter": ",",
+                        "file_count": "1",
+                        "quoted_flag": "N",
+                        "quoted_data": "''"
+                    }
+                ]
+            }
+        }
+    }
+}

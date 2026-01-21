@@ -1,0 +1,10 @@
+--app_config_file gs://prod-nap-dataplex-internal/app09203/isf-artifacts/app-config/emr_application_prod.json   
+--app_id app07420 
+--source_tables_details 'WORLDPAY_CARD_NETWORKS_DIM={"source_type": "S3", "path": "s3://tf-nap-prod-master-merchant-bin-files/csv/", "format": "csv"}' 
+--target_tables_details 'WORLDPAY_CARD_NETWORKS_DIM={"vault_connection_name": "nordsecrets/application/APP07420/4638/payments/insights/prod/teradata/payment_fraud/teradata_db_credentials", "hostname": "tdnapprodcop1.nordstrom.net", "port": "1025", "source_type": "TERADATA", "database_name": "PRD_NAP_PYMNT_FRAUD_BASE_VWS","data_source_name":"WORLDPAY_CARD_NETWORKS_DIM"}'  
+--sql_file_location s3://tf-nap-prod-credit-payments-isf-airflow/apps/etl_framework/airflow_nsk_dag_job_artifacts/prod/4638/payments/insights/sql/sparkSql/worldpay_card_networks_4638_payments_insights_worldpay_card_networks_s3_to_teradata_stage_worldpay_card_networks_s3_to_teradata.sql  
+--stage_task_name worldpay_card_networks_4638_payments_insights_worldpay_card_networks_s3_to_teradata_stage_worldpay_card_networks_s3_to_teradata_job  
+--offset_table '`jwn-nap-dataplex-prod-emue.nap_credit_and_payments_isf_kafka_offsets.kafka_consumer_offset_batch_details`'
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:594668836985:secret:VAULT_APPROLE_ROLE_ID  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:594668836985:secret:VAULT_APPROLE_SECRET_ID  
+--aws_user_role_arn arn:aws:iam::594668836985:role/big_data/tf-nap-prod-payments-big-data 

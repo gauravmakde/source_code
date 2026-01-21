@@ -1,0 +1,27 @@
+{
+    "dag_id": "marketplace_product_relationship",
+    "dag_schedule": "0 16 * * *",
+    "prod_email_on_failure": "dsa-app08742-session-path-expanded-events-data-pipelines@nordstrom.pagerduty.com, soren.stime1@nordstrom.com",
+    "nonprod_email_on_failure": "soren.stime1@nordstrom.com",
+    "stages": [
+        "run_hive_hive_marketplace_product_relationship_sql"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-1",
+        "end_date": "current_date()-1"
+    },
+    "run_hive_hive_marketplace_product_relationship_sql": {
+        "job_0": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "marketplace/marketplace_product_relationship.sql"
+                ],
+                "input_details": [],
+                "output_details": []
+            }
+        }
+    }
+}

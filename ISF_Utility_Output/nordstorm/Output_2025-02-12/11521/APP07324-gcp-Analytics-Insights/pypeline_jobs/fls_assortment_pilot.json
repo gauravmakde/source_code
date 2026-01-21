@@ -1,0 +1,49 @@
+{
+    "dag_id": "fls_assortment_pilot",
+    "dag_schedule": "0 19 * * SUN",
+    "prod_email_on_failure": "AssortmentInsights@nordstrom.com",
+    "nonprod_email_on_failure": "thomas.peterson@nordstrom.com",
+    "stages": [
+        "run_terdata_sql"
+    ],
+    "run_terdata_sql": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CCS",
+                        "scripts": [
+                            "fls_assortment_pilot/fls_assortment_lkps.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_1": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CCS",
+                        "scripts": [
+                            "fls_assortment_pilot/fls_assortment_trans.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_2": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CCS",
+                        "scripts": [
+                            "fls_assortment_pilot/fls_assortment_merch.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

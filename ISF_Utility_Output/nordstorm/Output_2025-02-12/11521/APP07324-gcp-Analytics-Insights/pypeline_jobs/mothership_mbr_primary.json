@@ -1,0 +1,36 @@
+{
+    "dag_id": "mothership_mbr_primary",
+    "dag_schedule": "45 08 */100,1-9,27-31 * MON,TUE",
+    "nonprod_email_on_failure": "charlie.taylor@nordstrom.com",
+    "prod_email_on_failure": "dsa-app08717-mbr-dashboard@nordstrom.pagerduty.com, tech_ffp_analytics@nordstrom.com",
+    "stages": [
+        "run_mbr_primary"
+    ],
+    "run_mbr_primary": {
+        "job_0_refresh_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTS",
+                        "scripts": [
+                            "mothership/mbr_primary.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_1_refresh_tableau_workbook": {
+            "tableau_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TABLEAU_NAP__",
+                        "source_type": "workbook",
+                        "workbook_name": "MBR dash",
+                        "project_name": "Finance"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    }
+}

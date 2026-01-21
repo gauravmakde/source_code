@@ -1,0 +1,28 @@
+{
+    "dag_id": "internal_price_match",
+    "dag_schedule": "0 2 1 * *",
+    "prod_email_on_failure": "app09035-internal-price-match@nordstrom.pagerduty.com, jingnan.miao@nordstrom.com",
+    "nonprod_email_on_failure": "jingnan.miao@nordstrom.com",
+    "stages": [
+        "run_terdata_sql"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-60",
+        "end_date": "current_date()-1"
+    },
+    "run_terdata_sql": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 14400,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_PRI",
+                        "scripts": [
+                            "price_match/internal_price_match_data.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,58 @@
+{
+  "dag_id": "alterations_load",
+  "dag_schedule": "30 11 * * *",
+  "stages": [
+    "alterations_load"
+  ],
+  "alterations_load": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "high",
+        "scripts": [
+          "alterations_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__ALTERATIONS_KAFKA__",
+            "sql_table_reference": "kafka_alterations_input",
+            "data_source_name": "customer-alterationdetail-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__ALTERATIONS_KAFKA_TO_S3_ORC__",
+            "sql_table_reference": "alterations_orc_output"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "alterations_stg_table" ,
+            "data_source_name": "ALTERATION_TICKET_STG"
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "ticket_garment_stg_table" ,
+            "data_source_name": "ALTERATION_TICKET_GARMENT_STG"
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "garment_work_details_stg_table" ,
+            "data_source_name": "ALTERATION_TICKET_GARMENT_WORK_STG"
+          }
+        ]
+      }
+    },
+    "load_1_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "alterations_load_fct.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

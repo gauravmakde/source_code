@@ -1,0 +1,9 @@
+--app_config_file s3://tf-nap-prod-credit-payments-isf-airflow/apps/etl_framework/prod/application_config/emr_application_prod.json   
+--app_id app07420  
+--target_tables_details 'payment_settlement_intent_data_fix_ldg={"vault_connection_name": "nordsecrets/application/APP07420/4638/payments/insights/preprod/teradata/teradata_db_credentials", "hostname": "tdnapprodcop1.nordstrom.net", "port": "1025", "source_type": "TERADATA", "database_name": "PREPROD_NAP_STG","data_source_name":"PAYMENT_SETTLEMENT_INTENT_DATA_FIX_LDG"}'  
+--sql_file_location s3://tf-nap-prod-credit-payments-isf-airflow/apps/etl_framework/airflow_nsk_dag_job_artifacts/prod/4638/payments/insights/sql/sparkSql/payment_settlement_intent_data_fix_teradata_preprod_4638_payments_insights_payment_settlement_intent_data_fix_hive_to_teradata_stage_0_payment_settlement_intent_data_fix_hive_to_teradata_stg_preprod.sql  
+--stage_task_name payment_settlement_intent_data_fix_teradata_preprod_4638_payments_insights_payment_settlement_intent_data_fix_hive_to_teradata_stage_0_hive_to_teradata_stg_job  
+--hive_offset_table nap_credit_and_payments_isf_kafka_offsets.kafka_consumer_offset_batch_details   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:594668836985:secret:VAULT_APPROLE_ROLE_ID  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:594668836985:secret:VAULT_APPROLE_SECRET_ID  
+--aws_user_role_arn arn:aws:iam::594668836985:role/big_data/tf-nap-prod-payments-big-data 

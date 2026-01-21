@@ -1,0 +1,1 @@
+TRUNCATE TABLE `{{params.gcp_project_id}}`.{{params.dbenv}}_nap_fct.inventory_receipts_insights_fact;

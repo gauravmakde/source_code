@@ -1,0 +1,22 @@
+{
+    "dag_id": "ddl_mmm_traffic_kpi",
+    "prod_email_on_failure": "app09044-kpi-scorecard@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure":"isha.rankawat@nordstrom.com",
+    "stages": [
+      "run_terdata_sql_stg_0"
+    ],
+    "run_terdata_sql_stg_0": {
+      "job_0": {
+        "teradata_engine":{
+          "input_details":[
+            {
+              "conn_name":"TERADATA_SOURCE_KPI",
+              "scripts":[
+                "rmi/anomaly_detection/ddl/ddl_mmm_traffic_kpi.sql"
+              ]
+            }
+          ]
+        }
+      }
+    }  
+  }

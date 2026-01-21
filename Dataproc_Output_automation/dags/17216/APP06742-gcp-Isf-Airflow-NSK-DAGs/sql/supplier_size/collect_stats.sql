@@ -1,0 +1,13 @@
+
+-- SET QUERY_BAND = 'App_ID=app09248;DAG_ID=supplier_size_17216_app06742_DASCLM;Task_Name=load_elt_control_end_updt;'
+-- FOR SESSION VOLATILE;
+
+ET;
+
+COLLECT STATISTICS COLUMN(npin_num) ON PRD_NAP_DIM.ITEM_SUPPLIER_SIZE_DIM;
+
+ET;
+
+-- SET QUERY_BAND = NONE FOR SESSION;
+
+ET;

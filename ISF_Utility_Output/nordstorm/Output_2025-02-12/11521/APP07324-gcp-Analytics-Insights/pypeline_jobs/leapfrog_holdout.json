@@ -1,0 +1,55 @@
+{
+    "dag_id": "leapfrog_holdout",
+    "dag_schedule": "0 9 * * *",
+    "prod_email_on_failure": "dsa-app08742-session-path-expanded-events-data-pipelines@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "jin.liu2@nordstrom.com",
+    "dependencies": {
+        "downstream": {
+            "dags": [
+                "customer_cohort_trips_11521_ACE_ENG"
+            ]
+        }
+    },
+    "stages": [
+        "holdout",
+        "refresh_dashboard"
+    ],
+    "stage_dependencies": {
+        "holdout": [
+            "refresh_dashboard"
+        ]
+    },
+    "sql_env_vars": {
+        "start_date": "current_date()-6",
+        "end_date": "current_date()-2"
+    },
+    "holdout": {
+        "job_2_load_hive_data_to_output": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "leapfrog_holdout/leapfrog_holdout.sql"
+                ],
+                "input_details": [],
+                "output_details": []
+            }
+        }
+    },
+    "refresh_dashboard": {
+        "job_0": {
+            "tableau_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TABLEAU_NAP__",
+                        "source_type": "workbook",
+                        "workbook_name": "Global Holdout - Ongoing Audit",
+                        "project_name": "Leapfrog"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    }
+}

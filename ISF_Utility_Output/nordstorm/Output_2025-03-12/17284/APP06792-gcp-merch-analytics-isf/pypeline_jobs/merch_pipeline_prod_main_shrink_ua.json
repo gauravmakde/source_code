@@ -1,0 +1,27 @@
+{
+    "dag_id": "merch_main_shrink_ua",
+    "dag_schedule": "45 08 * * *",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "ace.promo@Nordstrom.com,, dsa-app09460-shrink-common-dataset@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "ace.promo@Nordstrom.com,",
+    "stages": [
+        "run_teradata_sql_stg_00"
+    ],
+    "sql_env_vars": {
+        "environment_schema": "T2DL_DAS_IN_SEASON_MANAGEMENT_REPORTING"
+    },
+    "run_teradata_sql_stg_00": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_AIS_BATCH__",
+                        "scripts": [
+                            "shrink/merch_pipeline_main_shrink_ua.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

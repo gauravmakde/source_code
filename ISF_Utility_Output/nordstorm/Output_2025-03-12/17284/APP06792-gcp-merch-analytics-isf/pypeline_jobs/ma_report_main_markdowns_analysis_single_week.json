@@ -1,0 +1,42 @@
+{
+    "dag_id": "merch_main_markdowns_analysis_single_week",
+    "dag_schedule": "31 04 * * 1",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "ACE.promo@nordstrom.com,dsa-app09527-price-band-performance@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "jevon.barlas@nordstrom.com",
+    "stages": [
+        "run_teradata_sql_stg_0"
+    ],
+    "sql_env_vars": {
+        "environment_schema": "T2DL_DAS_IN_SEASON_MANAGEMENT_REPORTING"
+    },
+    "run_teradata_sql_stg_0": {
+        "job_0_populate_table": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 10800,
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_AIS_BATCH__",
+                        "scripts": [
+                            "markdowns/ma_pipeline_prod_main_markdowns_analysis_single_week.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_1_refresh_tableau_extract": {
+            "tableau_engine": {
+                "sensor_timeout_seconds": 10800,
+                "input_details": [
+                    {
+                        "conn_name": "__TABLEAU_MA__",
+                        "source_type": "datasource",
+                        "datasource_name": "Markdowns Analysis Single Week",
+                        "project_name": "Data Sources"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    }
+}

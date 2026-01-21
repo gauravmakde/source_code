@@ -1,0 +1,27 @@
+{
+    "dag_id": "daily_session_customer_table",
+    "dag_schedule": "0 21 * * *",
+    "prod_email_on_failure": "cia-app09142-customer-and-merch-attributes-to-object@nordstrom.pagerduty.com,jingnan.miao@nordstrom.com",
+    "nonprod_email_on_failure": "jingnan.miao@nordstrom.com",
+    "stages": [
+        "run_daily_session_customer_table_sql"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-3",
+        "end_date": "current_date()-1"
+    },
+    "run_daily_session_customer_table_sql": {
+        "job_0": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "digital_merch/daily_session_customer_table/daily_session_customer_table.sql"
+                ],
+                "input_details": [],
+                "output_details": []
+            }
+        }
+    }
+}

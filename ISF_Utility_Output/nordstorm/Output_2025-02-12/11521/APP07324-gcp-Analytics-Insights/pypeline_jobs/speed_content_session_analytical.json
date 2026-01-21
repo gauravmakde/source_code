@@ -1,0 +1,61 @@
+{
+    "dag_id": "content_session_analytical",
+    "dag_schedule": "0 16 * * *",
+    "prod_email_on_failure": "dsa-app08742-session-path-expanded-events-data-pipelines@nordstrom.pagerduty.com, soren.stime1@nordstrom.com",
+    "nonprod_email_on_failure": "soren.stime1@nordstrom.com",
+    "dependencies": {
+        "downstream": {
+            "dags": [
+                "speed_content_asset_summary_tpt_11521_ACE_ENG"
+            ]
+        }
+    },
+    "stages": [
+        "run_hive_hive_content_session_analytical_sql"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-4",
+        "end_date": "current_date()-3"
+    },
+    "run_hive_hive_content_session_analytical_sql": {
+        "job_0_check_speed": {
+            "python_executor": {
+                "module": "python/s3_file_sensor",
+                "version": "0.3.0",
+                "k8s_cpu_limit": 4,
+                "k8s_cpu_request": 3,
+                "k8s_memory_limit": "6Gi",
+                "k8s_memory_request": "2Gi",
+                "args": [
+                    "python/s3_file_sensor/main.py",
+                    "--function",
+                    "dir_check",
+                    "--bucket_nonprod",
+                    "",
+                    "--key_nonprod",
+                    "",
+                    "--bucket_prod",
+                    "tf-nap-prod-styling-intermediate",
+                    "--key_prod",
+                    "speed_tables/session_user_attributes/activity_date_partition=",
+                    "--max_retry_minutes",
+                    "60",
+                    "--dir_check_date_diff",
+                    "-3"
+                ]
+            }
+        },
+        "job_0": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "speed/content_session_analytical.sql"
+                ],
+                "input_details": [],
+                "output_details": []
+            }
+        }
+    }
+}

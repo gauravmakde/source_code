@@ -1,0 +1,321 @@
+{
+  "domain": "merch",
+  "name": "product_casepack",
+  "sources": [
+    {
+      "name": "mainDataTable",
+      "description": "Ultimate Source of data for daily incremental loads",
+      "type": "KAFKA",
+      "cache": "MEMORY_AND_DISK",
+      "enable": true,
+      "properties": {
+        "kafka.bootstrap.servers": "meadow.prod.us-west-2.aws.proton.nordstrom.com:9093",
+        "schemaRegistryUrl": "https://schema-registry.prod.us-west-2.aws.proton.nordstrom.com",
+        "group.id": "nordlytics_001",
+        "subscribe": "nap-product-casepack-object-model",
+        "headers": "",
+        "enable.auto.commit": "false",
+        "proton_accessKey":"APP09392.YPJ4OTVDF57JWSKCU",
+        "proton_secret":"Ue8IhWG1E2zqe9tgY1J6jYBoTraSs5UUCSQWJKp7ijuRVxXwlDGcK0nnIXPegA7b1ig.3H4LuQhD6jROdwHfGVr8ivTZY4bDB.vgJCvuQUxDiABAM5dGUqJeHUdFR3Si",
+        "kafka.security.protocol": "sasl_ssl",
+        "sasl.kerberos.service.name": "kafka",
+        "kafka.sasl.mechanism": "SCRAM-SHA-512",
+        "pathPattern": ""
+      }
+    }
+  ],
+  "dags": [
+    {
+      "name": "Main_dag",
+      "upstream": [
+        "mainDataTable"
+      ],
+      "operators": [
+        {
+          "name": "CASEPACK_SKU_st1",
+          "description": "Level 1 frame for CASEPACK_SKU extract",
+          "select": [
+            "Id",
+            "MarketCode",
+            "SourcePublishTimestamp",
+            "element_at(ProductCasePacks.items.CoreFunctionalGroup.Description,1) corefg_description",
+            "element_at(ProductCasePacks.items.CoreFunctionalGroup.ShortDescription,1) corefg_shortdescription",
+            "element_at(ProductCasePacks.items.ProductColors.NrfColorCode,1) NrfColorCode",
+            " '' AS ProductLastUpdateTimestamp",
+            "element_at( (filter(element_at(element_at(ProductCasePacks.items.HierarchyAssignments,1).HierarchyAssignmentLeaves,1), x -> x.Level == 'SUBCLASS')) , 1).LevelCode AS subclass_num",
+            "element_at( (filter(element_at(element_at(ProductCasePacks.items.HierarchyAssignments,1).HierarchyAssignmentLeaves,1), x -> x.Level == 'CLASS')) , 1).LevelCode AS class_num",
+            "element_at( (filter(element_at(element_at(ProductCasePacks.items.HierarchyAssignments,1).HierarchyAssignmentLeaves,1), x -> x.Level == 'DEPARTMENT')) , 1).LevelCode AS department_num",
+            "explode_outer(ProductCasePacks.items.SupplyChainFunctionalGroup.ProductVendorUpcs) VendorUpcs",
+            "trim(element_at(ProductCasePacks.items.ReferenceKeyFunctionalGroup.LegacyRmsCasePackId,1)) LegacyRmsCasePackId"
+          ]
+        },
+        {
+          "name": "CASEPACK_SKU_st2",
+          "description": "Level 2 frame for CASEPACK_SKU extract",
+          "select": [
+            "Id",
+            "MarketCode",
+            "SourcePublishTimestamp",
+            "corefg_description",
+            "corefg_shortdescription",
+            "NrfColorCode",
+            "ProductLastUpdateTimestamp",
+            "cast(subclass_num as string) subclass_num",
+            "cast(class_num as string) class_num",
+            "cast(department_num as string) department_num",
+            "explode_outer(VendorUpcs.ProductVendors) vendor",
+            "LegacyRmsCasePackId"
+          ],
+          "from": [
+            "CASEPACK_SKU_st1"
+          ],
+          "where": [
+            "VendorUpcs.ProductVendors is not null"
+          ]
+        },
+        {
+          "name": "CASEPACK_SKU_LDG_final",
+          "description": "Final data frame for CASEPACK_SKU extract",
+          "select": [
+            "Id id",
+            "MarketCode marketcode",
+            "SourcePublishTimestamp sourcepublishtimestamp",
+            "corefg_description",
+            "corefg_shortdescription",
+            "NrfColorCode productcolors_nrfcolorcode",
+            "ProductLastUpdateTimestamp changecontrolfg_productlastupdatetimestamp",
+            "subclass_num",
+            "class_num",
+            "department_num",
+            "cast(element_at(filter(vendor,x->x.IsPrimary==true),1).IsPrimary as string) supplychainfg_productvendorupcs_productvendors_isprimary",
+            "element_at(filter(vendor,x->x.IsPrimary==true),1).Name supplychainfg_productvendorupcs_productvendors_name",
+            "cast(element_at(filter(vendor,x->x.IsPrimary==true),1).Number as string) supplychainfg_productvendorupcs_productvendors_number",
+            "CASE WHEN element_at(element_at( (filter(vendor.ProductVendorRoles, x -> element_at(x.Code,1) == 'SUP')) , 1).Code,1) == 'SUP' THEN 'True' ELSE 'False' END AS vendor_is_supplier",
+            "CASE WHEN element_at(element_at( (filter(vendor.ProductVendorRoles, x -> element_at(x.Code,1) == 'MFR')) , 1).Code,1) == 'MFR' THEN 'True' ELSE 'False' END AS vendor_is_manufacturer",
+            "element_at(filter(vendor,x->x.IsPrimary==true),1).VendorColorDescription supplychainfg_productvendorupcs_productvendors_vendorcolordescription",
+            "element_at(element_at(filter(vendor,x->x.IsPrimary==true),1).VendorProductNumbers, 1).Code AS supplychainfg_productvendorupcs_productvendors_vendorproductnumbers_code",
+            "LegacyRmsCasePackId referencekeyfg_legacyrmscasepackid"
+          ],
+          "from": [
+            "CASEPACK_SKU_st2"
+          ],
+          "where": [
+            "vendor.Number is not null"
+          ]
+        },
+        {
+          "name": "CASEPACK_SKU_LDG_count",
+          "description": "Count of CASEPACK_SKU records generated",
+          "from": [
+            "CASEPACK_SKU_LDG_final"
+          ],
+          "select": [
+            "count(*)"
+          ]
+        },
+        {
+          "name": "CASEPACK_UPC_st1",
+          "description": "Level 1 frame for CASEPACK_UPC extract",
+          "select": [
+            "Id",
+            "MarketCode",
+            "SourcePublishTimestamp",
+            "ProductLastUpdateTimestamp",
+            "explode_outer(VendorUpcs.Upcs) Upcs",
+            "LegacyRmsCasePackId"
+          ],
+          "from": [
+            "CASEPACK_SKU_st1"
+          ],
+          "where": [
+            "VendorUpcs.Upcs is not null"
+          ]
+        },
+        {
+          "name": "CASEPACK_UPC_LDG_final",
+          "description": "Final data frame for CASEPACK_UPC extract",
+          "select": [
+            "Id id",
+            "MarketCode marketcode",
+            "SourcePublishTimestamp sourcepublishtimestamp",
+            "ProductLastUpdateTimestamp changecontrolfg_productlastupdatetimestamp",
+            "element_at(Upcs.Code,1) supplychainfg_productvendorupcs_upcs_code",
+            "element_at(Upcs.Description,1) supplychainfg_productvendorupcs_upcs_description",
+            "cast(element_at(Upcs.IsPrimaryUpc,1) as string) supplychainfg_productvendorupcs_upcs_isprimaryupc",
+            "element_at(Upcs.UpcType.Code,1) supplychainfg_productvendorupcs_upcs_upctype_code",
+            "LegacyRmsCasePackId referencekeyfg_legacyrmscasepackid"
+          ],
+          "from": [
+            "CASEPACK_UPC_st1"
+          ],
+          "where": [
+            "Upcs.Code is not null"
+          ]
+        },
+        {
+          "name": "CASEPACK_UPC_LDG_count",
+          "description": "Count of CASEPACK_UPC records generated",
+          "from": [
+            "CASEPACK_UPC_LDG_final"
+          ],
+          "select": [
+            "count(*)"
+          ]
+        },
+        {
+          "name": "CASEPACK_STYLE_LDG_final",
+          "description": "Final data frame for CASEPACK_STYLE extract",
+          "select": [
+            "Id id",
+            "MarketCode marketcode",
+            "SourcePublishTimestamp sourcepublishtimestamp",
+            "corefg_description",
+            "ProductLastUpdateTimestamp changecontrolfg_productlastupdatetimestamp",
+            "subclass_num",
+            "class_num",
+            "department_num",
+            "cast(element_at(filter(vendor,x->x.IsPrimary==true),1).IsPrimary as string) supplychainfg_productvendorupcs_productvendors_isprimary",
+            "element_at(filter(vendor,x->x.IsPrimary==true),1).Name supplychainfg_productvendorupcs_productvendors_name",
+            "cast(element_at(filter(vendor,x->x.IsPrimary==true),1).Number as string) supplychainfg_productvendorupcs_productvendors_number",
+            "CASE WHEN element_at(element_at( (filter(vendor.ProductVendorRoles, x -> element_at(x.Code,1) == 'SUP')) , 1).Code,1) == 'SUP' THEN 'True' ELSE 'False' END AS vendor_is_supplier",
+            "CASE WHEN element_at(element_at( (filter(vendor.ProductVendorRoles, x -> element_at(x.Code,1) == 'MFR')) , 1).Code,1) == 'MFR' THEN 'True' ELSE 'False' END AS vendor_is_manufacturer",
+            "element_at(element_at(filter(vendor,x->x.IsPrimary==true),1).VendorProductNumbers, 1).Code AS supplychainfg_productvendorupcs_productvendors_vendorproductnumbers_code",
+            "LegacyRmsCasePackId referencekeyfg_legacyrmscasepackid"
+          ],
+          "from": [
+            "CASEPACK_SKU_st2"
+          ],
+          "where": [
+            "vendor.Number is not null"
+          ]
+        },
+        {
+          "name": "CASEPACK_STYLE_LDG_count",
+          "description": "Count of CASEPACK_STYLE records generated",
+          "from": [
+            "CASEPACK_STYLE_LDG_final"
+          ],
+          "select": [
+            "count(*)"
+          ]
+        },
+        {
+          "name": "CASEPACK_SKU_XREF_st1",
+          "description": "Level 1 frame for CASEPACK_SKU_XREF extract",
+          "select": [
+            "Id",
+            "MarketCode",
+            "SourcePublishTimestamp",
+            "explode_outer(ProductCasePacks.items) productCasePacks",
+            " '' AS ProductLastUpdateTimestamp",
+            "ProductCasePacks.items.ReferenceKeyFunctionalGroup.LegacyRmsCasePackId"
+          ]
+        },
+        {
+          "name": "CASEPACK_SKU_XREF_st2",
+          "description": "Level 2 frame for CASEPACK_SKU_XREF extract",
+          "select": [
+            "Id",
+            "MarketCode",
+            "SourcePublishTimestamp",
+            "explode_outer(productCasePacks.Skus) Skus",
+            "ProductLastUpdateTimestamp",
+            "LegacyRmsCasePackId"
+          ],
+          "from": [
+            "CASEPACK_SKU_XREF_st1"
+          ]
+        },
+        {
+          "name": "CASEPACK_SKU_XREF_LDG_final",
+          "description": "Final data frame for CASEPACK_SKU_XREF extract",
+          "select": [
+            "Id id",
+            "MarketCode marketcode",
+            "SourcePublishTimestamp sourcepublishtimestamp",
+            "Skus.ComponentSequenceNumber skus_componentseqnum",
+            "Skus.Id skus_id",
+            "Skus.ItemPerPackQuantity skus_itemperpackquantity",
+            "Skus.ReferenceKeyFunctionalGroup.LegacyRmsSkuId skus_referencekeyfg_legacyrmsskuid",
+            " '' AS changecontrolfg_productlastupdatetimestamp",
+            "element_at(LegacyRmsCasePackId,1) as referencekeyfg_legacyrmscasepackid"
+          ],
+          "from": [
+            "CASEPACK_SKU_XREF_st2"
+          ],
+          "where": [
+            "Skus.Id is not null"
+          ]
+        },
+        {
+          "name": "CASEPACK_SKU_XREF_LDG_count",
+          "description": "Count of CASEPACK_SKU_XREF records generated",
+          "from": [
+            "CASEPACK_SKU_XREF_LDG_final"
+          ],
+          "select": [
+            "count(*)"
+          ]
+        }
+      ]
+    }
+  ],
+  "sinks": [
+    {
+      "name": "CASEPACK_SKU_LDG_sink",
+      "description": "Output CASEPACK_SKU_LDG records (normally CSV-GZIP format)",
+      "type": "bigquery",
+      "upstream": "CASEPACK_SKU_LDG_final",
+      "active": true,
+      "properties": {
+        "project": "jwn-nap-user1-nonprod-zmnb",
+        "dataset": "DEV_NAP_STG",
+        "table": "CASEPACK_SKU_LDG",
+        "temp_bucket": "test-data-datametica",
+        "mode": "overwrite"
+      }
+    },
+    {
+      "name": "CASEPACK_UPC_LDG_sink",
+      "description": "Output CASEPACK_UPC_LDG records (normally CSV-GZIP format)",
+      "type": "bigquery",
+      "upstream": "CASEPACK_UPC_LDG_final",
+      "active": true,
+      "properties": {
+        "project": "jwn-nap-user1-nonprod-zmnb",
+        "dataset": "DEV_NAP_STG",
+        "table": "CASEPACK_UPC_LDG",
+        "temp_bucket": "test-data-datametica",
+        "mode": "overwrite"
+      }
+    },
+    {
+      "name": "CASEPACK_STYLE_LDG_sink",
+      "description": "Output CASEPACK_STYLE_LDG records (normally CSV-GZIP format)",
+      "type": "bigquery",
+      "upstream": "CASEPACK_STYLE_LDG_final",
+      "active": true,
+      "properties": {
+        "project": "jwn-nap-user1-nonprod-zmnb",
+        "dataset": "DEV_NAP_STG",
+        "table": "CASEPACK_STYLE_LDG",
+        "temp_bucket": "test-data-datametica",
+        "mode": "overwrite"
+      }
+    },
+    {
+      "name": "CASEPACK_SKU_XREF_LDG_sink",
+      "description": "Output CASEPACK_SKU_XREF_LDG records (normally CSV-GZIP format)",
+      "type": "bigquery",
+      "upstream": "CASEPACK_SKU_XREF_LDG_final",
+      "active": true,
+      "properties": {
+        "project": "jwn-nap-user1-nonprod-zmnb",
+        "dataset": "DEV_NAP_STG",
+        "table": "CASEPACK_SKU_XREF_LDG",
+        "temp_bucket": "test-data-datametica",
+        "mode": "overwrite"
+      }
+    }
+  ]
+}

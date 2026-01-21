@@ -1,0 +1,28 @@
+{
+    "dag_id": "merch_ddl_los_daily_agg",
+    "prod_email_on_failure":"dsa-app09635-los-daily-agg@nordstrom.pagerduty.com", 
+    "nonprod_email_on_failure": "mayank.sarwa@nordstrom.com",
+    "stages": [
+      "run_teradata_sql_stg_0"
+    ],
+    "sql_env_vars":
+    {
+        "environment_schema": "t2dl_das_in_season_management_reporting"
+    },
+    "run_teradata_sql_stg_0": {
+      "job_0": {
+        "teradata_engine":{
+          "input_details":[
+            {
+              "conn_name":"__TERADATA_T2DL_NAP_AIS_BATCH__",
+              "scripts":[
+                "live_on_site/ddl/ma_pipeline_prod_ddl_los_daily_agg.sql"
+              ]
+            }
+          ]
+        }
+   
+      }
+    }
+  }
+  

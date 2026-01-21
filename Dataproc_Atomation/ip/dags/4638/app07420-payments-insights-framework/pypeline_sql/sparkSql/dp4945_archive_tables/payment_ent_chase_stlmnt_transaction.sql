@@ -1,0 +1,60 @@
+--Reading Data from landing S3 bucket
+create temporary table temp_ent_chase_stlmnt_transaction_csv using csv
+options (
+    path "s3://{dp495_s3_bucket}/csv/ent_chase_stlmnt_transaction/",
+    header "true"
+);
+
+--Writing data to new S3 Path
+insert into table ent_chase_stlmnt_transaction partition (year, month)
+select distinct
+    truncated_pan,
+    tenderidentifier,
+    sodstransactionid,
+    globaltransactionid,
+    cast(load_date as date) as load_date,
+    card_subtype,
+    card_type,
+    cast(cardholder_no_err_cd as int) as cardholder_no_err_cd,
+    cast(transaction_time_pti_pst as timestamp) as transaction_time_pti_pst,
+    terminal_number_pti,
+    transaction_time_pti,
+    settlement_id,
+    custom_data,
+    batch_id_number,
+    file_create_time,
+    file_create_date,
+    filler2,
+    validation_code,
+    transaction_id,
+    process_date,
+    downgrade_reason,
+    service_level,
+    entry_mode,
+    reject_reason_code,
+    mnemonic_code,
+    mop_code,
+    transaction_date,
+    auth_code,
+    tran_type,
+    cast(amount as int) as amount,
+    original_reference_number,
+    cardholder_number,
+    tran_code,
+    transaction_seq_number,
+    filler1,
+    terminal_number,
+    merchant_number,
+    record_type,
+    publish_flag,
+    cast(rps_txid as bigint) as rps_txid,
+    cast(pti_txid as decimal (22, 0)) as pti_txid,
+    published,
+    transaction_skey,
+    cast(update_dt as date) as update_dt,
+    cast(insert_dt as date) as insert_dt,
+    cast(condition_rank as int) as condition_rank,
+    current_timestamp() as last_updated_time,
+    date_format(load_date, "yyyy") as year,
+    date_format(load_date, "MM") as month
+from temp_ent_chase_stlmnt_transaction_csv;

@@ -1,0 +1,1 @@
+SELECT "30_td_fact_dqc.sql";

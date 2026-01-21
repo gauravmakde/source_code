@@ -1,0 +1,52 @@
+{
+  "dag_id": "wfm_metric_actual_load",
+  "dag_schedule": "30 23 * * *",
+  "stages": [
+    "wfm_metric_actual_load"
+  ],
+  "wfm_metric_actual_load": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "high",
+        "scripts": [
+          "wfm_metric_actual_load_stg.sql"
+        ],
+        "input_details": [
+          {
+
+            "conn_name": "__WFM_METRIC_ACTUAL_KAFKA__",
+            "sql_table_reference": "kafka_wfm_metric_actual_input",
+            "data_source_name": "linear-metric-actual-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__WFM_METRIC_ACTUAL_KAFKA_TO_S3_ORC__",
+            "sql_table_reference": "wfm_metric_actual_orc_output"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_metric_actual_stg_table",
+            "data_source_name": "METRIC_ACTUAL_STG"
+          }
+        ]
+      }
+    },
+    "load_1_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "wfm_metric_actual_load_fact.sql"
+            ]
+          }
+
+        ]
+      }
+    }
+  }
+}
+
+

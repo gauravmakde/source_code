@@ -1,0 +1,231 @@
+- subject: TRANSFER_LOGICAL
+  metric_name: napdw.stg_distinct_count
+  sql: "SELECT job_name, subj_area, src_db_name, src_tb_name, 'src', COALESCE(src_metric, 0)
+FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+WHERE job_name='TRANSFER_CREATED_LOGICAL_LDG_TO_BASE'
+AND dw_batch_date IN (SELECT curr_batch_date FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'NAP_ASCP_TRANSFER_LOGICAL')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+- subject: TRANSFER_LOGICAL
+  metric_name: napdw.base_distinct_count
+  sql: "SELECT job_name, subj_area, tgt_db_name, tgt_tb_name, 'tgt', COALESCE(src_metric, 0)
+FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+WHERE job_name='TRANSFER_CREATED_LOGICAL_LDG_TO_BASE'
+AND dw_batch_date IN (SELECT curr_batch_date FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'NAP_ASCP_TRANSFER_LOGICAL')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+- subject: TRANSFER_LOGICAL
+  metric_name: napdw.stg_distinct_count
+  sql: "SELECT job_name, subj_area, src_db_name, src_tb_name, 'src', COALESCE(src_metric, 0)
+FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+WHERE job_name='TRANSFER_SHIPMENT_RECEIPTS_LOGICAL_LDG_TO_BASE'
+AND dw_batch_date IN (SELECT curr_batch_date FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'NAP_ASCP_TRANSFER_LOGICAL')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+- subject: TRANSFER_LOGICAL
+  metric_name: napdw.base_distinct_count
+  sql: "SELECT job_name, subj_area, tgt_db_name, tgt_tb_name, 'tgt', COALESCE(src_metric, 0)
+FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+WHERE job_name='TRANSFER_SHIPMENT_RECEIPTS_LOGICAL_LDG_TO_BASE'
+AND dw_batch_date IN (SELECT curr_batch_date FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE subject_area_nm = 'NAP_ASCP_TRANSFER_LOGICAL')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+    
+- subject: TRANSFER_LOGICAL
+  metric_name: spark_processed_messages
+  sql: "select 
+           ISF_DAG_NM,
+           CAST(ISF_DAG_START_TMSTP as string),
+           CAST(TIMESTAMP_ADD(TIMESTAMP(CURRENT_datetime('GMT')), INTERVAL 6 MINUTE)AS STRING),
+           CAST(SPARK_JOB_START_TMSTP as string),
+           CAST(SPARK_JOB_END_TMSTP as string),
+           CAST(TPT_JOB_START_TMSTP as string),
+           CAST(TPT_JOB_END_TMSTP as string),
+           CAST(TERADATA_JOB_START_TMSTP as string),
+           CAST(TERADATA_JOB_END_TMSTP as string),
+           CAST(ISF_DAG_START_TMSTP as string),
+           cast(SPARK_PROCESSED_MESSAGE_CNT as int64)
+        from 
+         (
+           select ISF_DAG_NM, BATCH_ID, METRIC_NM, METRIC_VALUE from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG 
+           where isf_dag_nm = 'ascp_transfer_logical_16780_TECH_SC_NAP_insights'
+           and METRIC_NM not in ('TPT_JOB_START_TMSTP', 'TPT_JOB_END_TMSTP', 'TERADATA_JOB_START_TMSTP', 'TERADATA_JOB_END_TMSTP')
+           and batch_id = (SELECT BATCH_ID FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE SUBJECT_AREA_NM ='NAP_ASCP_TRANSFER_LOGICAL')
+           union all 
+           select ISF_DAG_NM, BATCH_ID, METRIC_NM, MAX(METRIC_VALUE) as METRIC_VALUE from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG 
+           where isf_dag_nm = 'ascp_transfer_logical_16780_TECH_SC_NAP_insights'
+           and METRIC_NM in ('TPT_JOB_END_TMSTP', 'TERADATA_JOB_END_TMSTP')
+           and batch_id = (SELECT BATCH_ID FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE SUBJECT_AREA_NM ='NAP_ASCP_TRANSFER_LOGICAL')
+           group by ISF_DAG_NM, BATCH_ID, METRIC_NM
+           union all
+           select ISF_DAG_NM, BATCH_ID, METRIC_NM, MIN(METRIC_VALUE) as METRIC_VALUE from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG 
+           where isf_dag_nm = 'ascp_transfer_logical_16780_TECH_SC_NAP_insights'
+           and METRIC_NM in ('TPT_JOB_START_TMSTP', 'TERADATA_JOB_START_TMSTP')
+           and batch_id = (SELECT BATCH_ID FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE SUBJECT_AREA_NM ='NAP_ASCP_TRANSFER_LOGICAL')
+           group by ISF_DAG_NM, BATCH_ID, METRIC_NM
+        ) src 
+        PIVOT (min(METRIC_VALUE) FOR METRIC_NM in ('SPARK_PROCESSED_MESSAGE_CNT' as SPARK_PROCESSED_MESSAGE_CNT , 
+                                                   'ISF_DAG_START_TMSTP' as ISF_DAG_START_TMSTP , 
+                                                   'ISF_DAG_END_TMSTP' as ISF_DAG_END_TMSTP,
+                                                   'TPT_JOB_START_TMSTP' as TPT_JOB_START_TMSTP,
+                                                   'TPT_JOB_END_TMSTP' as  TPT_JOB_END_TMSTP,
+                                                   'TERADATA_JOB_START_TMSTP' as TERADATA_JOB_START_TMSTP,
+                                                   'TERADATA_JOB_END_TMSTP' as TERADATA_JOB_END_TMSTP,
+                                                   'SPARK_JOB_START_TMSTP' as SPARK_JOB_START_TMSTP,
+                                                   'SPARK_JOB_END_TMSTP' as SPARK_JOB_END_TMSTP
+                                                  )
+        ) metrics"
+  metric_value_position: 10
+  tags:
+    - isf_dag_nm: 0
+    - isf_dag_start_tmstp: 1
+    - isf_dag_end_tmstp: 2
+    - spark_job_start_tmstp: 3
+    - spark_job_end_tmstp: 4
+    - tpt_job_start_tmstp: 5
+    - tpt_job_end_tmstp: 6
+    - teradata_job_start_tmstp: 7
+    - teradata_job_end_tmstp: 8
+    - execution_date: 9
+    
+- subject: TRANSFER_LOGICAL
+  metric_name: ldg_loaded_cnt
+  sql: "select 
+           ISF_DAG_NM,
+           TBL_NM,
+           TPT_JOB_START_TMSTP,
+           TPT_JOB_END_TMSTP,
+           LOADED_TO_CSV_CNT,
+           CAST(ISF_DAG_START_TMSTP as string),
+           CAST(LOADED_TO_LDG_CNT as INT64)
+        from 
+         (
+           select ISF_DAG_NM, METRIC_NM, METRIC_VALUE, COALESCE(TBL_NM, '{DBENV}_NAP_STG.TRANSFER_CREATED_LOGICAL_LDG') as TBL_NM
+           from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG          
+           where isf_dag_nm = 'ascp_transfer_logical_16780_TECH_SC_NAP_insights'
+           and batch_id = (SELECT BATCH_ID FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE SUBJECT_AREA_NM ='NAP_ASCP_TRANSFER_LOGICAL')
+           and (TBL_NM = '{DBENV}_NAP_STG.TRANSFER_CREATED_LOGICAL_LDG' or metric_nm = 'ISF_DAG_START_TMSTP')
+         ) src 
+        PIVOT (min(METRIC_VALUE) FOR METRIC_NM in ('LOADED_TO_CSV_CNT' as LOADED_TO_CSV_CNT , 
+                                                   'ISF_DAG_START_TMSTP' as ISF_DAG_START_TMSTP , 
+                                                   'TPT_JOB_START_TMSTP' as TPT_JOB_START_TMSTP,
+                                                   'TPT_JOB_END_TMSTP' as  TPT_JOB_END_TMSTP,
+                                                   'LOADED_TO_LDG_CNT' as LOADED_TO_LDG_CNT
+                                                  )
+        ) metrics"
+  metric_value_position: 6
+  tags:
+    - isf_dag_nm: 0
+    - ldg_tbl_nm: 1
+    - tpt_job_start_tmstp: 2
+    - tpt_job_end_tmstp: 3
+    - csv_loaded_cnt: 4
+    - execution_date: 5
+
+- subject: TRANSFER_LOGICAL
+  metric_name: ldg_loaded_cnt
+  sql: "select 
+           ISF_DAG_NM,
+           TBL_NM,
+           TPT_JOB_START_TMSTP,
+           TPT_JOB_END_TMSTP,
+           LOADED_TO_CSV_CNT,
+           CAST(ISF_DAG_START_TMSTP as string),
+           CAST(LOADED_TO_LDG_CNT as INT64)
+        from 
+         (
+           select ISF_DAG_NM, METRIC_NM, METRIC_VALUE, COALESCE(TBL_NM, '{DBENV}_NAP_STG.TRANSFER_SHIPMENT_RECEIPT_LOGICAL_LDG') as TBL_NM
+           from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG          
+           where isf_dag_nm = 'ascp_transfer_logical_16780_TECH_SC_NAP_insights'
+           and batch_id = (SELECT BATCH_ID FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE SUBJECT_AREA_NM ='NAP_ASCP_TRANSFER_LOGICAL')
+           and (TBL_NM = '{DBENV}_NAP_STG.TRANSFER_SHIPMENT_RECEIPT_LOGICAL_LDG' or metric_nm = 'ISF_DAG_START_TMSTP')
+         ) src 
+        PIVOT (min(METRIC_VALUE) FOR METRIC_NM in ('LOADED_TO_CSV_CNT' as LOADED_TO_CSV_CNT , 
+                                                   'ISF_DAG_START_TMSTP' as ISF_DAG_START_TMSTP , 
+                                                   'TPT_JOB_START_TMSTP' as TPT_JOB_START_TMSTP,
+                                                   'TPT_JOB_END_TMSTP' as  TPT_JOB_END_TMSTP,
+                                                   'LOADED_TO_LDG_CNT' as LOADED_TO_LDG_CNT
+                                                  )
+        ) metrics"
+  metric_value_position: 6
+  tags:
+    - isf_dag_nm: 0
+    - ldg_tbl_nm: 1
+    - tpt_job_start_tmstp: 2
+    - tpt_job_end_tmstp: 3
+    - csv_loaded_cnt: 4
+    - execution_date: 5
+    
+- subject: TRANSFER_LOGICAL
+  metric_name: spark_processed_rows
+  sql: "select 
+           ISF_DAG_NM,
+           TBL_NM,
+           CAST(ISF_DAG_START_TMSTP as string),
+           CAST(LOADED_TO_CSV_CNT as INT64)
+        from 
+         (
+           select ISF_DAG_NM, METRIC_NM, METRIC_VALUE, COALESCE(TBL_NM, '{DBENV}_NAP_STG.TRANSFER_SHIPMENT_RECEIPT_LOGICAL_LDG') as TBL_NM
+           from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG          
+           where isf_dag_nm = 'ascp_transfer_logical_16780_TECH_SC_NAP_insights'
+           and batch_id = (SELECT BATCH_ID FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE SUBJECT_AREA_NM ='NAP_ASCP_TRANSFER_LOGICAL')
+           and (TBL_NM = '{DBENV}_NAP_STG.TRANSFER_SHIPMENT_RECEIPT_LOGICAL_LDG' or metric_nm = 'ISF_DAG_START_TMSTP')
+         ) src 
+        PIVOT (min(METRIC_VALUE) FOR METRIC_NM in ('LOADED_TO_CSV_CNT' as LOADED_TO_CSV_CNT , 
+                                                   'ISF_DAG_START_TMSTP' as ISF_DAG_START_TMSTP , 
+                                                   'TPT_JOB_START_TMSTP' as TPT_JOB_START_TMSTP,
+                                                   'TPT_JOB_END_TMSTP' as  TPT_JOB_END_TMSTP
+                                                  )
+        ) metrics"
+  metric_value_position: 3
+  tags:
+    - isf_dag_nm: 0
+    - ldg_tbl_nm: 1
+    - execution_date: 2
+    
+- subject: TRANSFER_LOGICAL
+  metric_name: spark_processed_rows
+  sql: "select 
+           ISF_DAG_NM,
+           TBL_NM,
+           CAST(ISF_DAG_START_TMSTP as string),
+           CAST(LOADED_TO_CSV_CNT as INT64)
+        from 
+         (
+           select ISF_DAG_NM, METRIC_NM, METRIC_VALUE, COALESCE(TBL_NM, '{DBENV}_NAP_STG.TRANSFER_CREATED_LOGICAL_LDG') as TBL_NM
+           from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG          
+           where isf_dag_nm = 'ascp_transfer_logical_16780_TECH_SC_NAP_insights'
+           and batch_id = (SELECT BATCH_ID FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL WHERE SUBJECT_AREA_NM ='NAP_ASCP_TRANSFER_LOGICAL')
+           and (TBL_NM = '{DBENV}_NAP_STG.TRANSFER_CREATED_LOGICAL_LDG' or metric_nm = 'ISF_DAG_START_TMSTP')
+         ) src 
+        PIVOT (min(METRIC_VALUE) FOR METRIC_NM in ('LOADED_TO_CSV_CNT' as LOADED_TO_CSV_CNT , 
+                                                   'ISF_DAG_START_TMSTP' as ISF_DAG_START_TMSTP , 
+                                                   'TPT_JOB_START_TMSTP' as TPT_JOB_START_TMSTP,
+                                                   'TPT_JOB_END_TMSTP' as  TPT_JOB_END_TMSTP
+                                                  )
+        ) metrics"
+  metric_value_position: 3
+  tags:
+    - isf_dag_nm: 0
+    - ldg_tbl_nm: 1
+    - execution_date: 2

@@ -1,0 +1,11 @@
+--app_config_file s3://napstoreinvtry-prod-common-etl/apps/etl_framework/prod/application_config/emr_application_prod.json   
+--app_id APP08649 
+--source_tables_details 'kafka_inventory_return_store_inventory_adjusted={"source_type": "KAFKA", "vault_connection_name": "nordsecrets/application/APP08649/shared/prod/kafka/v2/oauth", "kafka.sasl.mechanism": "OAUTHBEARER", "request.timeout.ms": "20000", "retry.backoff.ms": "500", "kafka_cluster_name": "yakima-prod", "identity_pool_id": "pool-x5qe","data_source_name":"inventory-return-store-inventory-adjusted-avro"}' 
+--target_tables_details 'store_inventory_adjusted_event_ldg={"source_type": "TERADATA", "hostname": "tdnapprod.nordstrom.net", "port": "1025", "vault_connection_name": "nordsecrets/application/APP08649/shared/prod/teradata/nap/service_account", "database_name": "PRD_NAP_STG","data_source_name":"STORE_INVENTORY_ADJUSTED_EVENT_LDG"}'  
+--sql_file_location s3://napstoreinvtry-prod-common-etl/apps/etl_framework/airflow_nsk_dag_job_artifacts/prod/17610/DAS_SC_OUTBOUND/APP08649_insights_v2/sql/ascp_store_inventory_adjusted_event/ascp_store_inventory_adjusted_event_17610_DAS_SC_OUTBOUND_APP08649_insights_v2_main_kafka_avro_to_td_stg.sql  
+--stage_task_name ascp_store_inventory_adjusted_event_17610_DAS_SC_OUTBOUND_APP08649_insights_v2_main_job_2_load_avro_td_stg  
+--hive_offset_table score_app08649.kafka_consumer_offset_batch_details   
+--consumer_group_name inventory-return-store-inventory-adjusted-avro_ascp_store_inventory_adjusted_event_17610_DAS_SC_OUTBOUND_APP08649_insights_v2_main_job_2_load_avro_td_stg   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:483375294780:secret:VAULT_APPROLE_ROLE_ID-unT0nO  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:483375294780:secret:VAULT_APPROLE_SECRET_ID-OrqVrS  
+--aws_user_role_arn arn:aws:iam::483375294780:role/APP08649_AirflowV2SparkEngineRole 

@@ -1,0 +1,111 @@
+{
+    "dag_id": "trips_sandbox_weekly_cust",
+    "dag_schedule": "0 2 * * 3",
+    "prod_email_on_failure": "dsa-app08818-universal-semantic-layer@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "ian.rasquinha@nordstrom.com",
+    "stages": [
+        "trips_sandbox_weekly_cust",
+        "trips_sandbox_cust_single_attribute",
+        "trips_sandbox_monthly_yoy",
+        "trips_sandbox_weekly",
+        "trips_sandbox_yoy",
+        "trips_sandbox_cust_count"
+    ],
+    "stage_dependencies": {
+        "trips_sandbox_weekly_cust": [
+            "trips_sandbox_cust_single_attribute"
+        ],
+        "trips_sandbox_cust_single_attribute": [
+            "trips_sandbox_monthly_yoy",
+            "trips_sandbox_weekly"
+        ],
+        "trips_sandbox_weekly": [
+            "trips_sandbox_yoy",
+            "trips_sandbox_cust_count"
+        ]
+    },
+    "trips_sandbox_weekly_cust": {
+        "job_1_create_t2_view": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_USL",
+                        "scripts": [
+                            "universal_semantic_layer/trips_sandbox_weekly_cust.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "trips_sandbox_cust_single_attribute": {
+        "job_1_create_t2_view": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_USL",
+                        "scripts": [
+                            "universal_semantic_layer/trips_sandbox_cust_single_attribute.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "trips_sandbox_monthly_yoy": {
+        "job_1_create_t2_view": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_USL",
+                        "scripts": [
+                            "universal_semantic_layer/trips_sandbox_monthly_yoy.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "trips_sandbox_weekly": {
+        "job_1_create_t2_view": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_USL",
+                        "scripts": [
+                            "universal_semantic_layer/trips_sandbox_weekly.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "trips_sandbox_yoy": {
+        "job_1_create_t2_view": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_USL",
+                        "scripts": [
+                            "universal_semantic_layer/trips_sandbox_yoy.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "trips_sandbox_cust_count": {
+        "job_1_create_t2_view": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_USL",
+                        "scripts": [
+                            "universal_semantic_layer/trips_sandbox_cust_count.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,49 @@
+{
+  "dag_id":"hr_worker_event_load_v1",
+  "dag_schedule":"20 1,7,13,19 * * *",
+  "stages":[
+    "hr_worker_event_v1"
+  ],
+  "hr_worker_event_v1": {
+    "load_orc_td_stg": {
+      "spark_engine": {
+        "spark_run_mode":"high",
+        "scripts": [
+          "hr_worker_event_load_orc_and_teradata_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__HR_WORKER_EVENTS_KAFKA__",
+            "sql_table_reference": "kafka_hr_worker_object_model_avro",
+            "data_source_name": "hr-worker-object-model-avro"
+          }
+        ],
+        "output_details":[
+          {
+            "conn_name": "__HR_WORKER_LEGACY_S3_ORC_SINK__",
+            "sql_table_reference": "hr_worker_event_orc_output"
+          },
+          {
+            "conn_name": "__TERADATA_NAP_HR_STG__",
+            "sql_table_reference": "hr_worker_v2_ldg",
+            "data_source_name": "hr_worker_v2_ldg"
+          }
+        ]
+      }
+    },
+    "load_td_stg_to_dims": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__NEW_VAULT_TERADATA_NAP_HR_STG__",
+            "scripts": [
+              "hr_worker_event_load_teradata_stg_to_dim.sql"
+
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+

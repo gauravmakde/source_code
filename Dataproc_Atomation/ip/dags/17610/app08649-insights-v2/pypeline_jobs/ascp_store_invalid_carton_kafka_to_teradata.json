@@ -1,0 +1,120 @@
+{
+    "dag_id": "ascp_store_invalid_carton_from_kafka_to_teradata",
+    "dag_schedule": "0 9 * * *",
+    "prod_email_on_failure": "nap-sco-high-pri@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "",
+    "stages": [
+        "store_invalid_carton_load_v9"
+    ],
+    "store_invalid_carton_load_v9": {
+        "load_01_start_batch": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_NAP_FCT__",
+                        "scripts": [
+                            "ascp_store_invalid_carton/start_batch.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "load_02_kafka": {
+            "spark_engine": {
+                "spark_run_mode": "low",
+                "scripts": [
+                    "ascp_store_invalid_carton/read_store_invalid_carton_from_kafka_to_teradata.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "__KAFKA__",
+                        "sql_table_reference": "kafka_inventory_store_invalid_carton_object_model_avro",
+                        "data_source_name": "inventory-store-invalid-carton-lifecycle-analytical-avro"
+                    },
+                    {
+                        "conn_name": "__S3_SINK_INVENTORY_SRC__",
+                        "sql_table_reference": "orc_src",
+                        "path": "s3://{s3_bucket_orc}/data/ascp-store-invalid-carton-lifecycle-v1"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__S3_SINK_INVENTORY_TGT__",
+                        "sql_table_reference": "ascp-store-invalid-carton-lifecycle-v1"
+                    },
+                    {
+                        "conn_name": "__S3_SINK_INVENTORY_TMP__",
+                        "sql_table_reference": "ascp-store-invalid-carton-lifecycle-tmp"
+                    },
+                    {
+                        "conn_name": "__S3_ERROR_SINK__",
+                        "sql_table_reference": "store_invalid_carton_err"
+                    },
+                    {
+                        "conn_name": "__TERADATA_NAP_STG__",
+                        "sql_table_reference": "store_invalid_carton_ldg_table",
+                        "data_source_name": "STORE_INVALID_CARTON_LDG"
+                    }
+                ]
+            }
+        },
+        "load_03_teradata": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_NAP_FCT__",
+                        "scripts": [
+                            "ascp_store_invalid_carton/store_invalid_carton_load_fact_table.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "load_04_orc_tgt": {
+            "spark_engine": {
+                "spark_run_mode": "low",
+                "scripts": [
+                    "ascp_store_invalid_carton/store_invalid_carton_orc_overwrite.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "__S3_SINK_INVENTORY_SRC__",
+                        "sql_table_reference": "orc_tmp",
+                        "path": "s3://{s3_bucket_orc}/temporary/ascp-store-invalid-carton-lifecycle-tmp"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__S3_SINK_INVENTORY_TGT__",
+                        "sql_table_reference": "ascp-store-invalid-carton-lifecycle-v1"
+                    }
+                ]
+            }
+        },
+        "load_041_teradata_fact_dqc": {
+            "teradata_engine": {
+                "retries": 0,
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_NAP_FCT__",
+                        "scripts": [
+                            "ascp_store_invalid_carton/td_fact_dqc.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "load_05_end_batch": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_NAP_FCT__",
+                        "scripts": [
+                            "ascp_store_invalid_carton/end_batch.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

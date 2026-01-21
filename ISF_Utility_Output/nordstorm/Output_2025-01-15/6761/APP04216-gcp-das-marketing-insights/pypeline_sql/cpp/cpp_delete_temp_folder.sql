@@ -1,0 +1,1 @@
+INSERT OVERWRITE s3_merged_data SELECT * FROM {schema_name_cpp}.{resulting_cpp_table_name} limit 0;

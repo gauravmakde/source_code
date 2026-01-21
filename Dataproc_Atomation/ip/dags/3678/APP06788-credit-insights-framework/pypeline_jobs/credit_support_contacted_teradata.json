@@ -1,0 +1,43 @@
+{
+    "dag_id": "credit_support_contacted_teradata",
+    "dag_schedule": "0 */3 * * *",
+    "stages": [
+        "credit_support_contacted_kafka_to_teradata_stg_stage_0"
+    ],
+    "credit_support_contacted_kafka_to_teradata_stg_stage_0": {
+        "kafka_to_teradata_stg_job": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "scripts": [
+                    "sparkSql/credit_support_contacted_kafka_to_teradata_stg.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "__KAFKA_CONFLUENT_CLOUD_OAUTH__",
+                        "sql_table_reference": "kafka_customer_credit_customer_support_contacted_avro",
+                        "data_source_name": "customer-credit-customer-support-contacted-avro"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__CREDIT_TERADATA_NAP_STG__",
+                        "sql_table_reference": "credit_support_contacted_ldg",
+                        "data_source_name": "CREDIT_SUPPORT_CONTACTED_LDG"
+                    }
+                ]
+            }
+        },
+        "teradata_stg_to_teradata_fct_job": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__CREDIT_TERADATA_NAP_FCT__",
+                        "scripts": [
+                            "teradata/credit_support_contacted_teradata_stg_to_teradata_fct.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

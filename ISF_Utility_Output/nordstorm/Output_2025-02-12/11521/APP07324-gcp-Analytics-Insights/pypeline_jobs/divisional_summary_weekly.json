@@ -1,0 +1,40 @@
+{
+    "dag_id": "divisional_summary_weekly",
+    "dag_schedule": "20 15 * * SUN",
+    "prod_email_on_failure": "app08227-product-funnel@nordstrom.pagerduty.com, ace.promo@nordstrom.com, rasagnya.avala@nordstrom.com",
+    "nonprod_email_on_failure": "yesenia.garcia@nordstrom.com",
+    "dependencies": {
+        "upstream": {
+            "dags": [
+                {
+                    "external_dag_id": "product_price_funnel_daily_11521_ACE_ENG",
+                    "retries": 3,
+                    "poke_interval": 120,
+                    "timeout": 3600
+                }
+            ]
+        },
+        "downstream": {
+            "dags": [
+                "refresh_divisional_summary_weekly_11521_ACE_ENG"
+            ]
+        }
+    },
+    "stages": [
+        "run_divisional_summary_weekly_sql"
+    ],
+    "run_divisional_summary_weekly_sql": {
+        "run_divisional_summary_weekly_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_PFD",
+                        "scripts": [
+                            "product_funnel/divisional_summary_weekly.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

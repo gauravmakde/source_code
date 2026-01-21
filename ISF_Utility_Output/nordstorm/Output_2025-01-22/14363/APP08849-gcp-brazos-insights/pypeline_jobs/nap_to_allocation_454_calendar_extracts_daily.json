@@ -1,0 +1,32 @@
+{
+    "dag_id": "nap_to_allocation_454_calendar_extracts_daily",
+    "dag_schedule": "30 03 * * *",
+    "timezone": "US/Pacific",
+    "stages": [
+        "extract_454_calendar"
+    ],
+    "extract_454_calendar": {
+        "export_5_years": {
+            "spark_engine": {
+                "spark_run_mode": "low",
+                "retries": "0",
+                "scripts": [
+                    "five_years_daily_calendar_creating.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_NAP_USR_VIEWS",
+                        "sql_table_reference": "day_cal_454_dim",
+                        "data_source_name": "DAY_CAL_454_DIM"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "S3_DAILY_CALENDAR",
+                        "sql_table_reference": "daily_calendar"
+                    }
+                ]
+            }
+        }
+    }
+}

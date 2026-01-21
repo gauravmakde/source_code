@@ -1,0 +1,23 @@
+{
+    "dag_id": "fashion_map_choice_initial_run",
+    "prod_email_on_failure": "soren.stime1@nordstrom.com, robert.legg@nordstrom.com",
+    "nonprod_email_on_failure": "soren.stime1@nordstrom.com",
+    "stages": [
+        "run_terdata_sql"
+    ],
+    "run_terdata_sql": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_DEG",
+                        "scripts": [
+                            "fashion_map/fashion_map_choice_initial_run.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

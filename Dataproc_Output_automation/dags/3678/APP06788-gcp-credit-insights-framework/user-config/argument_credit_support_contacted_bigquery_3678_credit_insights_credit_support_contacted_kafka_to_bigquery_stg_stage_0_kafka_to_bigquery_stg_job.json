@@ -1,0 +1,13 @@
+--app_config_file gs://test-data-datametica/app09392/isf-artifacts/app-config/emr_application_dev.json
+--app_id APP06788 
+--source_tables_details 'kafka_customer_credit_customer_support_contacted_avro={"source_type": "KAFKA", "kafka.sasl.mechanism": "OAUTHBEARER", "vault_connection_name": "nordsecrets/application/APP09392/meadow/onix/oauth", "kafka_cluster_name": "meadow", "reset_offset_to_latest": "false", "retry.backoff.ms": "500", "request.timeout.ms": "20000", "data_source_name": "customer-credit-customer-support-contacted-avro"}' 
+--target_tables_details 'credit_support_contacted_ldg={"source_type": "BIGQUERY", "dataset": "DEV_NAP_CREDIT_STG", "table": "CREDIT_SUPPORT_CONTACTED_LDG", "project": "jwn-nap-user1-nonprod-zmnb", "mode": "overwrite", "temp_bucket": "test-data-datametica"}'  
+--sql_file_location gs://test-data-datametica/app09392/isf-artifacts/sql/sparkSql/credit_support_contacted_kafka_to_bigquery_stg.sql  
+--stage_task_name credit_support_contacted_bigquery_3678_credit_insights_credit_support_contacted_kafka_to_bigquery_stg_stage_0_kafka_to_bigquery_stg_job  
+--offset_table '`jwn-nap-user1-nonprod-zmnb.onehop_etl_app_db.kafka_consumer_offset_batch_details`'
+--consumer_group_name onix-customer-credit-customer-support-contacted-avro_credit_support_contacted_teradata_3678_credit_insights_credit_support_contacted_kafka_to_teradata_stg_stage_0_kafka_to_teradata_stg_job   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_ROLE_ID-Psikfr
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_SECRET_ID-themT6
+--aws_user_role_arn arn:aws:iam::290445963451:role/APP09392_AWS_Secrets_Role
+--aws_user_role_external_id=testUser
+--gcp_project_id jwn-nap-user1-nonprod-zmnb

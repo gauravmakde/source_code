@@ -1,0 +1,12 @@
+--app_config_file gs://test-data-datametica/app09392/isf-artifacts/app-config/emr_application_dev.json
+--app_id APP02432 
+--source_tables_details 's3_aruba_wifi_s3_input={"source_type": "S3", "format": "avro", "path": "s3://nap-store-aruba-wifi-events-prod-avro/store-network-aruba-wifi-traffic-events-avro/"}' 
+--target_tables_details 'aruba_wifi_orc_output={"source_type": "S3", "format": "orc", "path": "s3://nap-store-aruba-wifi-events-prod-orc"}'  
+--sql_file_location gs://test-data-datametica/app09392/isf-artifacts/sql/aruba_wifi_load.sql  
+--stage_task_name aruba_wifi_load_2656_napstore_insights_s3_avro_to_orc_load_0  
+--offset_table '`jwn-nap-user1-nonprod-zmnb.onehop_etl_app_db.kafka_consumer_offset_batch_details`'
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_ROLE_ID-Psikfr
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_SECRET_ID-themT6
+--aws_user_role_arn arn:aws:iam::290445963451:role/APP09392_AWS_Secrets_Role
+--aws_user_role_external_id=testUser
+--gcp_project_id jwn-nap-user1-nonprod-zmnb

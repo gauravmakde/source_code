@@ -1,0 +1,16 @@
+k8s_envs:
+  ENV : production
+  TD_ENV : PRD
+  TD_HOST : tdnapprod.nordstrom.net
+  TD_VAULT_PATH : data/application/APP03676/5633/das_customer/customer/prod/teradata/teradta_db_credentials
+  NR_VAULT_PATH : data/application/APP03676/5633/das_customer/customer/prod/newrelic/newrelic_infrastructure_jwn_ingest_key
+  VAULT_PATH : prod-vault.vault.vip.nordstrom.com
+  VAULT_PORT : 8200
+  S3_BUCKET : tf-das-cust-prod-teradata-stage
+k8s_envs_secrets:
+  VAULT_ROLE_ID:
+    name : vault
+    key : roleid
+  VAULT_SECRET:
+    name : vault
+    key : secret

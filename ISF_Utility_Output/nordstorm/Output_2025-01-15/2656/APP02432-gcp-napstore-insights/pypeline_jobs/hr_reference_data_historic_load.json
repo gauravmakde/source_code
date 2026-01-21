@@ -1,0 +1,59 @@
+{
+  "dag_id": "hr_reference_data_historic_load",
+  "dag_schedule": null,
+  "stages": [
+    "s3_csv"
+  ],
+  "s3_csv": {
+    "load_0_stg_tables": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "hr_reference_data_historic_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__HR_ORGANIZATION_HISTORIC_S3_CSV_INPUT__",
+            "sql_table_reference": "s3_hr_org_csv_input"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_HR_STG__",
+            "sql_table_reference": "td_org_ldg_table",
+            "data_source_name": "HR_WORKER_ORG_LDG"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_HR_STG__",
+            "sql_table_reference": "td_loc_ldg_table",
+            "data_source_name": "HR_WORKER_LOCATION_LDG"
+          },
+          {
+            "conn_name": "__TERADATA_NAP_HR_STG__",
+            "sql_table_reference": "td_job_ldg_table",
+            "data_source_name": "HR_WORKER_JOB_LDG"
+          }
+        ]
+      }
+    },
+    "load_1_dim_tables": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__NEW_VAULT_TERADATA_NAP_HR_STG__",
+            "scripts": [
+              "hr_organization_load_dim.sql",
+              "hr_job_load_dim.sql",
+              "hr_location_load_dim.sql"
+
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+
+
+

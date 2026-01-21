@@ -1,0 +1,49 @@
+{
+    "dag_id": "merch_main_merch_executive_weekly",
+    "dag_schedule": "30 05 * * 1",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "ace.promo@Nordstrom.com, dsa-app08739-merch-executive-weekly@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "ace.promo@Nordstrom.com",
+    "dependencies": {
+        "upstream": {
+            "dags": [
+                {
+                    "external_dag_id": "merch_pra_mfp_17284_MERCH_ANALYTICS_insights_framework"
+                }
+            ]
+        }
+    },
+    "stages": [
+        "run_teradata_sql_stg_0"
+    ],
+    "sql_env_vars": {
+        "environment_schema": "T2DL_DAS_IN_SEASON_MANAGEMENT_REPORTING"
+    },
+    "run_teradata_sql_stg_0": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_AIS_BATCH__",
+                        "scripts": [
+                            "merch_executive_weekly/merch_pipeline_main_merch_executive_weekly.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_0_refresh_tableau": {
+            "tableau_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TABLEAU_MA__",
+                        "source_type": "datasource",
+                        "datasource_name": "Merch Business Review Summary DNU - Not Self Service",
+                        "project_name": "Data Sources"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    }
+}

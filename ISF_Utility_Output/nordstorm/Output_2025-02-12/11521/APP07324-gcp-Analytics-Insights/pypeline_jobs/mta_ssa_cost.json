@@ -1,0 +1,90 @@
+{
+    "dag_id": "mta_ssa_cost",
+    "prod_email_on_failure": "app08047-mta@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "yesenia.garcia@nordstrom.com",
+    "dependencies": {
+        "upstream": {
+            "dags": [
+                {
+                    "external_dag_id": "affiliates_cost_11521_ACE_ENG",
+                    "retries": 3,
+                    "poke_interval": 120,
+                    "timeout": 3600
+                }
+            ]
+        }
+    },
+    "stages": [
+        "run_mta_ssa_cost_sql"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-90",
+        "end_date": "current_date()-1"
+    },
+    "run_mta_ssa_cost_sql": {
+        "job_0_mta_ssa_cost_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTA",
+                        "scripts": [
+                            "mta/mta_ssa_cost_agg.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_1_refresh_vw_4": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTA",
+                        "scripts": [
+                            "mta/mta_ssa_cost_agg_vw.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_2_refresh_vw_5": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTA",
+                        "scripts": [
+                            "mta/mta_ssa_cost_fcst_agg_vw.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_3_refresh_tableau_workbook": {
+            "tableau_engine": {
+                "sensor_timeout_seconds": 3150,
+                "input_details": [
+                    {
+                        "conn_name": "__TABLEAU_NAP__",
+                        "source_type": "workbook",
+                        "workbook_name": "4 Box Marketing Performance Suite",
+                        "project_name": "1. Media Insights - Tools"
+                    }
+                ],
+                "output_details": []
+            }
+        },
+        "job_4_refresh_executive_workbook": {
+            "tableau_engine": {
+                "sensor_timeout_seconds": 3150,
+                "input_details": [
+                    {
+                        "conn_name": "__TABLEAU_NAP__",
+                        "source_type": "workbook",
+                        "workbook_name": "4 Box Marketing Executive Dashboard",
+                        "project_name": "1. Media Insights - Tools"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    }
+}

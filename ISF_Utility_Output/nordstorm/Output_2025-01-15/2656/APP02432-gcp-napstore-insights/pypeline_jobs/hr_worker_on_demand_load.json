@@ -1,0 +1,51 @@
+{
+  "dag_id": "hr_worker_on_demand_load",
+  "dag_schedule": null,
+  "stages": [
+    "hr_worker_events"
+  ],
+  "hr_worker_events": {
+    "load_0_stg_tables": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "hr_worker_on_demand_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__HR_WORKER_S3_AVRO_INPUT__",
+            "sql_table_reference": "s3_hr_worker_avro_input"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_HR_STG__",
+            "sql_table_reference": "hr_worker_v1_ldg",
+            "data_source_name": "hr_worker_v1_ldg"
+
+          }
+        ]
+      }
+    },
+    "load_1_dim_tables": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__NEW_VAULT_TERADATA_NAP_HR_STG__",
+            "scripts": [
+              "hr_worker_load_teradata_stg_to_dim.sql"
+            ,"hr_employee_status_details_load_dim.sql"
+            ,"hr_job_details_load_dim.sql"
+            ,"hr_line_position_details_load_dim.sql"
+            ,"hr_org_details_load_dim.sql"
+            ,"hr_work_contact_details_load_dim.sql"
+
+
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+

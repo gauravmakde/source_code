@@ -1,0 +1,142 @@
+{
+    "dag_id": "leapfrog_segmented_audience_trips",
+    "prod_email_on_failure": "dsa-app08742-session-path-expanded-events-data-pipelines@nordstrom.pagerduty.com, jin.liu2@nordstrom.com",
+    "nonprod_email_on_failure": "jin.liu2@nordstrom.com",
+    "stages": [
+        "leapfrog_segmented_audience_trips",
+        "leapfrog_session_active_audience",
+        "leapfrog_holdout_performance",
+        "refresh_leapfrog_holdout_performance_dashboard"
+    ],
+    "stage_dependencies": {
+        "leapfrog_segmented_audience_trips": [
+            "leapfrog_session_active_audience"
+        ],
+        "leapfrog_session_active_audience": [
+            "leapfrog_holdout_performance"
+        ],
+        "leapfrog_holdout_performance": [
+            "refresh_leapfrog_holdout_performance_dashboard"
+        ]
+    },
+    "sql_env_vars": {
+        "start_date": "current_date()-9",
+        "end_date": "current_date()-2"
+    },
+    "leapfrog_segmented_audience_trips": {
+        "job_1_create_td_segmented_audience_trips_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_DEG",
+                        "scripts": [
+                            "leapfrog_holdout/ddl/ddl_leapfrog_segmented_audience_trips_ldg.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_2_load_hive_data_to_output": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "leapfrog_holdout/leapfrog_segmented_audience_trips_load.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_DEG",
+                        "sql_table_reference": "leapfrog_segmented_audience_trips_output",
+                        "data_source_name": "leapfrog_segmented_audience_trips_ldg"
+                    }
+                ]
+            }
+        },
+        "job_3_update_t2_table_from_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_DEG",
+                        "scripts": [
+                            "leapfrog_holdout/leapfrog_segmented_audience_trips.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "leapfrog_session_active_audience": {
+        "job_1_create_td_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_DEG",
+                        "scripts": [
+                            "leapfrog_holdout/ddl/ddl_leapfrog_session_active_audience_ldg.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_2_load_hive_data_to_output": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "leapfrog_holdout/leapfrog_session_active_audience_load.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_DEG",
+                        "sql_table_reference": "leapfrog_session_active_audience_output",
+                        "data_source_name": "leapfrog_session_active_audience_ldg"
+                    }
+                ]
+            }
+        },
+        "job_3_update_t2_table_from_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_DEG",
+                        "scripts": [
+                            "leapfrog_holdout/leapfrog_session_active_audience.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "leapfrog_holdout_performance": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_DEG",
+                        "scripts": [
+                            "leapfrog_holdout/leapfrog_holdout_performance.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "refresh_leapfrog_holdout_performance_dashboard": {
+        "job_0": {
+            "tableau_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TABLEAU_NAP__",
+                        "source_type": "workbook",
+                        "workbook_name": "Leapfrog Holdout Performance Dashboard",
+                        "project_name": "Leapfrog"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    }
+}

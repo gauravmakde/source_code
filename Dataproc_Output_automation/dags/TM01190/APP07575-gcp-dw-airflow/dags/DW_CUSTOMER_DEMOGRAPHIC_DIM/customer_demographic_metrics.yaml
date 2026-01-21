@@ -1,0 +1,78 @@
+- subject: CUST_DEMOGRAPHIC
+  metricName: napdw.cust_demo_acp_ids_src
+  sql: "
+      SELECT COUNT_Acp_id as f0_, 'DW_CUSTOMER_DEMOGRAPHIC_DIM' as job_name FROM (
+      select count(distinct acp_id) as COUNT_Acp_id
+      from {DBENV}_NAP_CUST_BASE_VWS.CUSTOMER_EXPERIAN_DEMOGRAPHIC_PREDICTION_LDG) a
+      WHERE COUNT_Acp_id>0
+"
+  metricValuePosition: 0
+  tags:
+    - job_name: 1
+- subject: CUST_DEMOGRAPHIC
+  metricName: napdw.cust_demo_acp_ids_total_src
+  sql: "SELECT COUNT_Acp_id as f0_, 'DW_CUSTOMER_DEMOGRAPHIC_DIM' as job_name FROM (
+        select count(distinct acp_id) as COUNT_Acp_id
+        from {DBENV}_NAP_CUST_BASE_VWS.CUSTOMER_EXPERIAN_DEMOGRAPHIC_PREDICTION_LDG) a
+        WHERE COUNT_Acp_id>0"
+  metricValuePosition: 0
+  tags:
+    - job_name: 1
+- subject: CUST_DEMOGRAPHIC
+  metricName: napdw.cust_demo_acp_ids_tgt
+  sql: "SELECT * FROM (select count(distinct acp_id) as f0_,
+        'DW_CUSTOMER_DEMOGRAPHIC_DIM' as job_name
+        from {DBENV}_NAP_CUST_BASE_VWS.CUSTOMER_EXPERIAN_DEMOGRAPHIC_PREDICTION_DIM where dw_batch_date =
+        (select max(dw_batch_date) from {DBENV}_NAP_CUST_BASE_VWS.CUSTOMER_EXPERIAN_DEMOGRAPHIC_PREDICTION_DIM)
+        ) a WHERE f0_>0;"
+  metricValuePosition: 0
+  tags:
+    - job_name: 1
+- subject: CUST_DEMOGRAPHIC
+  metricName: napdw.cust_demo_acp_ids
+  sql: "SELECT * FROM (SELECT COUNT(DISTINCT acp_id)as f0_,
+               dw_batch_date,
+               'DW_CUSTOMER_DEMOGRAPHIC_DIM' AS job_name
+        FROM {DBENV}_NAP_CUST_BASE_VWS.CUSTOMER_EXPERIAN_DEMOGRAPHIC_PREDICTION_DIM
+        GROUP BY dw_batch_date
+        HAVING dw_batch_date = (SELECT MAX(dw_batch_date) FROM {DBENV}_NAP_CUST_BASE_VWS.CUSTOMER_EXPERIAN_DEMOGRAPHIC_PREDICTION_DIM)
+        ) a WHERE f0_>0;"
+  metricValuePosition: 0
+  tags:
+    - dw_batch_date: 1
+    - job_name: 2
+- subject: CUST_DEMOGRAPHIC
+  metricName: napdw.cust_demo_acp_ids_insert
+  sql: "SELECT * FROM (SELECT COUNT(DISTINCT acp_id) AS f0_,
+               dw_sys_load_tmstp,
+               'DW_CUSTOMER_DEMOGRAPHIC_DIM'
+        FROM {DBENV}_NAP_CUST_BASE_VWS.CUSTOMER_EXPERIAN_DEMOGRAPHIC_PREDICTION_DIM
+        GROUP BY dw_sys_load_tmstp
+        HAVING dw_sys_load_tmstp = (SELECT MAX(dw_sys_load_tmstp) FROM {DBENV}_NAP_CUST_BASE_VWS.CUSTOMER_EXPERIAN_DEMOGRAPHIC_PREDICTION_DIM)
+        ) a WHERE f0_>0;"
+  metricValuePosition: 0
+  tags:
+    - dw_sys_load_tmstp: 1
+    - job_name: 2
+- subject: CUST_DEMOGRAPHIC
+  metricName: napdw.cust_demo_acp_ids_upadte
+  sql: "SELECT * FROM (SELECT COUNT(DISTINCT acp_id) AS f0_,
+               dw_sys_updt_tmstp,
+               'DW_CUSTOMER_DEMOGRAPHIC_DIM'
+        FROM {DBENV}_NAP_CUST_BASE_VWS.CUSTOMER_EXPERIAN_DEMOGRAPHIC_PREDICTION_DIM
+        GROUP BY dw_sys_updt_tmstp
+        HAVING dw_sys_updt_tmstp = (SELECT MAX(dw_sys_updt_tmstp) FROM {DBENV}_NAP_CUST_BASE_VWS.CUSTOMER_EXPERIAN_DEMOGRAPHIC_PREDICTION_DIM)
+        ) a WHERE f0_>0;"
+  metricValuePosition: 0
+  tags:
+    - dw_sys_updt_tmstp: 1
+    - job_name: 2
+- subject: CUST_DEMOGRAPHIC
+  metricName: napdw.cust_demo_acp_ids_total
+  sql: "SELECT COUNT_Acp_id as f0_, 'DW_CUSTOMER_DEMOGRAPHIC_DIM' as job_name FROM (
+        select count(distinct acp_id) as COUNT_Acp_id
+        from {DBENV}_NAP_CUST_BASE_VWS.CUSTOMER_EXPERIAN_DEMOGRAPHIC_PREDICTION_LDG) a
+        WHERE COUNT_Acp_id>0"
+  metricValuePosition: 0
+  tags:
+    - job_name: 1

@@ -1,0 +1,82 @@
+{
+    "dag_id": "sales_and_returns_fact_base",
+    "dag_schedule": "0 4 * * *",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "app08118-sarf@nordstrom.pagerduty.com, TECH_PRICE_MD_OPT@nordstrom.com",
+    "nonprod_email_on_failure": "Lance.Christenson@nordstrom.com",
+    "stage_dependencies": {
+        "upstream_dep_stage": "run_sales_and_returns_fact_base"
+    },
+    "dependencies": {
+        "downstream": {
+            "dags": [
+                "item_delivery_method_funnel_11521_ACE_ENG",
+                "mothership_finance_sales_demand_fact_11521_ACE_ENG",
+                "gifting_order_summary_11521_ACE_ENG",
+                "remote_sell_transactions_11521_ACE_ENG"
+            ]
+        }
+    },
+    "stages": [
+        "upstream_dep_stage",
+        "run_sales_and_returns_fact_base"
+    ],
+    "sql_env_vars": {
+        "backfill_day_of_week": "7",
+        "incremental_look_back": "60"
+    },
+    "upstream_dep_stage": {
+        "check_NAP_DW_SALES_FACT": {
+            "branch_engine": {
+                "python_code": "sarf_upstream_check.py",
+                "callable_function_name": "callable_func_name",
+                "provide_context": "True",
+                "callable_return_vars": {
+                    "task1": "run_sales_and_returns_fact_base",
+                    "task2": "run_sales_and_returns_fact_base"
+                }
+            }
+        }
+    },
+    "run_sales_and_returns_fact_base": {
+        "job_0_product_reg_price_dim": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 5400,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_SAR",
+                        "scripts": [
+                            "sales_returns/product_reg_price_dim.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_1_retail_tran_price_type_fact": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 5400,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_SAR",
+                        "scripts": [
+                            "sales_returns/retail_tran_price_type_fact.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_2_sales_and_returns_fact_base": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 5400,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_SAR",
+                        "scripts": [
+                            "sales_returns/sales_and_returns_fact_base.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,1 @@
+CALL `{{params.gcp_project_id}}`.{{params.dbenv}}_NAP_UTL.BATCH_START_SP ('PREV_DAY_OLDF_BATCH_COMPLETED');

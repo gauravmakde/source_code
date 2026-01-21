@@ -1,0 +1,1389 @@
+/*This SQL builds the back end data that is used in the APT Spend report
+Includes Plan, rcpts, OO, and CM data
+Plan data is from APT not MFP
+Author: Isaac J Wallick
+DAG:ast_prod_main_apt_spent_rpt
+Date Created:1/6/23
+Updated: 2/16/23
+*/
+CREATE MULTISET VOLATILE TABLE sc_cluster_map AS (
+SELECT DISTINCT
+  	   SELLING_COUNTRY
+  	  ,SELLING_BRAND
+  	  ,CLUSTER_NAME
+  	  ,CASE WHEN cluster_name = 'NORDSTROM_CANADA_STORES' THEN 111
+            WHEN cluster_name = 'NORDSTROM_CANADA_ONLINE' THEN 121
+            WHEN cluster_name = 'NORDSTROM_STORES' THEN 110
+            WHEN cluster_name = 'NORDSTROM_ONLINE' THEN 120
+            WHEN cluster_name = 'RACK_ONLINE' THEN 250
+            WHEN cluster_name = 'RACK_CANADA_STORES' THEN 211
+            WHEN cluster_name IN ('RACK STORES', 'PRICE','HYBRID','BRAND') THEN 210
+            WHEN cluster_name = 'NORD CA RSWH' THEN 311
+            WHEN cluster_name = 'NORD US RSWH' THEN 310
+            WHEN cluster_name = 'RACK CA RSWH' THEN 261
+            WHEN cluster_name = 'RACK US RSWH' THEN 260
+            END AS chnl_idnt
+  	from T2DL_DAS_APT_REPORTING.MERCH_ASSORTMENT_SUPPLIER_CLUSTER_PLAN_FACT
+  	GROUP BY 1,2,3,4
+) WITH DATA
+PRIMARY INDEX (chnl_idnt, cluster_name,SELLING_COUNTRY,SELLING_BRAND) 
+ON COMMIT PRESERVE ROWS;
+
+COLLECT STATS
+	PRIMARY INDEX (chnl_idnt, cluster_name,SELLING_COUNTRY,SELLING_BRAND)
+	,COLUMN(chnl_idnt)
+	,COLUMN(cluster_name)
+	,COLUMN(SELLING_COUNTRY)
+	,COLUMN(SELLING_BRAND)
+ON sc_cluster_map ;
+
+--drop table sc_date
+--lets create a week to month mapping
+CREATE MULTISET VOLATILE TABLE sc_date AS(
+SELECT
+	 WEEK_IDNT
+	,MONTH_IDNT
+	,MONTH_LABEL
+	,month_454_label
+	,fiscal_year_num||''||fiscal_month_num||' '||month_abrv AS MONTH_ID 
+	,QUARTER_IDNT 
+	,QUARTER_LABEL 
+	,'FY'||substr(cast(fiscal_year_num as varchar(5)),3,2)||' '||quarter_abrv as QUARTER
+	,HALF_LABEL
+	,FISCAL_YEAR_NUM 
+	,CASE WHEN CURRENT_DATE BETWEEN month_start_day_date and month_end_day_date THEN 1 ELSE 0 END as curr_month_flag
+FROM PRD_NAP_USR_VWS.DAY_CAL_454_DIM
+WHERE curr_month_flag =1 OR day_date >= current_date
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11)
+
+WITH DATA
+   PRIMARY INDEX(WEEK_IDNT)
+   ON COMMIT PRESERVE ROWS;
+
+COLLECT STATS
+     PRIMARY INDEX (WEEK_IDNT)
+     ,COLUMN(WEEK_IDNT)
+     ,COLUMN(MONTH_IDNT)
+     ,COLUMN(QUARTER_IDNT)
+     ,COLUMN(FISCAL_YEAR_NUM)
+     ON sc_date;
+       
+--Lets current week so we can get MTD rcpts
+CREATE MULTISET VOLATILE TABLE sc_wtd_date AS(
+SELECT
+	b.WEEK_IDNT
+	,a.MONTH_IDNT
+	,b.MONTH_LABEL
+	,b.month_454_label
+	,b.fiscal_year_num||''||b.fiscal_month_num||' '||b.month_abrv as MONTH_ID 
+	,b.QUARTER_IDNT 
+	,b.QUARTER_LABEL 
+	,'FY'||substr(cast(b.fiscal_year_num as varchar(5)),3,2)||' '||b.quarter_abrv as QUARTER
+	,b.HALF_LABEL
+	,b.FISCAL_YEAR_NUM
+FROM
+	(SELECT 
+	MAX(month_idnt) month_idnt
+	FROM PRD_NAP_USR_VWS.DAY_CAL_454_DIM
+	WHERE week_start_day_date <= CURRENT_DATE) a
+JOIN PRD_NAP_USR_VWS.DAY_CAL_454_DIM b
+ON a.MONTH_IDNT = b.month_idnt
+WHERE week_start_day_date <= CURRENT_DATE
+GROUP BY 1,2,3,4,5,6,7,8,9,10)
+
+WITH DATA
+   PRIMARY INDEX(WEEK_IDNT)
+   ON COMMIT PRESERVE ROWS;
+
+COLLECT STATS
+     PRIMARY INDEX (WEEK_IDNT)
+     ,COLUMN(WEEK_IDNT)
+     ON sc_wtd_date;
+
+
+--Lets collect supp attributes    
+--DROP TABLE sc_supp_gp
+CREATE MULTISET VOLATILE TABLE sc_supp_gp AS( 
+SELECT
+	 a.dept_num 
+	,a.supplier_num 
+	,a.supplier_group 
+	,case when a.banner = 'FP' then 'NORDSTROM' ELSE 'NORDSTROM_RACK' end as SELLING_BRAND
+	,a.buy_planner 
+	,a.preferred_partner_desc 
+	,a.areas_of_responsibility 
+	,a.is_npg 
+	,a.diversity_group 
+	,a.nord_to_rack_transfer_rate 
+FROM PRD_NAP_USR_VWS.SUPP_DEPT_MAP_DIM a
+GROUP BY 1,2,3,4,5,6,7,8,9,10)
+WITH DATA
+   PRIMARY INDEX(DEPT_NUM,SUPPLIER_GROUP)
+   ON COMMIT PRESERVE ROWS;
+
+COLLECT STATS
+     PRIMARY INDEX(DEPT_NUM,SUPPLIER_GROUP)
+     ,COLUMN(DEPT_NUM)
+     ,COLUMN(SUPPLIER_GROUP)
+	ON sc_supp_gp;
+
+
+--lets collect category attributes
+CREATE MULTISET VOLATILE TABLE sc_cattr AS( 
+SELECT 
+	 a.dept_num
+	,a.class_num 
+	,a.sbclass_num 
+	,a.CATEGORY
+	,a.category_planner_1 
+	,a.category_planner_2 
+	,a.category_group
+	,a.seasonal_designation
+	,a.rack_merch_zone
+	,a.is_activewear
+	,a.channel_category_roles_1 
+	,a.channel_category_roles_2 
+	,a.bargainista_dept_map 
+from PRD_NAP_USR_VWS.CATG_SUBCLASS_MAP_DIM a
+group by 1,2,3,4,5,6,7,8,9,10,11,12,13)
+
+WITH DATA
+   PRIMARY INDEX(dept_num,CATEGORY)
+   ON COMMIT PRESERVE ROWS;
+
+COLLECT STATS
+     PRIMARY INDEX(dept_num,CATEGORY)
+     ,COLUMN(dept_num)
+     ,COLUMN(CATEGORY)
+     ON sc_cattr;
+
+--Lets get the current and future plan data    
+--drop table sc_plan_base
+CREATE MULTISET VOLATILE TABLE sc_plan_base AS( 
+SELECT 
+	h.SELLING_COUNTRY 
+	,h.SELLING_BRAND
+	,h.CHNL_IDNT
+	,h.SUPPLIER_GROUP
+	,h.ALT_INV_MODEL
+	,h.CATEGORY 
+	,h.DEPARTMENT_NUMBER 
+	,TRIM(h.MONTH_ID) as MONTH_ID
+	,TRIM(h.MONTH_LABEL) as MONTH_LABEL
+	,TRIM(h.HALF_LABEL) as HALF_LABEL
+	,TRIM(h.QUARTER) as QUARTER
+	,TRIM(h.FISCAL_YEAR_NUM) as FISCAL_YEAR_NUM
+	,h.category_planner_1 
+	,h.category_planner_2 
+	,h.category_group
+	,h.seasonal_designation
+	,h.rack_merch_zone
+	,h.is_activewear
+	,h.channel_category_roles_1 
+	,h.channel_category_roles_2 
+	,h.bargainista_dept_map
+	,h.buy_planner 
+	,h.preferred_partner_desc 
+	,h.areas_of_responsibility 
+	,h.is_npg 
+	,h.diversity_group 
+	,h.nord_to_rack_transfer_rate 
+	,SUM(h.REPLENISHMENT_RECEIPTS_LESS_RESERVE_COST_AMOUNT) AS RP_PLAN_RCPT_C
+	,SUM(h.REPLENISHMENT_RECEIPTS_LESS_RESERVE_RETAIL_AMOUNT) AS RP_PLAN_RCPT_R
+	,SUM(h.REPLENISHMENT_RECEIPTS_LESS_RESERVE_UNITS) AS RP_PLAN_RCPT_U
+	,SUM(h.NONREPLENISHMENT_RECEIPTS_LESS_RESERVE_COST_AMOUNT) AS NRP_PLAN_RCPT_C
+	,SUM(h.NONREPLENISHMENT_RECEIPTS_LESS_RESERVE_RETAIL_AMOUNT) AS NRP_PLAN_RCPT_R
+	,SUM(h.NONREPLENISHMENT_RECEIPTS_LESS_RESERVE_UNITS) AS NRP_PLAN_RCPT_U
+	,SUM(h.REPLENISHMENT_RECEIPTS_LESS_RESERVE_COST_AMOUNT+h.NONREPLENISHMENT_RECEIPTS_LESS_RESERVE_COST_AMOUNT) AS TTL_PLAN_RCPT_LESS_RESERVE_C
+	,SUM(h.REPLENISHMENT_RECEIPTS_LESS_RESERVE_RETAIL_AMOUNT+h.NONREPLENISHMENT_RECEIPTS_LESS_RESERVE_RETAIL_AMOUNT) AS TTL_PLAN_RCPT_LESS_RESERVE_R
+	,SUM(h.REPLENISHMENT_RECEIPTS_LESS_RESERVE_UNITS+h.NONREPLENISHMENT_RECEIPTS_LESS_RESERVE_UNITS) AS TTL_PLAN_RCPT_LESS_RESERVE_U
+FROM (	
+	SELECT 
+		f.SELLING_COUNTRY 
+		,f.SELLING_BRAND
+		,f.CHNL_IDNT
+		,COALESCE(f.SUPPLIER_GROUP,'OTHER') AS SUPPLIER_GROUP
+		,'NON-FANATICS' as ALT_INV_MODEL
+		,f.CATEGORY 
+		,f.DEPARTMENT_NUMBER 
+		,f.MONTH_ID
+		,f.MONTH_LABEL
+		,f.HALF_LABEL
+		,f.QUARTER
+		,f.FISCAL_YEAR_NUM
+		,f.category_planner_1 
+		,f.category_planner_2 
+		,f.category_group
+		,f.seasonal_designation
+		,f.rack_merch_zone
+		,f.is_activewear
+		,f.channel_category_roles_1 
+		,f.channel_category_roles_2 
+		,f.bargainista_dept_map
+		,g.buy_planner 
+		,g.preferred_partner_desc 
+		,g.areas_of_responsibility 
+		,g.is_npg 
+		,g.diversity_group 
+		,g.nord_to_rack_transfer_rate 
+		,f.REPLENISHMENT_RECEIPTS_COST_AMOUNT
+		,f.REPLENISHMENT_RECEIPTS_RETAIL_AMOUNT
+		,f.REPLENISHMENT_RECEIPTS_UNITS
+		,f.NONREPLENISHMENT_RECEIPTS_COST_AMOUNT
+		,f.NONREPLENISHMENT_RECEIPTS_RETAIL_AMOUNT
+		,f.NONREPLENISHMENT_RECEIPTS_UNITS
+		,f.REPLENISHMENT_RECEIPTS_LESS_RESERVE_COST_AMOUNT
+		,f.REPLENISHMENT_RECEIPTS_LESS_RESERVE_RETAIL_AMOUNT
+		,f.REPLENISHMENT_RECEIPTS_LESS_RESERVE_UNITS
+		,f.NONREPLENISHMENT_RECEIPTS_LESS_RESERVE_COST_AMOUNT
+		,f.NONREPLENISHMENT_RECEIPTS_LESS_RESERVE_RETAIL_AMOUNT
+		,f.NONREPLENISHMENT_RECEIPTS_LESS_RESERVE_UNITS
+	FROM(
+		 	SELECT
+		 		d.SELLING_COUNTRY 
+				,d.SELLING_BRAND 
+				,d.CHNL_IDNT
+				,d.CLUSTER_NAME 
+				,d.SUPPLIER_GROUP
+				,d.CATEGORY
+				,e.category_planner_1 
+				,e.category_planner_2 
+				,e.category_group
+				,e.seasonal_designation
+				,e.rack_merch_zone
+				,e.is_activewear
+				,e.channel_category_roles_1 
+				,e.channel_category_roles_2 
+				,e.bargainista_dept_map
+				,d.DEPARTMENT_NUMBER 
+				,d.MONTH_ID
+				,d.MONTH_LABEL
+				,d.HALF_LABEL
+				,d.QUARTER
+				,d.FISCAL_YEAR_NUM
+				,d.REPLENISHMENT_RECEIPTS_COST_AMOUNT 
+				,d.REPLENISHMENT_RECEIPTS_RETAIL_AMOUNT 
+				,d.REPLENISHMENT_RECEIPTS_UNITS 
+				,d.REPLENISHMENT_RECEIPTS_LESS_RESERVE_COST_AMOUNT
+				,d.REPLENISHMENT_RECEIPTS_LESS_RESERVE_RETAIL_AMOUNT
+				,d.REPLENISHMENT_RECEIPTS_LESS_RESERVE_UNITS
+				,d.NONREPLENISHMENT_RECEIPTS_LESS_RESERVE_COST_AMOUNT
+				,d.NONREPLENISHMENT_RECEIPTS_LESS_RESERVE_RETAIL_AMOUNT
+				,d.NONREPLENISHMENT_RECEIPTS_LESS_RESERVE_UNITS
+				,d.NONREPLENISHMENT_RECEIPTS_COST_AMOUNT 
+				,d.NONREPLENISHMENT_RECEIPTS_RETAIL_AMOUNT 
+				,d.NONREPLENISHMENT_RECEIPTS_UNITS
+			FROM (
+			     SELECT
+					a.SELLING_COUNTRY 
+					,a.SELLING_BRAND 
+					,b.CHNL_IDNT
+					,a.CLUSTER_NAME 
+					,a.SUPPLIER_GROUP
+					,a.CATEGORY 
+					,a.DEPARTMENT_NUMBER 
+					,c.MONTH_ID
+					,c.MONTH_LABEL
+					,c.HALF_LABEL
+					,c.QUARTER
+					,c.FISCAL_YEAR_NUM
+					,a.REPLENISHMENT_RECEIPTS_COST_AMOUNT 
+					,a.REPLENISHMENT_RECEIPTS_RETAIL_AMOUNT 
+					,a.REPLENISHMENT_RECEIPTS_UNITS 
+					,a.REPLENISHMENT_RECEIPTS_LESS_RESERVE_COST_AMOUNT
+					,a.REPLENISHMENT_RECEIPTS_LESS_RESERVE_RETAIL_AMOUNT
+					,a.REPLENISHMENT_RECEIPTS_LESS_RESERVE_UNITS
+					,a.NONREPLENISHMENT_RECEIPTS_LESS_RESERVE_COST_AMOUNT
+					,a.NONREPLENISHMENT_RECEIPTS_LESS_RESERVE_RETAIL_AMOUNT
+					,a.NONREPLENISHMENT_RECEIPTS_LESS_RESERVE_UNITS
+					,a.NONREPLENISHMENT_RECEIPTS_COST_AMOUNT 
+					,a.NONREPLENISHMENT_RECEIPTS_RETAIL_AMOUNT 
+					,a.NONREPLENISHMENT_RECEIPTS_UNITS 
+				FROM T2DL_DAS_APT_REPORTING.MERCH_ASSORTMENT_SUPPLIER_CLUSTER_PLAN_FACT a
+				JOIN sc_date c
+				ON a.MONTH_ID = c.MONTH_454_LABEL
+			    JOIN sc_cluster_map b 
+				ON a.cluster_name = b.cluster_name
+				WHERE a.ALTERNATE_INVENTORY_MODEL='OWN' 
+	 			GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24
+				)d
+		    left JOIN sc_cattr e 
+			ON  d.DEPARTMENT_NUMBER = e.dept_num
+			AND d.CATEGORY = e.CATEGORY
+			GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33
+			) f
+	    LEFT JOIN sc_supp_gp g 
+		ON f.DEPARTMENT_NUMBER = g.DEPT_NUM
+		AND f.SUPPLIER_GROUP = g.SUPPLIER_GROUP
+		AND f.SELLING_BRAND = g.SELLING_BRAND
+		GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39) h
+	GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,25,26,27
+	)
+WITH DATA
+   PRIMARY INDEX(DEPARTMENT_NUMBER,SUPPLIER_GROUP,CATEGORY,MONTH_ID)
+   ON COMMIT PRESERVE ROWS;
+
+COLLECT STATS
+     PRIMARY INDEX(DEPARTMENT_NUMBER,SUPPLIER_GROUP,CATEGORY,MONTH_ID)
+     ,COLUMN(DEPARTMENT_NUMBER)
+     ,COLUMN(SUPPLIER_GROUP)
+     ,COLUMN(CATEGORY)
+     ,COLUMN(MONTH_ID)
+     ON sc_plan_base;
+    
+  
+ --Lets bring in wtd rcpts at supp/cat
+-- drop table sc_wtd_rcpts;
+CREATE MULTISET VOLATILE TABLE sc_wtd_rcpts AS(
+SELECT 
+	g.DEPARTMENT_NUM 
+	,g.SUPPLIER_GROUP
+	,g.ALT_INV_MODEL
+	,g.SELLING_COUNTRY
+	,g.SELLING_BRAND
+	,g.CHNL_IDNT
+	,TRIM(g.YEAR_NUM) as YEAR_NUM
+	,TRIM(g.MONTH_ID) as MONTH_ID
+	,TRIM(g.MONTH_LABEL) as MONTH_LABEL
+	,TRIM(g.HALF_LABEL) as HALF_LABEL
+	,TRIM(g.QUARTER) as QUARTER
+	,Coalesce(h.CATEGORY, i.CATEGORY, 'OTHER') CATEGORY
+	,g.buy_planner 
+	,g.preferred_partner_desc 
+	,g.areas_of_responsibility 
+	,g.is_npg 
+	,g.diversity_group 
+	,g.nord_to_rack_transfer_rate 
+	,Coalesce(h.category_planner_1, i.category_planner_1, 'OTHER') category_planner_1
+	,COALESCE(h.category_planner_2, i.category_planner_2, 'OTHER') category_planner_2
+	,COALESCE(h.category_group, i.category_group,'OTHER') category_group
+	,COALESCE(h.seasonal_designation,i.seasonal_designation,'OTHER') seasonal_designation
+	,COALESCE(h.rack_merch_zone,i.rack_merch_zone,'OTHER') rack_merch_zone
+	,COALESCE(h.is_activewear,i.is_activewear,'OTHER') is_activewear
+	,COALESCE(h.channel_category_roles_1,i.channel_category_roles_1,'OTHER') channel_category_roles_1
+	,COALESCE(h.channel_category_roles_2, i.channel_category_roles_2,'OTHER') channel_category_roles_2
+	,COALESCE(h.bargainista_dept_map, i.bargainista_dept_map,'OTHER') as bargainista_dept_map
+	,SUM(g.RP_RCPTS_MTD_C) as RP_RCPTS_MTD_C
+	,SUM(g.RP_RCPTS_MTD_R) as RP_RCPTS_MTD_R
+	,SUM(g.RP_RCPTS_MTD_U) as RP_RCPTS_MTD_U
+    ,SUM(g.NRP_RCPTS_MTD_C) as NRP_RCPTS_MTD_C
+	,SUM(g.NRP_RCPTS_MTD_R) as NRP_RCPTS_MTD_R
+	,SUM(g.NRP_RCPTS_MTD_U) as NRP_RCPTS_MTD_U
+FROM
+	(	
+	SELECT 
+		d.DEPARTMENT_NUM 
+		,d.SUPPLIER_NUM
+		,d.SUPPLIER_NAME
+		,d.SELLING_COUNTRY
+		,d.SELLING_BRAND
+		,d.YEAR_NUM 
+		,d.MONTH_ID
+		,d.MONTH_LABEL
+		,d.HALF_LABEL
+		,d.QUARTER
+		,d.RP_IND 
+		,d.NPG_IND
+		,d.CHNL_IDNT
+		,d.CLASS_NUM
+		,d.SUBCLASS_NUM
+		,COALESCE(e.SUPPLIER_GROUP,'OTHER') AS SUPPLIER_GROUP
+		,CASE WHEN f.payto_vendor_num  = '5179609' THEN 'FANATICS ONLY' ELSE 'NON-FANATICS' END AS ALT_INV_MODEL
+		,e.buy_planner 
+		,e.preferred_partner_desc 
+		,e.areas_of_responsibility 
+		,e.is_npg 
+		,e.diversity_group 
+		,e.nord_to_rack_transfer_rate 
+		,SUM(CASE WHEN d.RP_IND = 'Y' AND d.DROPSHIP_IND ='N' AND d.CHANNEL_NUM NOT IN ('930','220','221') 
+		 		  THEN d.RECEIPTS_REGULAR_COST + d.RECEIPTS_CLEARANCE_COST + d.RECEIPTS_CROSSDOCK_REGULAR_COST + d.RECEIPTS_CROSSDOCK_CLEARANCE_COST 
+				  ELSE 0
+			END) AS RP_RCPTS_MTD_C
+		,SUM(CASE WHEN d.RP_IND = 'Y' AND d.DROPSHIP_IND ='N' AND d.CHANNEL_NUM NOT IN ('930','220','221') 
+				  THEN d.RECEIPTS_REGULAR_RETAIL + d.RECEIPTS_CLEARANCE_RETAIL + d.RECEIPTS_CROSSDOCK_REGULAR_RETAIL + d.RECEIPTS_CROSSDOCK_CLEARANCE_RETAIL 
+				  ELSE 0
+			END) AS RP_RCPTS_MTD_R
+		,SUM(CASE WHEN d.RP_IND = 'Y' AND d.DROPSHIP_IND ='N' AND d.CHANNEL_NUM NOT IN ('930','220','221') 
+				  THEN d.RECEIPTS_REGULAR_UNITS + d.RECEIPTS_CLEARANCE_UNITS + d.RECEIPTS_CROSSDOCK_REGULAR_UNITS + d.RECEIPTS_CROSSDOCK_CLEARANCE_UNITS 
+				  ELSE 0
+			END) AS RP_RCPTS_MTD_U
+		,SUM(CASE WHEN d.RP_IND = 'N' AND d.DROPSHIP_IND ='N' AND d.CHANNEL_NUM NOT IN ('930','220','221') 
+				  THEN d.RECEIPTS_REGULAR_COST + d.RECEIPTS_CLEARANCE_COST + d.RECEIPTS_CROSSDOCK_REGULAR_COST + d.RECEIPTS_CROSSDOCK_CLEARANCE_COST 
+				  ELSE 0
+			END) AS NRP_RCPTS_MTD_C
+		,SUM(CASE WHEN d.RP_IND = 'N' AND d.DROPSHIP_IND ='N' AND d.CHANNEL_NUM NOT IN ('930','220','221') 
+				  THEN d.RECEIPTS_REGULAR_RETAIL + d.RECEIPTS_CLEARANCE_RETAIL + d.RECEIPTS_CROSSDOCK_REGULAR_RETAIL + d.RECEIPTS_CROSSDOCK_CLEARANCE_RETAIL
+				  ELSE 0
+			END) AS NRP_RCPTS_MTD_R
+		,SUM(CASE WHEN d.RP_IND = 'N' AND d.DROPSHIP_IND ='N' AND d.CHANNEL_NUM NOT IN ('930','220','221') 
+				  THEN d.RECEIPTS_REGULAR_UNITS + d.RECEIPTS_CLEARANCE_UNITS + d.RECEIPTS_CROSSDOCK_REGULAR_UNITS + d.RECEIPTS_CROSSDOCK_CLEARANCE_UNITS 
+				  ELSE 0
+			END) AS NRP_RCPTS_MTD_U	
+	FROM(
+		SELECT 
+			a.RMS_SKU_NUM 
+			,a.DEPARTMENT_NUM 
+			,a.DEPARTMENT_DESC
+			,a.CLASS_NUM
+			,a.SUBCLASS_NUM
+			,a.DIVISION_NUM 
+			,a.DIVISION_DESC 
+			,a.SUBDIVISION_NUM 
+			,a.SUPPLIER_NUM 
+			,a.SUPPLIER_NAME 
+			,a.STORE_NUM
+			,a.CHANNEL_NUM 
+			,a.WEEK_NUM 
+			,a.YEAR_NUM 
+			,b.MONTH_ID
+			,b.MONTH_LABEL
+			,b.HALF_LABEL
+			,b.QUARTER
+			,a.MONTH_NUM
+			,a.DROPSHIP_IND 
+			,a.RP_IND 
+			,a.NPG_IND 
+			,c.CHNL_IDNT
+			,c.CLUSTER_NAME
+			,c.SELLING_BRAND
+			,c.SELLING_COUNTRY
+			,a.RECEIPTS_REGULAR_COST
+			,a.RECEIPTS_REGULAR_RETAIL
+			,a.RECEIPTS_REGULAR_UNITS
+			,a.RECEIPTS_CLEARANCE_COST
+			,a.RECEIPTS_CLEARANCE_RETAIL
+			,a.RECEIPTS_CLEARANCE_UNITS
+			,a.RECEIPTS_CROSSDOCK_REGULAR_COST
+			,a.RECEIPTS_CROSSDOCK_REGULAR_RETAIL
+			,a.RECEIPTS_CROSSDOCK_REGULAR_UNITS
+			,a.RECEIPTS_CROSSDOCK_CLEARANCE_COST
+			,a.RECEIPTS_CROSSDOCK_CLEARANCE_RETAIL
+			,a.RECEIPTS_CROSSDOCK_CLEARANCE_UNITS
+		from PRD_NAP_USR_VWS.MERCH_PORECEIPT_SKU_STORE_WEEK_FACT_VW a
+		JOIN sc_wtd_date b 
+		ON a.WEEK_NUM = b.WEEK_IDNT
+		JOIN sc_cluster_map c 
+		ON a.CHANNEL_NUM = c.CHNL_IDNT
+		--where a.DEPARTMENT_NUM = '882'
+		--AND b.MONTH_LABEL = '2022 JAN'
+		--AND a.DROPSHIP_IND = 'N'
+		--AND a.RP_IND = 'Y'
+		group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38
+		 )d
+	LEFT JOIN sc_supp_gp e
+	ON d.DEPARTMENT_NUM = e.DEPT_NUM
+	AND d.SUPPLIER_NUM = e.supplier_num 
+	and d.SELLING_BRAND = e.SELLING_BRAND
+	LEFT JOIN (Select distinct payto_vendor_num,order_from_vendor_num from PRD_NAP_USR_VWS.VENDOR_PAYTO_RELATIONSHIP_DIM
+			where payto_vendor_num  in ('5179609')) f
+	ON d.SUPPLIER_NUM = f.order_from_vendor_num 
+	GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23		
+	)g
+LEFT JOIN sc_cattr h 
+ON g.DEPARTMENT_NUM = h.DEPT_NUM
+AND g.CLASS_NUM = h.CLASS_NUM
+AND g.SUBCLASS_NUM = h.SBCLASS_NUM
+LEFT JOIN sc_cattr i
+ON  g.DEPARTMENT_NUM = i.DEPT_NUM
+AND g.CLASS_NUM = i.CLASS_NUM
+AND i.SBCLASS_NUM = -1
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27)
+
+WITH DATA
+   PRIMARY INDEX(DEPARTMENT_NUM,SUPPLIER_GROUP,CATEGORY,MONTH_LABEL)
+   ON COMMIT PRESERVE ROWS;
+
+COLLECT STATS
+     PRIMARY INDEX(DEPARTMENT_NUM,SUPPLIER_GROUP,CATEGORY,MONTH_LABEL)
+     ,COLUMN(DEPARTMENT_NUM)
+     ,COLUMN(SUPPLIER_GROUP)
+     ,COLUMN(CATEGORY)
+     ,COLUMN(MONTH_LABEL)
+     ON sc_wtd_rcpts;
+    
+
+--drop table sc_oo_final
+--lets add back in the hierarchy to the base data and SUM up inactive/active rcpts as well as rp nrp
+--Inactive channels 930,220 and 221
+CREATE MULTISET VOLATILE TABLE sc_oo_final AS(
+SELECT 
+		g.DEPARTMENT_NUM
+		,g.CHANNEL_NUM 
+		,g.SELLING_COUNTRY
+		,g.SELLING_BRAND
+		,TRIM(g.MONTH_LABEL) as MONTH_LABEL
+		,TRIM(g.MONTH_ID) as MONTH_ID
+		,TRIM(g.QUARTER) as QUARTER
+		,TRIM(g.HALF_LABEL) as HALF_LABEL
+		,TRIM(g.FISCAL_YEAR_NUM) as FISCAL_YEAR_NUM
+		,g.ALT_INV_MODEL
+		,Coalesce(h.CATEGORY, i.CATEGORY, 'OTHER') CATEGORY
+		,g.SUPPLIER_GROUP
+		,Coalesce(h.category_planner_1, i.category_planner_1, 'OTHER') category_planner_1
+		,COALESCE(h.category_planner_2, i.category_planner_2, 'OTHER') category_planner_2
+		,COALESCE(h.category_group, i.category_group,'OTHER') category_group
+		,COALESCE(h.seasonal_designation,i.seasonal_designation,'OTHER') seasonal_designation
+		,COALESCE(h.rack_merch_zone,i.rack_merch_zone,'OTHER') rack_merch_zone
+		,COALESCE(h.is_activewear,i.is_activewear,'OTHER') is_activewear
+		,COALESCE(h.channel_category_roles_1,i.channel_category_roles_1,'OTHER') channel_category_roles_1
+		,COALESCE(h.channel_category_roles_2, i.channel_category_roles_2,'OTHER') channel_category_roles_2
+		,COALESCE(h.bargainista_dept_map, i.bargainista_dept_map,'OTHER') as bargainista_dept_map
+		,g.buy_planner 
+		,g.preferred_partner_desc 
+		,g.areas_of_responsibility 
+		,g.is_npg 
+		,g.diversity_group 
+		,g.nord_to_rack_transfer_rate
+		,SUM(g.RP_OO_ACTIVE_COST) as RP_OO_C
+		,SUM(g.RP_OO_ACTIVE_RETAIL) as RP_OO_R
+		,SUM(g.RP_OO_ACTIVE_UNITS) as RP_OO_U
+		,SUM(g.NON_RP_OO_ACTIVE_COST) as NRP_OO_C
+		,SUM(g.NON_RP_OO_ACTIVE_RETAIL) as NRP_OO_R
+		,SUM(g.NON_RP_OO_ACTIVE_UNITS) as NRP_OO_U
+FROM(
+		SELECT 		
+			 d.DEPARTMENT_NUM 
+			,d.DIVISION_NUM 
+			,d.SUBDIVISION_DESC 
+			,d.CLASS_NUM 
+			,d.SUBCLASS_NUM 
+			,COALESCE(e.SUPPLIER_GROUP,'OTHER') AS SUPPLIER_GROUP
+			,CASE WHEN f.payto_vendor_num  = '5179609' THEN 'FANATICS ONLY' ELSE 'NON-FANATICS' END AS ALT_INV_MODEL
+			,d.WEEK_NUM 
+			,d.MONTH_NUM 
+			,d.MONTH_LABEL
+			,d.MONTH_ID
+			,d.QUARTER
+			,d.HALF_LABEL
+			,d.FISCAL_YEAR_NUM
+			,d.CHANNEL_NUM 
+			,d.SELLING_COUNTRY
+			,d.SELLING_BRAND
+			,e.buy_planner 
+			,e.preferred_partner_desc 
+			,e.areas_of_responsibility 
+			,e.is_npg 
+			,e.diversity_group 
+			,e.nord_to_rack_transfer_rate 
+			,SUM(d.RP_OO_ACTIVE_COST) as RP_OO_ACTIVE_COST
+			,SUM(d.RP_OO_ACTIVE_RETAIL) as RP_OO_ACTIVE_RETAIL
+			,SUM(d.RP_OO_ACTIVE_UNITS) as RP_OO_ACTIVE_UNITS
+			,SUM(d.NON_RP_OO_ACTIVE_COST) NON_RP_OO_ACTIVE_COST
+			,SUM(d.NON_RP_OO_ACTIVE_RETAIL) NON_RP_OO_ACTIVE_RETAIL
+			,SUM(d.NON_RP_OO_ACTIVE_UNITS) as NON_RP_OO_ACTIVE_UNITS
+		FROM (		
+				SELECT 
+					 a.RMS_SKU_NUM 
+					,a.PURCHASE_ORDER_NUMBER 
+					,a.DEPARTMENT_NUM 
+					,a.DIVISION_NUM 
+					,a.SUBDIVISION_DESC 
+					,a.CLASS_NUM 
+					,a.SUBCLASS_NUM 
+					,a.SUPPLIER_NUM 
+					,a.WEEK_NUM 
+					,a.MONTH_NUM 
+					,a.MONTH_LABEL
+					,b.MONTH_ID
+					,b.QUARTER
+					,b.HALF_LABEL
+					,b.FISCAL_YEAR_NUM
+					,a.STORE_NUM 
+					,a.CHANNEL_NUM 
+					,c.SELLING_COUNTRY
+					,c.SELLING_BRAND
+					,a.RP_OO_ACTIVE_COST
+					,a.RP_OO_ACTIVE_RETAIL
+					,a.RP_OO_ACTIVE_UNITS
+					,a.NON_RP_OO_ACTIVE_COST
+					,a.NON_RP_OO_ACTIVE_RETAIL
+					,a.NON_RP_OO_ACTIVE_UNITS
+				FROM PRD_NAP_USR_VWS.MERCH_APT_ON_ORDER_INSIGHT_FACT_VW a
+				JOIN sc_date b 
+				ON a.WEEK_NUM = b.week_IDNT
+				JOIN sc_cluster_map c 
+				ON a.CHANNEL_NUM = c.CHNL_IDNT
+				--where a.month_num = '202302'
+				--and a.DEPARTMENT_NUM = '882'
+				) d
+		LEFT JOIN sc_supp_gp e
+		ON d.DEPARTMENT_NUM = e.DEPT_NUM
+		AND d.SUPPLIER_NUM = e.SUPPLIER_NUM
+		AND d.SELLING_BRAND = e.SELLING_BRAND
+		LEFT JOIN (
+					SELECT DISTINCT payto_vendor_num,order_from_vendor_num 
+					FROM PRD_NAP_USR_VWS.VENDOR_PAYTO_RELATIONSHIP_DIM
+					WHERE payto_vendor_num  in ('5179609')
+				) f
+		ON d.SUPPLIER_NUM = f.order_from_vendor_num 
+		GROUP BY 1,2,3,4,5,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23
+	) g
+LEFT JOIN sc_cattr h
+  ON g.DEPARTMENT_NUM = h.DEPT_NUM
+ AND g.CLASS_NUM = h.class_num 
+ AND g.SUBCLASS_NUM = h.sbclass_num
+LEFT JOIN sc_cattr i
+  ON  g.DEPARTMENT_NUM = i.DEPT_NUM
+ AND g.CLASS_NUM = i.CLASS_NUM
+ AND i.sbclass_num = -1
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27
+) WITH DATA
+  PRIMARY INDEX(DEPARTMENT_NUM,SUPPLIER_GROUP,CATEGORY,MONTH_LABEL)
+  ON COMMIT PRESERVE ROWS;
+
+COLLECT STATS
+     PRIMARY INDEX(DEPARTMENT_NUM,SUPPLIER_GROUP,CATEGORY,MONTH_LABEL)
+     ,COLUMN(DEPARTMENT_NUM)
+     ,COLUMN(SUPPLIER_GROUP)
+     ,COLUMN(CATEGORY)
+     ,COLUMN(MONTH_LABEL)
+     ON sc_oo_final;
+    
+    
+--drop table sc_cm
+    --bring in cm
+CREATE MULTISET VOLATILE TABLE sc_cm AS(
+SELECT
+	 g.DEPT_ID
+	,g.selling_country
+	,g.selling_brand
+	,g.ORG_ID
+	,TRIM(g.MONTH_ID) as MONTH_ID
+	,TRIM(g.MONTH_LABEL) as MONTH_LABEL
+	,TRIM(g.QUARTER) as QUARTER
+	,TRIM(g.HALF_LABEL) as HALF_LABEL
+	,TRIM(g.FISCAL_YEAR_NUM) as FISCAL_YEAR_NUM
+	,Coalesce(h.CATEGORY, i.CATEGORY, 'OTHER') CATEGORY
+	,g.SUPPLIER_GROUP
+	,g.ALT_INV_MODEL
+	,g.buy_planner 
+	,g.preferred_partner_desc 
+	,g.areas_of_responsibility 
+	,g.is_npg 
+	,g.diversity_group 
+	,g.nord_to_rack_transfer_rate 
+	,Coalesce(h.category_planner_1, i.category_planner_1, 'OTHER') category_planner_1
+	,COALESCE(h.category_planner_2, i.category_planner_2, 'OTHER') category_planner_2
+	,COALESCE(h.category_group, i.category_group,'OTHER') category_group
+	,COALESCE(h.seasonal_designation,i.seasonal_designation,'OTHER') seasonal_designation
+	,COALESCE(h.rack_merch_zone,i.rack_merch_zone,'OTHER') rack_merch_zone
+	,COALESCE(h.is_activewear,i.is_activewear,'OTHER') is_activewear
+	,COALESCE(h.channel_category_roles_1,i.channel_category_roles_1,'OTHER') channel_category_roles_1
+	,COALESCE(h.channel_category_roles_2, i.channel_category_roles_2,'OTHER') channel_category_roles_2
+	,COALESCE(h.bargainista_dept_map, i.bargainista_dept_map,'OTHER') as bargainista_dept_map
+	,SUM(g.NRP_CM_C) as NRP_CM_C
+	,SUM(g.NRP_CM_R) as NRP_CM_R
+	,SUM(g.NRP_CM_U) as NRP_CM_U
+	,SUM(g.RP_CM_C) as RP_CM_C
+	,SUM(g.RP_CM_R) as RP_CM_R
+	,SUM(g.RP_CM_U) AS RP_CM_U
+FROM (
+		SELECT 
+			 d.DEPT_ID
+			,d.selling_country
+			,d.selling_brand
+			,d.MONTH_ID
+			,d.MONTH_LABEL
+			,d.QUARTER 
+			,d.FISCAL_YEAR_NUM
+			,d.HALF_LABEL
+			,d.CLASS_ID
+			,d.SUBCLASS_ID
+			,COALESCE(e.SUPPLIER_GROUP,'OTHER') AS SUPPLIER_GROUP
+			,CASE WHEN f.payto_vendor_num  = '5179609' THEN 'FANATICS ONLY' ELSE 'NON-FANATICS' END AS ALT_INV_MODEL
+			,d.ORG_ID
+			,e.buy_planner 
+			,e.preferred_partner_desc 
+			,e.areas_of_responsibility 
+			,e.is_npg 
+			,e.diversity_group 
+			,e.nord_to_rack_transfer_rate 
+			,SUM(CASE 
+				WHEN d.PLAN_TYPE in ('BACKUP','FASHION','NRPREORDER') AND d.SELLING_COUNTRY in ('US') THEN d.TTL_COST_US
+				WHEN d.PLAN_TYPE in ('BACKUP','FASHION','NRPREORDER') AND d.SELLING_COUNTRY in ('CA') THEN d.TTL_COST_CA  
+				ELSE 0 END) AS NRP_CM_C
+			,SUM(CASE 
+				WHEN d.PLAN_TYPE in ('BACKUP','FASHION','NRPREORDER') AND d.SELLING_COUNTRY in ('US') THEN d.TTL_RTL_US
+				ELSE 0 END) AS NRP_CM_R
+			,SUM(CASE 
+				WHEN d.PLAN_TYPE in ('BACKUP','FASHION','NRPREORDER') THEN d.RCPT_UNITS 
+				ELSE 0 END) AS NRP_CM_U
+			,SUM(CASE 
+				WHEN d.PLAN_TYPE in ('REPLNSHMNT') AND d.SELLING_COUNTRY in ('US') THEN d.TTL_COST_US
+				WHEN d.PLAN_TYPE in ('REPLNSHMNT') AND d.SELLING_COUNTRY in ('CA') THEN d.TTL_COST_CA  
+				ELSE 0 END) AS RP_CM_C
+			,SUM(CASE 
+				WHEN d.PLAN_TYPE in ('REPLNSHMNT') AND d.SELLING_COUNTRY in ('US') THEN d.TTL_RTL_US 
+				ELSE 0 END) AS RP_CM_R
+			,SUM(CASE 
+				WHEN d.PLAN_TYPE in ('REPLNSHMNT') THEN d.RCPT_UNITS  
+				ELSE 0 END) AS RP_CM_U
+		FROM (
+				SELECT 
+					 a.DEPT_ID
+					,a.STYLE_ID
+					,a.STYLE_GROUP_ID
+					,a.CLASS_id
+					,a.SUBCLASS_id
+					,a.SUPP_ID
+					,a.SUPP_NAME
+					,a.FISCAL_MONTH_ID
+					,a.OTB_EOW_DATE
+					,a.ORG_ID
+					,a.VPN
+					,a.NRF_COLOR_CODE
+					,a.SUPP_COLOR
+					,a.PLAN_TYPE
+					,a.TTL_COST_US
+					,a.TTL_COST_CA
+					,a.TTL_RTL_US
+					,a.RCPT_UNITS
+					,a.CM_DOLLARS
+					,c.MONTH_ID
+					,c.MONTH_LABEL
+					,c.QUARTER 
+					,c.HALF_LABEL
+					,c.FISCAL_YEAR_NUM
+					,a.PO_KEY
+					,a.PLAN_KEY
+					,b.SELLING_BRAND
+					,b.SELLING_COUNTRY 
+				FROM t2dl_das_open_to_buy.AB_CM_ORDERS_CURRENT a
+				--T3DL_ACE_ASSORTMENT.AB_CM_ORDERS_CURRENT_TEST a
+				--t2dl_das_open_to_buy.AB_CM_ORDERS_CURRENT a
+				JOIN sc_cluster_map b
+				ON a.ORG_ID = b.CHNL_IDNT
+				JOIN sc_date c
+				on a.FISCAL_MONTH_ID = c.MONTH_IDNT
+				--where a.DEPT_ID = '882'
+				group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28
+			) d
+		LEFT JOIN sc_supp_gp e
+		  ON d.DEPT_ID = e.DEPT_NUM
+		 AND d.SUPP_ID = e.SUPPLIER_NUM
+		 AND d.SELLING_BRAND = e.SELLING_BRAND
+		LEFT JOIN (
+					SELECT DISTINCT 
+						 payto_vendor_num,order_from_vendor_num 
+					FROM PRD_NAP_USR_VWS.VENDOR_PAYTO_RELATIONSHIP_DIM
+					WHERE payto_vendor_num  in ('5179609')
+			) f
+		  ON d.SUPP_ID = f.order_from_vendor_num
+		GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19
+	) g
+LEFT JOIN sc_cattr h
+  ON g.DEPT_ID = h.DEPT_NUM
+ AND g.class_id = h.class_num 
+ AND g.SUBCLASS_id = h.sbclass_num
+LEFT JOIN sc_cattr i
+  ON  g.DEPT_ID = i.DEPT_NUM
+ AND g.class_id = i.CLASS_NUM
+ AND i.sbclass_num = -1
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27
+) WITH DATA
+   PRIMARY INDEX(DEPT_ID,SUPPLIER_GROUP,CATEGORY,MONTH_LABEL)
+   ON COMMIT PRESERVE ROWS;
+
+COLLECT STATS
+     PRIMARY INDEX (DEPT_ID,SUPPLIER_GROUP,CATEGORY,MONTH_LABEL)
+     ,COLUMN(DEPT_ID)
+     ,COLUMN(SUPPLIER_GROUP)
+     ,COLUMN(CATEGORY)
+     ,COLUMN(MONTH_LABEL)
+     ON sc_cm;
+    
+CREATE MULTISET VOLATILE TABLE sc_rp AS(
+ SELECT 
+	f.DEPT_ID
+	,f.CHANNEL
+	,f.SELLING_COUNTRY
+	,f.SELLING_BRAND
+	,TRIM(f.MONTH_ID) as MONTH_ID
+	,TRIM(f.MONTH_LABEL) as MONTH_LABEL
+	,TRIM(f.HALF_LABEL) as HALF_LABEL
+	,TRIM(f.QUARTER) as QUARTER 
+	,TRIM(f.FISCAL_YEAR_NUM) as FISCAL_YEAR_NUM
+	,Coalesce(g.CATEGORY, h.CATEGORY, 'OTHER') CATEGORY
+	,f.SUPPLIER_GROUP
+	,f.ALT_INV_MODEL
+	,f.buy_planner 
+	,f.preferred_partner_desc 
+	,f.areas_of_responsibility 
+	,f.is_npg 
+	,f.diversity_group 
+	,f.nord_to_rack_transfer_rate
+	,Coalesce(g.category_planner_1, h.category_planner_1, 'OTHER') category_planner_1
+	,COALESCE(g.category_planner_2, h.category_planner_2, 'OTHER') category_planner_2
+	,COALESCE(g.category_group, h.category_group,'OTHER') category_group
+	,COALESCE(g.seasonal_designation,h.seasonal_designation,'OTHER') seasonal_designation
+	,COALESCE(g.rack_merch_zone,h.rack_merch_zone,'OTHER') rack_merch_zone
+	,COALESCE(g.is_activewear,h.is_activewear,'OTHER') is_activewear
+	,COALESCE(g.channel_category_roles_1,h.channel_category_roles_1,'OTHER') channel_category_roles_1
+	,COALESCE(g.channel_category_roles_2, h.channel_category_roles_2,'OTHER') channel_category_roles_2
+	,COALESCE(g.bargainista_dept_map, h.bargainista_dept_map,'OTHER') as bargainista_dept_map
+	,SUM(f.RP_ANT_SPD_C) as RP_ANT_SPD_C
+	,SUM(f.RP_ANT_SPD_U) as RP_ANT_SPD_U
+	,SUM(f.RP_ANT_SPD_R) as RP_ANT_SPD_R
+FROM(
+    	SELECT 
+			c.SELLING_COUNTRY
+			,c.SELLING_BRAND
+			,c.CHANNEL 
+			,COALESCE(d.SUPPLIER_GROUP,'OTHER') AS SUPPLIER_GROUP
+			,CASE WHEN e.payto_vendor_num  = '5179609' THEN 'FANATICS ONLY' ELSE 'NON-FANATICS' END AS ALT_INV_MODEL
+			,d.buy_planner 
+			,d.preferred_partner_desc 
+			,d.areas_of_responsibility 
+			,d.is_npg 
+			,d.diversity_group 
+			,d.nord_to_rack_transfer_rate
+			,c.DEPT_ID
+			,c.CLASS_ID
+			,c.SUBCLASS_ID
+			,c.MONTH_ID
+			,c.MONTH_LABEL
+			,c.HALF_LABEL
+			,c.QUARTER
+			,c.FISCAL_YEAR_NUM
+			,SUM(c.RP_ANT_SPD_C) as RP_ANT_SPD_C
+			,SUM(c.RP_ANT_SPD_U) as RP_ANT_SPD_U
+			,SUM(c.RP_ANT_SPD_R) as RP_ANT_SPD_R
+		FROM(SELECT
+				'US' as SELLING_COUNTRY
+				,channel_brand  as SELLING_BRAND
+				,TRIM(SUBSTRING(channel_number FROM 1 FOR POSITION(' ' IN channel_number) - 1)) as CHANNEL
+				,TRIM(SUBSTRING(Department FROM 1 FOR POSITION(' ' IN Department) - 1)) DEPT_ID
+				,TRIM(SUBSTRING("Class" FROM 1 FOR POSITION(' ' IN "Class") - 1)) AS CLASS_ID
+				,TRIM(SUBSTRING(Subclass FROM 1 FOR POSITION(' ' IN Subclass) - 1)) as SUBCLASS_ID
+				,supplier_idnt
+				,TRIM(b.month_id) as MONTH_ID
+				,b.MONTH_LABEL
+				,b.HALF_LABEL
+				,b.QUARTER
+				,b.FISCAL_YEAR_NUM
+				,SUM(a.RP_ANT_SPD_C) as RP_ANT_SPD_C
+				,SUM(a.RP_ANT_SPD_U) as RP_ANT_SPD_U
+				,SUM(a.RP_ANT_SPD_R) as RP_ANT_SPD_R
+			from T2DL_DAS_OPEN_TO_BUY.rp_ant_spend_report a
+			join sc_date b 
+			on a.week_idnt = b.week_idnt
+			group by 1,2,3,4,5,6,7,8,9,10,11,12
+			)c
+		LEFT JOIN sc_supp_gp d
+			ON c.DEPT_ID = d.DEPT_NUM
+			AND c.SUPPLIER_IDNT = d.SUPPLIER_NUM
+			AND c.SELLING_BRAND = d.SELLING_BRAND
+		LEFT JOIN (
+					SELECT DISTINCT 
+					 payto_vendor_num,order_from_vendor_num 
+					FROM PRD_NAP_USR_VWS.VENDOR_PAYTO_RELATIONSHIP_DIM
+					WHERE payto_vendor_num  in ('5179609')
+					) e
+				  ON c.supplier_idnt = e.order_from_vendor_num
+		group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19
+) f
+LEFT JOIN sc_cattr g
+  ON f.DEPT_ID = g.DEPT_NUM
+ AND f.class_id = g.class_num 
+ AND f.SUBCLASS_id = g.sbclass_num
+LEFT JOIN sc_cattr h
+  ON f.DEPT_ID = h.DEPT_NUM
+ AND f.class_id = h.CLASS_NUM
+ AND h.sbclass_num = -1
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27
+	--where Department = '3 HOSIERY'
+) WITH DATA
+   PRIMARY INDEX(DEPT_ID,SUPPLIER_GROUP,CATEGORY,MONTH_LABEL)
+   ON COMMIT PRESERVE ROWS;
+
+COLLECT STATS
+     PRIMARY INDEX (DEPT_ID,SUPPLIER_GROUP,CATEGORY,MONTH_LABEL)
+     ,COLUMN(DEPT_ID)
+     ,COLUMN(SUPPLIER_GROUP)
+     ,COLUMN(CATEGORY)
+     ,COLUMN(MONTH_LABEL)
+     ON sc_rp;
+
+--lets bring all the data together   
+CREATE MULTISET VOLATILE TABLE sc_final AS(
+SELECT 
+	 a.SELLING_COUNTRY
+	,a.SELLING_BRAND
+	,a.CHANNEL
+	,a.SUPPLIER_GROUP 
+	,a.CATEGORY 
+	,a.DEPARTMENT_NUMBER
+	,a.ALT_INV_MODEL
+	,a.MONTH_ID
+	,a.MONTH_LABEL
+	,a.HALF
+	,a.QUARTER
+	,a.FISCAL_YEAR_NUM
+	,a.BUY_PLANNER
+	,a.PREFERRED_PARTNER_DESC
+	,a.AREAS_OF_RESPOSIBILITY
+	,a.NPG_IND 
+	,a.DIVERSITY_GROUP 
+	,a.NORD_TO_RACK_TRANSFER_RATE
+	,a.CATEGORY_PLANNER_1
+	,a.CATEGORY_PLANNER_2 
+	,a.CATEGORY_GROUP
+	,a.SEASONAL_DESIGNATION
+	,a.RACK_MERCH_ZONE
+	,a.IS_ACTIVEWEAR
+	,a.CHANNEL_CATEGORY_ROLES_1
+	,a.CHANNEL_CATEGORY_ROLES_2 
+	,a.BARGAINISTA_DEPT_MAP
+	,SUM(a.RP_PLAN_RCPT_C) AS RP_PLAN_RCPT_C
+	,SUM(a.RP_PLAN_RCPT_R) AS RP_PLAN_RCPT_R
+	,SUM(a.RP_PLAN_RCPT_U) AS RP_PLAN_RCPT_U
+	,SUM(a.NRP_PLAN_RCPT_C) AS NRP_PLAN_RCPT_C
+	,SUM(a.NRP_PLAN_RCPT_R) AS NRP_PLAN_RCPT_R
+	,SUM(a.NRP_PLAN_RCPT_U) AS NRP_PLAN_RCPT_U
+	,SUM(a.TTL_PLAN_RCPT_LESS_RESERVE_C) AS TTL_PLAN_RCPT_LESS_RESERVE_C
+	,SUM(a.TTL_PLAN_RCPT_LESS_RESERVE_R) AS TTL_PLAN_RCPT_LESS_RESERVE_R
+	,SUM(a.TTL_PLAN_RCPT_LESS_RESERVE_U) AS TTL_PLAN_RCPT_LESS_RESERVE_U
+	,SUM(a.RP_RCPTS_MTD_C) AS RP_RCPTS_MTD_C
+	,SUM(a.RP_RCPTS_MTD_R) AS RP_RCPTS_MTD_R
+	,SUM(a.RP_RCPTS_MTD_U) AS RP_RCPTS_MTD_U
+	,SUM(a.NRP_RCPTS_MTD_C) AS NRP_RCPTS_MTD_C
+	,SUM(a.NRP_RCPTS_MTD_R) AS NRP_RCPTS_MTD_R
+	,SUM(a.NRP_RCPTS_MTD_U) AS NRP_RCPTS_MTD_U
+	,SUM(a.RP_OO_C) AS RP_OO_C
+	,SUM(a.RP_OO_R) AS RP_OO_R
+	,SUM(a.RP_OO_U) AS RP_OO_U
+	,SUM(a.NRP_OO_C) AS NRP_OO_C
+	,SUM(a.NRP_OO_R) AS NRP_OO_R
+	,SUM(a.NRP_OO_U) AS NRP_OO_U
+	,SUM(a.NRP_CM_C) AS NRP_CM_C
+	,SUM(a.NRP_CM_R) AS NRP_CM_R
+	,SUM(a.NRP_CM_U) AS NRP_CM_U
+	,SUM(a.RP_CM_C) AS RP_CM_C
+	,SUM(a.RP_CM_R) AS RP_CM_R
+	,SUM(a.RP_CM_U) AS RP_CM_U
+	,SUM(RP_ANT_SPD_C) AS RP_ANT_SPD_C
+	,SUM(RP_ANT_SPD_R) AS RP_ANT_SPD_R
+	,SUM(RP_ANT_SPD_U) AS RP_ANT_SPD_U
+FROM (
+		SELECT 
+			 CAST(SELLING_COUNTRY AS VARCHAR (2)) AS SELLING_COUNTRY
+			,CAST(SELLING_BRAND AS VARCHAR(15)) AS SELLING_BRAND
+			,CAST(CHNL_IDNT AS VARCHAR(5)) AS CHANNEL
+			,CAST(SUPPLIER_GROUP AS VARCHAR(100)) AS SUPPLIER_GROUP 
+			,CAST(CATEGORY AS VARCHAR(50)) AS CATEGORY 
+			,CAST(DEPARTMENT_NUMBER AS INT) AS DEPARTMENT_NUMBER
+			,CAST(ALT_INV_MODEL AS VARCHAR(15)) AS ALT_INV_MODEL
+			,CAST(MONTH_ID AS VARCHAR(25)) AS MONTH_ID
+			,CAST(MONTH_LABEL AS VARCHAR(15)) AS MONTH_LABEL
+			,CAST(HALF_LABEL AS VARCHAR(20)) AS HALF
+			,CAST(QUARTER AS VARCHAR(10)) AS QUARTER
+			,CAST(FISCAL_YEAR_NUM AS VARCHAR(10)) AS FISCAL_YEAR_NUM
+			,CAST(buy_planner AS VARCHAR(100)) AS BUY_PLANNER
+			,CAST(preferred_partner_desc AS VARCHAR(100)) AS PREFERRED_PARTNER_DESC
+			,CAST(areas_of_responsibility AS VARCHAR(100)) AS AREAS_OF_RESPOSIBILITY
+			,CAST(is_npg AS VARCHAR(2)) AS NPG_IND 
+			,CAST(diversity_group AS VARCHAR(100)) AS DIVERSITY_GROUP 
+			,CAST(nord_to_rack_transfer_rate as VARCHAR(100)) as NORD_TO_RACK_TRANSFER_RATE
+			,CAST(category_planner_1 AS VARCHAR(50)) AS CATEGORY_PLANNER_1
+			,CAST(category_planner_2 AS VARCHAR(50)) AS CATEGORY_PLANNER_2 
+			,CAST(category_group AS VARCHAR(50)) AS CATEGORY_GROUP
+			,CAST(seasonal_designation AS VARCHAR(50)) AS SEASONAL_DESIGNATION
+			,CAST(rack_merch_zone AS VARCHAR(50)) AS RACK_MERCH_ZONE
+			,CAST(is_activewear AS VARCHAR(50)) AS IS_ACTIVEWEAR
+			,CAST(channel_category_roles_1 AS VARCHAR(50)) AS CHANNEL_CATEGORY_ROLES_1
+			,CAST(channel_category_roles_2 AS VARCHAR(50)) AS CHANNEL_CATEGORY_ROLES_2 
+			,CAST(bargainista_dept_map AS VARCHAR(50)) AS BARGAINISTA_DEPT_MAP
+			,CAST(RP_PLAN_RCPT_C AS DECIMAL(20, 4)) AS RP_PLAN_RCPT_C
+			,CAST(RP_PLAN_RCPT_R AS DECIMAL(20, 4)) AS RP_PLAN_RCPT_R
+			,CAST(RP_PLAN_RCPT_U AS DECIMAL(20, 4)) AS RP_PLAN_RCPT_U
+			,CAST(NRP_PLAN_RCPT_C AS DECIMAL(20, 4)) AS NRP_PLAN_RCPT_C
+			,CAST(NRP_PLAN_RCPT_R AS DECIMAL(20, 4)) AS NRP_PLAN_RCPT_R
+			,CAST(NRP_PLAN_RCPT_U AS DECIMAL(20, 4)) AS NRP_PLAN_RCPT_U
+			,CAST(TTL_PLAN_RCPT_LESS_RESERVE_C AS DECIMAL(20, 4)) AS TTL_PLAN_RCPT_LESS_RESERVE_C
+			,CAST(TTL_PLAN_RCPT_LESS_RESERVE_R AS DECIMAL(20, 4)) AS TTL_PLAN_RCPT_LESS_RESERVE_R
+			,CAST(TTL_PLAN_RCPT_LESS_RESERVE_U AS DECIMAL(20, 4)) AS TTL_PLAN_RCPT_LESS_RESERVE_U
+		    ,CAST(0 AS DECIMAL(20, 4)) AS RP_RCPTS_MTD_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_RCPTS_MTD_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_RCPTS_MTD_U
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_RCPTS_MTD_C
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_RCPTS_MTD_R
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_RCPTS_MTD_U
+		    ,CAST(0 AS DECIMAL(20, 4)) AS RP_OO_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_OO_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_OO_U
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_OO_C
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_OO_R
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_OO_U
+		    ,CAST(0 AS DECIMAL(20, 4)) AS NRP_CM_C
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_CM_R
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_CM_U
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_CM_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_CM_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_CM_U
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_ANT_SPD_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_ANT_SPD_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_ANT_SPD_U
+		FROM sc_plan_base
+		
+		UNION ALL
+		
+		SELECT 
+			 CAST(SELLING_COUNTRY AS VARCHAR (2)) AS SELLING_COUNTRY
+			,CAST(SELLING_BRAND AS VARCHAR(15)) AS SELLING_BRAND
+			,CAST(CHNL_IDNT AS VARCHAR(5)) AS CHANNEL
+			,CAST(SUPPLIER_GROUP AS VARCHAR(100)) AS SUPPLIER_GROUP 
+			,CAST(CATEGORY AS VARCHAR(50)) AS CATEGORY 
+			,CAST(DEPARTMENT_NUM AS INT) AS DEPARTMENT_NUMBER
+			,CAST(ALT_INV_MODEL AS VARCHAR(15)) AS ALT_INV_MODEL
+			,CAST(MONTH_ID AS VARCHAR(25)) AS MONTH_ID
+			,CAST(MONTH_LABEL AS VARCHAR(15)) AS MONTH_LABEL
+			,CAST(HALF_LABEL AS VARCHAR(20)) AS HALF
+			,CAST(QUARTER AS VARCHAR(10)) AS QUARTER
+			,CAST(YEAR_NUM AS VARCHAR(10)) AS FISCAL_YEAR_NUM
+			,CAST(buy_planner AS VARCHAR(100)) AS BUY_PLANNER
+			,CAST(preferred_partner_desc AS VARCHAR(100)) AS PREFERRED_PARTNER_DESC
+			,CAST(areas_of_responsibility AS VARCHAR(100)) AS AREAS_OF_RESPOSIBILITY
+			,CAST(is_npg AS VARCHAR(2)) AS NPG_IND 
+			,CAST(diversity_group AS VARCHAR(100)) AS DIVERSITY_GROUP 
+			,CAST(nord_to_rack_transfer_rate as VARCHAR(100)) as NORD_TO_RACK_TRANSFER_RATE
+			,CAST(category_planner_1 AS VARCHAR(50)) AS CATEGORY_PLANNER_1
+			,CAST(category_planner_2 AS VARCHAR(50)) AS CATEGORY_PLANNER_2 
+			,CAST(category_group AS VARCHAR(50)) AS CATEGORY_GROUP
+			,CAST(seasonal_designation AS VARCHAR(50)) AS SEASONAL_DESIGNATION
+			,CAST(rack_merch_zone AS VARCHAR(50)) AS RACK_MERCH_ZONE
+			,CAST(is_activewear AS VARCHAR(50)) AS IS_ACTIVEWEAR
+			,CAST(channel_category_roles_1 AS VARCHAR(50)) AS CHANNEL_CATEGORY_ROLES_1
+			,CAST(channel_category_roles_2 AS VARCHAR(50)) AS CHANNEL_CATEGORY_ROLES_2 
+			,CAST(bargainista_dept_map AS VARCHAR(50)) AS BARGAINISTA_DEPT_MAP
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_PLAN_RCPT_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_PLAN_RCPT_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_PLAN_RCPT_U
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_PLAN_RCPT_C
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_PLAN_RCPT_R
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_PLAN_RCPT_U
+			,CAST(0 AS DECIMAL(20, 4)) AS TTL_PLAN_RCPT_LESS_RESERVE_C
+			,CAST(0 AS DECIMAL(20, 4)) AS TTL_PLAN_RCPT_LESS_RESERVE_R
+			,CAST(0 AS DECIMAL(20, 4)) AS TTL_PLAN_RCPT_LESS_RESERVE_U
+		    ,CAST(RP_RCPTS_MTD_C AS DECIMAL(20, 4)) AS RP_RCPTS_MTD_C
+			,CAST(RP_RCPTS_MTD_R AS DECIMAL(20, 4)) AS RP_RCPTS_MTD_R
+			,CAST(RP_RCPTS_MTD_U AS DECIMAL(20, 4)) AS RP_RCPTS_MTD_U
+			,CAST(NRP_RCPTS_MTD_C AS DECIMAL(20, 4)) AS NRP_RCPTS_MTD_C
+			,CAST(NRP_RCPTS_MTD_R AS DECIMAL(20, 4)) AS NRP_RCPTS_MTD_R
+			,CAST(NRP_RCPTS_MTD_U AS DECIMAL(20, 4)) AS NRP_RCPTS_MTD_U
+		    ,CAST(0 AS DECIMAL(20, 4)) AS RP_OO_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_OO_R
+            ,CAST(0 AS DECIMAL(20, 4)) AS RP_OO_U
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_OO_C
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_OO_R
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_OO_U
+		    ,CAST(0 AS DECIMAL(20, 4)) AS NRP_CM_C
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_CM_R
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_CM_U
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_CM_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_CM_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_CM_U
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_ANT_SPD_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_ANT_SPD_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_ANT_SPD_U
+		FROM sc_wtd_rcpts
+		
+		UNION ALL
+		
+		SELECT 
+			CAST(SELLING_COUNTRY AS VARCHAR (2)) AS SELLING_COUNTRY
+			,CAST(SELLING_BRAND AS VARCHAR(15)) AS SELLING_BRAND
+			,CAST(CHANNEL_NUM AS VARCHAR(5)) AS CHANNEL
+			,CAST(SUPPLIER_GROUP AS VARCHAR(100)) AS SUPPLIER_GROUP 
+			,CAST(CATEGORY AS VARCHAR(50)) AS CATEGORY 
+			,CAST(DEPARTMENT_NUM AS INT) AS DEPARTMENT_NUMBER
+			,CAST(ALT_INV_MODEL AS VARCHAR(15)) AS ALT_INV_MODEL
+			,CAST(MONTH_ID AS VARCHAR(25)) AS MONTH_ID
+			,CAST(MONTH_LABEL AS VARCHAR(15)) AS MONTH_LABEL
+			,CAST(HALF_LABEL AS VARCHAR(20)) AS HALF
+			,CAST(QUARTER AS VARCHAR(10)) AS QUARTER
+			,CAST(FISCAL_YEAR_NUM AS VARCHAR(10)) AS FISCAL_YEAR_NUM
+			,CAST(buy_planner AS VARCHAR(100)) AS BUY_PLANNER
+			,CAST(preferred_partner_desc AS VARCHAR(100)) AS PREFERRED_PARTNER_DESC
+			,CAST(areas_of_responsibility AS VARCHAR(100)) AS AREAS_OF_RESPOSIBILITY
+			,CAST(is_npg AS VARCHAR(2)) AS NPG_IND 
+			,CAST(diversity_group AS VARCHAR(100)) AS DIVERSITY_GROUP 
+			,CAST(nord_to_rack_transfer_rate as VARCHAR(100)) as NORD_TO_RACK_TRANSFER_RATE
+			,CAST(category_planner_1 AS VARCHAR(50)) AS CATEGORY_PLANNER_1
+			,CAST(category_planner_2 AS VARCHAR(50)) AS CATEGORY_PLANNER_2 
+			,CAST(category_group AS VARCHAR(50)) AS CATEGORY_GROUP
+			,CAST(seasonal_designation AS VARCHAR(50)) AS SEASONAL_DESIGNATION
+			,CAST(rack_merch_zone AS VARCHAR(50)) AS RACK_MERCH_ZONE
+			,CAST(is_activewear AS VARCHAR(50)) AS IS_ACTIVEWEAR
+			,CAST(channel_category_roles_1 AS VARCHAR(50)) AS CHANNEL_CATEGORY_ROLES_1
+			,CAST(channel_category_roles_2 AS VARCHAR(50)) AS CHANNEL_CATEGORY_ROLES_2 
+			,CAST(bargainista_dept_map AS VARCHAR(50)) AS BARGAINISTA_DEPT_MAP
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_PLAN_RCPT_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_PLAN_RCPT_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_PLAN_RCPT_U
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_PLAN_RCPT_C
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_PLAN_RCPT_R
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_PLAN_RCPT_U
+			,CAST(0 AS DECIMAL(20, 4)) AS TTL_PLAN_RCPT_LESS_RESERVE_C
+			,CAST(0 AS DECIMAL(20, 4)) AS TTL_PLAN_RCPT_LESS_RESERVE_R
+			,CAST(0 AS DECIMAL(20, 4)) AS TTL_PLAN_RCPT_LESS_RESERVE_U
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_RCPTS_MTD_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_RCPTS_MTD_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_RCPTS_MTD_U
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_RCPTS_MTD_C
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_RCPTS_MTD_R
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_RCPTS_MTD_U
+			,CAST(RP_OO_C AS DECIMAL(20, 4)) AS RP_OO_C
+			,CAST(RP_OO_R AS DECIMAL(20, 4)) AS RP_OO_R
+			,CAST(RP_OO_U AS DECIMAL(20, 4)) AS RP_OO_U
+			,CAST(NRP_OO_C AS DECIMAL(20, 4)) AS NRP_OO_C
+			,CAST(NRP_OO_R AS DECIMAL(20, 4)) AS NRP_OO_R
+			,CAST(NRP_OO_U AS DECIMAL(20, 4)) AS NRP_OO_U
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_CM_C
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_CM_R
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_CM_U
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_CM_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_CM_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_CM_U
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_ANT_SPD_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_ANT_SPD_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_ANT_SPD_U
+		FROM sc_oo_final
+	
+		UNION ALL
+		
+		SELECT 
+			 CAST(SELLING_COUNTRY AS VARCHAR (2)) AS SELLING_COUNTRY
+			,CAST(SELLING_BRAND AS VARCHAR(15)) AS SELLING_BRAND
+			,CAST(ORG_ID AS VARCHAR(5)) AS CHANNEL
+			,CAST(SUPPLIER_GROUP AS VARCHAR(100)) AS SUPPLIER_GROUP 
+			,CAST(CATEGORY AS VARCHAR(50)) AS CATEGORY 
+			,CAST(DEPT_ID AS INT) AS DEPARTMENT_NUMBER
+			,CAST(ALT_INV_MODEL AS VARCHAR(15)) AS ALT_INV_MODEL
+			,CAST(MONTH_ID AS VARCHAR(25)) AS MONTH_ID
+			,CAST(MONTH_LABEL AS VARCHAR(15)) AS MONTH_LABEL
+			,CAST(HALF_LABEL AS VARCHAR(20)) AS HALF
+			,CAST(QUARTER AS VARCHAR(10)) AS QUARTER
+			,CAST(FISCAL_YEAR_NUM AS VARCHAR(10)) AS FISCAL_YEAR_NUM
+			,CAST(buy_planner AS VARCHAR(100)) AS BUY_PLANNER
+			,CAST(preferred_partner_desc AS VARCHAR(100)) AS PREFERRED_PARTNER_DESC
+			,CAST(areas_of_responsibility AS VARCHAR(100)) AS AREAS_OF_RESPOSIBILITY
+			,CAST(is_npg AS VARCHAR(2)) AS NPG_IND 
+			,CAST(diversity_group AS VARCHAR(100)) AS DIVERSITY_GROUP 
+			,CAST(nord_to_rack_transfer_rate as VARCHAR(100)) as NORD_TO_RACK_TRANSFER_RATE
+			,CAST(category_planner_1 AS VARCHAR(50)) AS CATEGORY_PLANNER_1
+			,CAST(category_planner_2 AS VARCHAR(50)) AS CATEGORY_PLANNER_2 
+			,CAST(category_group AS VARCHAR(50)) AS CATEGORY_GROUP
+			,CAST(seasonal_designation AS VARCHAR(50)) AS SEASONAL_DESIGNATION
+			,CAST(rack_merch_zone AS VARCHAR(50)) AS RACK_MERCH_ZONE
+			,CAST(is_activewear AS VARCHAR(50)) AS IS_ACTIVEWEAR
+			,CAST(channel_category_roles_1 AS VARCHAR(50)) AS CHANNEL_CATEGORY_ROLES_1
+			,CAST(channel_category_roles_2 AS VARCHAR(50)) AS CHANNEL_CATEGORY_ROLES_2 
+			,CAST(bargainista_dept_map AS VARCHAR(50)) AS BARGAINISTA_DEPT_MAP
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_PLAN_RCPT_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_PLAN_RCPT_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_PLAN_RCPT_U
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_PLAN_RCPT_C
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_PLAN_RCPT_R
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_PLAN_RCPT_U
+			,CAST(0 AS DECIMAL(20, 4)) AS TTL_PLAN_RCPT_LESS_RESERVE_C
+			,CAST(0 AS DECIMAL(20, 4)) AS TTL_PLAN_RCPT_LESS_RESERVE_R
+			,CAST(0 AS DECIMAL(20, 4)) AS TTL_PLAN_RCPT_LESS_RESERVE_U
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_RCPTS_MTD_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_RCPTS_MTD_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_RCPTS_MTD_U
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_RCPTS_MTD_C
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_RCPTS_MTD_R
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_RCPTS_MTD_U
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_OO_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_OO_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_OO_U
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_OO_C
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_OO_R
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_OO_U
+			,CAST(NRP_CM_C AS DECIMAL(20, 4)) AS NRP_CM_C
+			,CAST(NRP_CM_R AS DECIMAL(20, 4)) AS NRP_CM_R
+			,CAST(NRP_CM_U AS DECIMAL(20, 4)) AS NRP_CM_U
+			,CAST(RP_CM_C AS DECIMAL(20, 4)) AS RP_CM_C
+			,CAST(RP_CM_R AS DECIMAL(20, 4)) AS RP_CM_R
+			,CAST(RP_CM_U AS DECIMAL(20, 4)) AS RP_CM_U
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_ANT_SPD_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_ANT_SPD_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_ANT_SPD_U
+		FROM sc_cm
+		
+		UNION ALL 
+		
+		SELECT
+			CAST(SELLING_COUNTRY AS VARCHAR (2)) AS SELLING_COUNTRY
+			,CAST(SELLING_BRAND AS VARCHAR(15)) AS SELLING_BRAND
+			,CAST(CHANNEL AS VARCHAR(5)) AS CHANNEL
+			,CAST(SUPPLIER_GROUP AS VARCHAR(100)) AS SUPPLIER_GROUP 
+			,CAST(CATEGORY AS VARCHAR(50)) AS CATEGORY 
+			,CAST(DEPT_ID AS INT) AS DEPARTMENT_NUMBER
+			,CAST(ALT_INV_MODEL AS VARCHAR(15)) AS ALT_INV_MODEL
+			,CAST(MONTH_ID AS VARCHAR(25)) AS MONTH_ID
+			,CAST(MONTH_LABEL AS VARCHAR(15)) AS MONTH_LABEL
+			,CAST(HALF_LABEL AS VARCHAR(20)) AS HALF
+			,CAST(QUARTER AS VARCHAR(10)) AS QUARTER
+			,CAST(FISCAL_YEAR_NUM AS VARCHAR(10)) AS FISCAL_YEAR_NUM
+			,CAST(buy_planner AS VARCHAR(100)) AS BUY_PLANNER
+			,CAST(preferred_partner_desc AS VARCHAR(100)) AS PREFERRED_PARTNER_DESC
+			,CAST(areas_of_responsibility AS VARCHAR(100)) AS AREAS_OF_RESPOSIBILITY
+			,CAST(is_npg AS VARCHAR(2)) AS NPG_IND 
+			,CAST(diversity_group AS VARCHAR(100)) AS DIVERSITY_GROUP 
+			,CAST(nord_to_rack_transfer_rate as VARCHAR(100)) as NORD_TO_RACK_TRANSFER_RATE
+			,CAST(category_planner_1 AS VARCHAR(50)) AS CATEGORY_PLANNER_1
+			,CAST(category_planner_2 AS VARCHAR(50)) AS CATEGORY_PLANNER_2 
+			,CAST(category_group AS VARCHAR(50)) AS CATEGORY_GROUP
+			,CAST(seasonal_designation AS VARCHAR(50)) AS SEASONAL_DESIGNATION
+			,CAST(rack_merch_zone AS VARCHAR(50)) AS RACK_MERCH_ZONE
+			,CAST(is_activewear AS VARCHAR(50)) AS IS_ACTIVEWEAR
+			,CAST(channel_category_roles_1 AS VARCHAR(50)) AS CHANNEL_CATEGORY_ROLES_1
+			,CAST(channel_category_roles_2 AS VARCHAR(50)) AS CHANNEL_CATEGORY_ROLES_2 
+			,CAST(bargainista_dept_map AS VARCHAR(50)) AS BARGAINISTA_DEPT_MAP
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_PLAN_RCPT_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_PLAN_RCPT_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_PLAN_RCPT_U
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_PLAN_RCPT_C
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_PLAN_RCPT_R
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_PLAN_RCPT_U
+			,CAST(0 AS DECIMAL(20, 4)) AS TTL_PLAN_RCPT_LESS_RESERVE_C
+			,CAST(0 AS DECIMAL(20, 4)) AS TTL_PLAN_RCPT_LESS_RESERVE_R
+			,CAST(0 AS DECIMAL(20, 4)) AS TTL_PLAN_RCPT_LESS_RESERVE_U
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_RCPTS_MTD_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_RCPTS_MTD_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_RCPTS_MTD_U
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_RCPTS_MTD_C
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_RCPTS_MTD_R
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_RCPTS_MTD_U
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_OO_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_OO_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_OO_U
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_OO_C
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_OO_R
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_OO_U
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_CM_C
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_CM_R
+			,CAST(0 AS DECIMAL(20, 4)) AS NRP_CM_U
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_CM_C
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_CM_R
+			,CAST(0 AS DECIMAL(20, 4)) AS RP_CM_U
+			,CAST(RP_ANT_SPD_C AS DECIMAL(20, 4)) AS RP_ANT_SPD_C
+			,CAST(RP_ANT_SPD_R AS DECIMAL(20, 4)) AS RP_ANT_SPD_R
+			,CAST(RP_ANT_SPD_U AS DECIMAL(20, 4)) AS RP_ANT_SPD_U
+		FROM sc_rp
+		
+	) a 
+--WHERE DEPARTMENT_NUMBER = '882'
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27
+) WITH DATA
+   PRIMARY INDEX(DEPARTMENT_NUMBER,SUPPLIER_GROUP,CATEGORY,MONTH_LABEL)
+   ON COMMIT PRESERVE ROWS;
+
+COLLECT STATS
+     PRIMARY INDEX (DEPARTMENT_NUMBER,SUPPLIER_GROUP,CATEGORY,MONTH_LABEL)
+     ,COLUMN(DEPARTMENT_NUMBER)
+     ,COLUMN(SUPPLIER_GROUP)
+     ,COLUMN(CATEGORY)
+     ,COLUMN(MONTH_LABEL)
+     ON sc_final;
+
+DELETE FROM T2DL_DAS_OPEN_TO_BUY.APT_SUPP_CAT_SPEND_CURRENT;
+--DELETE FROM T2DL_DAS_OPEN_TO_BUY.APT_SUPP_CAT_SPEND_CURRENT;   
+ 
+INSERT INTO T2DL_DAS_OPEN_TO_BUY.APT_SUPP_CAT_SPEND_CURRENT
+--INSERT INTO T2DL_DAS_OPEN_TO_BUY.APT_SUPP_CAT_SPEND_CURRENT 
+	SELECT 
+		 a.SELLING_COUNTRY
+		,a.SELLING_BRAND
+		,TRIM(a.CHANNEL||','||c.CHANNEL_DESC) AS CHANNEL
+		,a.SUPPLIER_GROUP 
+		,a.CATEGORY 
+		,TRIM(b.DIVISION_NUM||','||b.DIVISION_NAME) AS Division
+		,TRIM(b.SUBDIVISION_NUM||','||b.SUBDIVISION_NAME) AS Subdivision
+		,TRIM(a.DEPARTMENT_NUMBER||','||b.DEPT_NAME) AS Department
+		,b.ACTIVE_STORE_IND AS ACTIVE_DIVISION
+		,a.ALT_INV_MODEL
+		,TRIM(a.MONTH_ID) as MONTH_ID
+		,a.MONTH_LABEL
+		,a.HALF
+		,a.QUARTER
+		,a.FISCAL_YEAR_NUM
+		,a.BUY_PLANNER
+		,a.PREFERRED_PARTNER_DESC
+		,a.AREAS_OF_RESPOSIBILITY
+		,a.NPG_IND 
+		,CASE WHEN a.RP_PLAN_RCPT_C > 0 THEN 'Y' 
+			  WHEN a.NRP_PLAN_RCPT_C > 0 THEN 'N'
+			  ELSE 'N'
+			END AS RP_IND
+		,a.DIVERSITY_GROUP 
+		,a.NORD_TO_RACK_TRANSFER_RATE
+		,a.CATEGORY_PLANNER_1
+		,a.CATEGORY_PLANNER_2 
+		,a.CATEGORY_GROUP
+		,a.SEASONAL_DESIGNATION
+		,a.RACK_MERCH_ZONE
+		,a.IS_ACTIVEWEAR
+		,a.CHANNEL_CATEGORY_ROLES_1
+		,a.CHANNEL_CATEGORY_ROLES_2 
+		,a.BARGAINISTA_DEPT_MAP
+		,a.RP_PLAN_RCPT_C
+		,a.RP_PLAN_RCPT_R
+		,a.RP_PLAN_RCPT_U
+		,a.NRP_PLAN_RCPT_C
+		,a.NRP_PLAN_RCPT_R
+		,a.NRP_PLAN_RCPT_U
+		,a.TTL_PLAN_RCPT_LESS_RESERVE_C
+		,a.TTL_PLAN_RCPT_LESS_RESERVE_R
+		,a.TTL_PLAN_RCPT_LESS_RESERVE_U
+		,a.RP_RCPTS_MTD_C
+		,a.RP_RCPTS_MTD_R
+		,a.RP_RCPTS_MTD_U
+		,a.NRP_RCPTS_MTD_C
+		,a.NRP_RCPTS_MTD_R
+		,a.NRP_RCPTS_MTD_U
+		,a.RP_OO_C
+		,a.RP_OO_R
+		,a.RP_OO_U
+		,a.NRP_OO_C
+		,a.NRP_OO_R
+		,a.NRP_OO_U
+		,a.NRP_CM_C
+		,a.NRP_CM_R
+		,a.NRP_CM_U
+		,a.RP_CM_C
+		,a.RP_CM_R
+		,a.RP_CM_U
+		,RP_ANT_SPD_C
+		,RP_ANT_SPD_R
+		,RP_ANT_SPD_U
+		,CURRENT_DATE AS PROCESS_DT 
+FROM sc_final a
+JOIN prd_nap_usr_vws.department_dim b
+  ON a.DEPARTMENT_NUMBER = b.dept_num
+JOIN PRD_NAP_USR_VWS.STORE_DIM c 
+  ON a.CHANNEL = c.CHANNEL_NUM 
+WHERE a.RP_PLAN_RCPT_C <> 0
+	OR a.RP_PLAN_RCPT_U <> 0
+	OR a.NRP_PLAN_RCPT_C <> 0
+	OR a.NRP_PLAN_RCPT_U <> 0
+	OR a.TTL_PLAN_RCPT_LESS_RESERVE_C <> 0
+	OR a.TTL_PLAN_RCPT_LESS_RESERVE_U <> 0
+	OR a.RP_RCPTS_MTD_C <> 0
+	OR a.RP_RCPTS_MTD_U <> 0
+	OR a.NRP_RCPTS_MTD_C <> 0
+	OR a.NRP_RCPTS_MTD_U <> 0
+	OR a.RP_OO_C <> 0
+	OR a.RP_OO_U <> 0
+	OR a.NRP_OO_C <> 0
+	OR a.NRP_OO_U <> 0
+	OR a.RP_CM_C <> 0
+	OR a.RP_CM_U <> 0
+	OR a.NRP_CM_C <> 0
+	OR a.NRP_CM_U <> 0
+	OR RP_ANT_SPD_C <> 0
+	OR RP_ANT_SPD_R <> 0
+	OR RP_ANT_SPD_U <> 0
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61
+;

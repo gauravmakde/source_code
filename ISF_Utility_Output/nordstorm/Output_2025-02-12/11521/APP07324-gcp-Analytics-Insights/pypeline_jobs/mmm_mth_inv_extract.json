@@ -1,0 +1,23 @@
+{
+    "dag_id": "mmm_mth_inv_extract",
+    "dag_schedule": "0 13 * * 2",
+    "prod_email_on_failure": "analytics-insights@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "Lance.Christenson@nordstrom.com",
+    "stages": [
+        "run_terdata_sql_stg_0"
+    ],
+    "run_terdata_sql_stg_0": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MMM",
+                        "scripts": [
+                            "mmm/mmm_mth_inv_extract.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

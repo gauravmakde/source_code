@@ -1,0 +1,1 @@
+MSCK REPAIR TABLE object_model.loyaltymember_object_model_avro;

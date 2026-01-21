@@ -1,0 +1,133 @@
+{
+    "dag_id": "dior_sessions",
+    "prod_email_on_failure": "dsa-data-foundations@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "ankur.niranjan@nordstrom.com, bhupender.singh@nordstrom.com",
+    "sql_env_vars": {
+        "start_date": "current_date()-3",
+        "end_date": "current_date()-1"
+    },
+    "dependencies": {
+        "downstream": {
+            "dags": [
+                "refresh_digital_funnel_sessions_11521_ACE_ENG"
+            ]
+        }
+    },
+    "stages": [
+        "load_to_csv_events",
+        "tpt_load_ldg_events",
+        "ldg_to_t2_events",
+        "load_to_csv_daily",
+        "tpt_load_ldg_daily",
+        "ldg_to_t2_daily"
+    ],
+    "stage_dependencies": {
+        "load_to_csv_events": [
+            "tpt_load_ldg_events",
+            "load_to_csv_daily"
+        ],
+        "tpt_load_ldg_events": "ldg_to_t2_events",
+        "load_to_csv_daily": "tpt_load_ldg_daily",
+        "tpt_load_ldg_daily": "ldg_to_t2_daily"
+    },
+    "load_to_csv_events": {
+        "job_1_load_data_to_csv": {
+            "spark_engine": {
+                "spark_run_mode": "medium_no_broadcast",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "sessions/dior_session_fact_load.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TPT_CSV_OUTPUT",
+                        "sql_table_reference": "dior_session_fact_ldg_output"
+                    }
+                ]
+            }
+        }
+    },
+    "tpt_load_ldg_events": {
+        "job_2_load_data_to_t2_ldg": {
+            "tpt_engine": {
+                "retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TPT_SSN",
+                        "delimiter": "1F",
+                        "table_name": "dior_session_fact_ldg",
+                        "s3_file_path": "s3://{tpt_path}/dior_session_fact_ldg_output/*.csv.gz",
+                        "job_name": "dior_session_fact_ldg"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    },
+    "ldg_to_t2_events": {
+        "job_3_update_t2_tables_from_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_SSN",
+                        "scripts": [
+                            "sessions/dior_session_fact.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "load_to_csv_daily": {
+        "job_1_load_data_to_csv": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "sessions/dior_session_fact_daily_load.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TPT_CSV_OUTPUT",
+                        "sql_table_reference": "dior_session_fact_daily_ldg_output"
+                    }
+                ]
+            }
+        }
+    },
+    "tpt_load_ldg_daily": {
+        "job_2_load_data_to_t2_ldg": {
+            "tpt_engine": {
+                "retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TPT_SSN",
+                        "delimiter": "1F",
+                        "table_name": "dior_session_fact_daily_ldg",
+                        "s3_file_path": "s3://{tpt_path}/dior_session_fact_daily_ldg_output/*.csv.gz",
+                        "job_name": "dior_session_fact_daily_ldg"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    },
+    "ldg_to_t2_daily": {
+        "job_3_update_t2_tables_from_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_SSN",
+                        "scripts": [
+                            "sessions/dior_session_fact_daily.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

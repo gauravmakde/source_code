@@ -1,0 +1,46 @@
+{
+    "dag_id": "ddl_media_pacing_report",
+    "prod_email_on_failure": "app09044-kpi-scorecard@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure":"isha.rankawat@nordstrom.com",
+    "stages": [
+      "ddl_media_pacing_report"
+    ],
+    "ddl_media_pacing_report": {
+      "run_apm_ddl": {
+        "teradata_engine":{
+          "input_details":[
+            {
+              "conn_name":"TERADATA_SOURCE_KPI",
+              "scripts":[
+                "rmi/ddl/ddl_media_pacing_report.sql"
+              ]
+            }
+          ]
+        }
+      },
+      "run_apm_ldg_ddl": {
+        "teradata_engine":{
+          "input_details":[
+            {
+              "conn_name":"TERADATA_SOURCE_KPI",
+              "scripts":[
+                "rmi/ddl/ddl_media_pacing_report_ldg.sql"
+              ]
+            }
+          ]
+        }
+      },
+    "run_tpt_job_insert": {
+      "teradata_engine":{
+        "input_details":[
+          {
+            "conn_name":"TERADATA_SOURCE_KPI",
+            "scripts":[
+              "rmi/media_pacing_report_tpt_job_insert.sql"
+            ]
+          }
+        ]
+      }
+    }
+    }
+  }

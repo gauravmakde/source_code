@@ -1,0 +1,129 @@
+{
+    "dag_id": "analytical_session_fact",
+    "dag_schedule": "30 4 * * *",
+    "timezone": "US/Pacific",
+    "dag_sla_minutes": "135",
+    "nonprod_email_on_failure": "ricky.medrano@nordstrom.com",
+    "prod_email_on_failure": "app08134-ssa@nordstrom.pagerduty.com",
+    "dependencies": {
+        "upstream": {
+            "other_app_id": {
+                "dags": [
+                    {
+                        "external_dag_id": "METAMORPH_CUSTOMER_ANALYTICAL_SESSION_TD_ORC",
+                        "conn_id": "okta-conn-to-app05039",
+                        "retries": 3,
+                        "poke_interval": 120,
+                        "timeout": 3600
+                    },
+                    {
+                        "external_dag_id": "session_events_expanded_speed_1_17168_styling_styling_insights_kpi",
+                        "conn_id": "okta-conn-to-app05039",
+                        "retries": 3,
+                        "poke_interval": 120,
+                        "timeout": 3600
+                    }
+                ]
+            }
+        },
+        "downstream": {
+            "dags": [
+                "dior_sessions_11521_ACE_ENG"
+            ]
+        }
+    },
+    "stages": [
+        "asf_load_to_hive",
+        "smaf_load_to_csv",
+        "smaf_tpt_load_ldg",
+        "smaf_ldg_to_t2",
+        "musa_update_t2"
+    ],
+    "stage_dependencies": {
+        "asf_load_to_hive": "smaf_load_to_csv",
+        "smaf_load_to_csv": "smaf_tpt_load_ldg",
+        "smaf_tpt_load_ldg": "smaf_ldg_to_t2",
+        "smaf_ldg_to_t2": "musa_update_t2"
+    },
+    "sql_env_vars": {
+        "start_date": "current_date()-3",
+        "end_date": "current_date()"
+    },
+    "asf_load_to_hive": {
+        "job_1_asf_to_hive": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "sessions/analytical_session_fact_load.sql"
+                ],
+                "input_details": [],
+                "output_details": []
+            }
+        }
+    },
+    "smaf_load_to_csv": {
+        "job_2_smaf_load_to_csv": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "scripts": [
+                    "mta/ssa_mkt_attr_load.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TPT_CSV_OUTPUT",
+                        "sql_table_reference": "ssa_mkt_attr_fact_ldg_output"
+                    }
+                ]
+            }
+        }
+    },
+    "smaf_tpt_load_ldg": {
+        "job_3_smaf_tpt": {
+            "tpt_engine": {
+                "retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TPT_MTA",
+                        "delimiter": "1F",
+                        "table_name": "ssa_mkt_attr_fact_ldg",
+                        "s3_file_path": "s3://{tpt_path}/ssa_mkt_attr_fact_ldg_output/*.csv.gz",
+                        "job_name": "ssa_mkt_attr_fact_ldg"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    },
+    "smaf_ldg_to_t2": {
+        "job_4_smaf_to_t2": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTA",
+                        "scripts": [
+                            "mta/ssa_mkt_attr_fact.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "musa_update_t2": {
+        "job_5_musa_update_t2": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTA",
+                        "scripts": [
+                            "mta/mta_utm_session_agg.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

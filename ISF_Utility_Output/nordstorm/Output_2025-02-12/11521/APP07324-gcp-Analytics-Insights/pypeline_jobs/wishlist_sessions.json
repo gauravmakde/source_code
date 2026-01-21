@@ -1,0 +1,61 @@
+{
+    "dag_id": "wishlist_sessions",
+    "dag_schedule": "0 21 * * *",
+    "prod_email_on_failure": "dsa-app08750-wishlist-sessions-overview@nordstrom.pagerduty.com, soren.stime1@nordstrom.com",
+    "nonprod_email_on_failure": "sachin.goyal@nordstrom.com, soren.stime1@nordstrom.com",
+    "stages": [
+        "wishlist_sessions"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-2",
+        "end_date": "current_date()-1"
+    },
+    "wishlist_sessions": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_WSH",
+                        "scripts": [
+                            "wishlist_sessions/ddl/ddl_wishlist_sessions_ldg.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_1": {
+            "spark_engine": {
+                "spark_run_mode": "medium_no_broadcast",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "wishlist_sessions/wishlist_sessions_ldg.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_WSH",
+                        "sql_table_reference": "wishlist_sessions_output",
+                        "data_source_name": "wishlist_sessions_daily_ldg"
+                    },
+                    {
+                        "conn_name": "S3_WISHLIST_SESSIONS_OUTPUT",
+                        "sql_table_reference": "wishlist_sessions"
+                    }
+                ]
+            }
+        },
+        "job_2": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_WSH",
+                        "scripts": [
+                            "wishlist_sessions/wishlist_sessions.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

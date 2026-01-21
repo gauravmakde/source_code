@@ -1,0 +1,125 @@
+{
+    "dag_id": "marketing_mix_model_digital_marketing_teradata",
+    "dag_schedule": "30 19 * * 7",
+    "dag_sla_minutes": "90",
+    "prod_email_on_failure": "nap-marketing@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "mohit.patil@nordstrom.com",
+    "dependencies": {
+        "upstream": {
+            "dags": [
+                {
+                    "external_dag_id": "DAS_MARKETING_CONTACT_EVENT_LDG_TO_FACT",
+                    "external_task_id": "ELT_CONTROL_DEACTIVATE",
+                    "execution_delta": "timedelta(hours=-125, minutes=-30)",
+                    "allowed_states": [
+                        "success"
+                    ],
+                    "failed_states": [
+                        "failed"
+                    ],
+                    "timeout": 7200,
+                    "poke_interval": 60
+                },
+                {
+                    "external_dag_id": "DAS_MARKETING_CPP_UNSUBSCRIBE_AGG_FACT",
+                    "external_task_id": "ELT_CONTROL_DEACTIVATE",
+                    "execution_delta": "timedelta(hours=-125, minutes=-30)",
+                    "allowed_states": [
+                        "success"
+                    ],
+                    "failed_states": [
+                        "failed"
+                    ],
+                    "timeout": 7200,
+                    "poke_interval": 60
+                },
+                {
+                    "external_dag_id": "DAS_MARKETING_CONTACT_EVENT_MOBILE_PUSH",
+                    "external_task_id": "CNTCT_EVNT_MOBILE_PUSH_AGG_FACT",
+                    "execution_delta": "timedelta(hours=-122, minutes=-30)",
+                    "allowed_states": [
+                        "success"
+                    ],
+                    "failed_states": [
+                        "failed"
+                    ],
+                    "timeout": 7200,
+                    "poke_interval": 60
+                }
+            ],
+            "other_app_id": {
+                "dags": [
+                    {
+                        "external_dag_id": "fp_funnel_cost_fact_11521_ACE_ENG",
+                        "conn_id": "okta_connection_app07324",
+                        "external_task_id": "collect_stats_job_4_collect_stats_sensor",
+                        "upstream_lookback_days": 1,
+                        "allowed_states": [
+                            "success"
+                        ],
+                        "failed_states": [
+                            "failed"
+                        ],
+                        "timeout": 7200,
+                        "poke_interval": 60
+                    },
+                    {
+                        "external_dag_id": "rack_funnel_cost_fact_11521_ACE_ENG",
+                        "conn_id": "okta_connection_app07324",
+                        "external_task_id": "",
+                        "upstream_lookback_days": 1,
+                        "allowed_states": [
+                            "success"
+                        ],
+                        "failed_states": [
+                            "failed"
+                        ],
+                        "timeout": 7200,
+                        "poke_interval": 60
+                    }
+                ]
+            }
+        }
+    },
+    "stages": [
+        "marketing_mix_model_digital_marketing"
+    ],
+    "dag_dynamic_vars": {
+        "database_env": "eval('{\"nonprod\": \"PROTO_DSA_AI_DB\",\"test\": \"PROTO_DSA_AI_DB\", \"prod\": \"PRD_NAP_DSA_AI_STG\"}[env]')",
+        "year": "eval('str(datetime.now().strftime(\"%Y\"))')",
+        "month": "eval('str(datetime.now().strftime(\"%m\"))')",
+        "day": "eval('str(datetime.now().strftime(\"%d\"))')"
+    },
+    "marketing_mix_model_digital_marketing": {
+        "teradata_job": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__MMM_TERADATA_STAGE__",
+                        "scripts": [
+                            "marketing_mix_model_digital_marketing_teradata.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_export": {
+            "tpt_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__MMM_TPT_EXPORT__",
+                        "database_name": "?database_env?",
+                        "table_name": "MMM_DIGITAL_MARKETING_LDG",
+                        "s3_file_path": "s3://{mmm_s3_data_bucket}/Nordstrom/Outbound/delta_load/weekly_refresh/year=?year?/month=?month?/day=?day?/mmm_digital_weekly_export_?year?_?month?_?day?.csv",
+                        "sql_file_name": "marketing_mix_model_digital_marketing_tpt_export.sql",
+                        "text_delimiter_hexa_flag": "N",
+                        "text_delimiter": ",",
+                        "file_count": "1",
+                        "quoted_flag": "N",
+                        "quoted_data": "''"
+                    }
+                ]
+            }
+        }
+    }
+}

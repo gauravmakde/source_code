@@ -1,0 +1,46 @@
+{
+    "dag_id": "remote_sell_views",
+    "prod_email_on_failure": "dsa-app08154-remote-sales-dashboard@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "agatha.mak@nordstrom.com",
+    "stages": [
+        "run_terdata_sql_stg_0"
+    ],
+    "run_terdata_sql_stg_0": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_RMT",
+                        "scripts": [
+                            "remote_selling/remote_sell_daily_vw.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_1": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_RMT",
+                        "scripts": [
+                            "remote_selling/remote_sell_employee_vw.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_2": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_RMT",
+                        "scripts": [
+                            "remote_selling/remote_sell_item_vw.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

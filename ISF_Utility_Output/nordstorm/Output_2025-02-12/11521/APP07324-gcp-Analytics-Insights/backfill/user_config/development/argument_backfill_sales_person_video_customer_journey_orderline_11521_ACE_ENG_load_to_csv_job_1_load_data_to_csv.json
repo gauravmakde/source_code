@@ -1,0 +1,11 @@
+--app_config_file gs://test-data-datametica/app09392/isf-artifacts/app-config/emr_application_dev.json
+--app_id APP07324  
+--target_tables_details 'customer_journey_orderline_landing_table={"source_type": "S3", "format": "csv", "path": "s3://ace-etl/tpt_load/", "header": "false", "compression": "gzip", "sep": "/\u001f", "emptyValue": ""}'  
+--sql_file_location gs://test-data-datametica/app09392/isf-artifacts/sql/backfill_sales_person_video_customer_journey_orderline_11521_ACE_ENG_load_to_csv_customer_journey_orderline_load.sql  
+--stage_task_name backfill_sales_person_video_customer_journey_orderline_11521_ACE_ENG_load_to_csv_job_1_load_data_to_csv  
+--offset_table '`jwn-nap-user1-nonprod-zmnb.onehop_etl_app_db.kafka_consumer_offset_batch_details`'
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_ROLE_ID-Psikfr
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_SECRET_ID-themT6
+--aws_user_role_arn arn:aws:iam::290445963451:role/APP09392_AWS_Secrets_Role
+--aws_user_role_external_id=testUser
+--gcp_project_id jwn-nap-user1-nonprod-zmnb

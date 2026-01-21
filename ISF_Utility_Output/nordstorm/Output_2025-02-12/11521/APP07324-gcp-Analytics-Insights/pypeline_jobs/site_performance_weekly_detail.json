@@ -1,0 +1,57 @@
+{
+    "dag_id": "site_performance_weekly_detail",
+    "dag_schedule": "0 3 * * 1",
+    "prod_email_on_failure": "dsa-app08715-modern-web-platform-site-performance-pipeline@nordstrom.pagerduty.com, soren.stime1@nordstrom.com",
+    "nonprod_email_on_failure": "soutrik.saha@nordstrom.com",
+    "stages": [
+        "read_write_hive_to_td"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-7",
+        "end_date": "current_date()-7"
+    },
+    "read_write_hive_to_td": {
+        "job_1_create_td_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_DEG",
+                        "scripts": [
+                            "mwp_site_performance/ddl/ddl_site_performance_weekly_detail_ldg.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_2_load_hive_data_to_output": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "mwp_site_performance/site_performance_weekly_detail_load.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_DEG",
+                        "sql_table_reference": "weekly_detail_output",
+                        "data_source_name": "site_performance_weekly_detail_ldg"
+                    }
+                ]
+            }
+        },
+        "job_3_update_t2_table_from_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_DEG",
+                        "scripts": [
+                            "mwp_site_performance/site_performance_weekly_detail.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

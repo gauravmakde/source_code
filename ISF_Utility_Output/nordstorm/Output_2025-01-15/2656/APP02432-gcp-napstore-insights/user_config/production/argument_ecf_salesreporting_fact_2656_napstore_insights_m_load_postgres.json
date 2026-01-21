@@ -1,0 +1,10 @@
+--app_config_file s3://tf-nap-prod-airflow-nsk-insights/apps/etl_framework/prod/application_config/emr_application_prod.json   
+--app_id APP02432 
+--source_tables_details 'ecf_salesreporting_vw={"source_type": "TERADATA", "hostname": "tdnapprod.nordstrom.net", "port": "1025", "vault_connection_name": "nordsecrets/application/APP02432/2656/napstore/APP02432-napstore-insights/prod/teradata/teradata_db_credentials", "database_name": "PRD_NAP_BASE_VWS","data_source_name":"ECF_SALESREPORTING_FACT_VW"}' 
+--target_tables_details 'ecf_salesreporting_postgres={"source_type": "postgres", "vault_connection_name": "nordsecrets/application/APP02432/2656/napstore/APP02432-napstore-insights/prod/posgres/posgres_db_credentials", "hostname": "ecfsalesservice-rds.chcsiya1gggq.us-west-2.rds.amazonaws.com", "port": "5432", "database_name": "ecfsalesservice","data_source_name":"ECF_SALESREPORTING"}'  
+--sql_file_location s3://tf-nap-prod-airflow-nsk-insights/apps/etl_framework/airflow_nsk_dag_job_artifacts/prod/2656/napstore/insights/sql/ecf_salesreporting/ecf_salesreporting_fact_2656_napstore_insights_m_ecf_salesreporting_to_postgres_extract.sql  
+--stage_task_name ecf_salesreporting_fact_2656_napstore_insights_m_load_postgres  
+--hive_offset_table onehop_etl_app_db.kafka_consumer_offset_batch_details   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:122990593628:secret:APP02432_VAULT_APPROLE_ROLE_ID-LVcHl8  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:122990593628:secret:APP02432_VAULT_APPROLE_SECRET_ID-MO0zqw  
+--aws_user_role_arn arn:aws:iam::122990593628:role/APP02432_AWS_Secrets_Role 

@@ -1,0 +1,5 @@
+-- CALL {{params.dbenv}}_NAP_UTL.BATCH_END_SP ('CUSTOMER_DSCO_SHIPPED_EVENT_FACT');
+-- CALL {{params.dbenv}}_NAP_UTL.BATCH_CLEAN_SP ('CUSTOMER_DSCO_SHIPPED_EVENT_FACT');
+
+CALL `{{params.gcp_project_id}}`.{{params.dbenv}}_NAP_UTL.BATCH_END_SP ('CUSTOMER_DSCO_SHIPPED_EVENT_FACT');
+CALL `{{params.gcp_project_id}}`.{{params.dbenv}}_NAP_UTL.BATCH_CLEAN_SP ('CUSTOMER_DSCO_SHIPPED_EVENT_FACT');

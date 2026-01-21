@@ -1,0 +1,41 @@
+{
+    "dag_id": "cco_line_items_table",
+    "dag_schedule": "00 18 * * 0-5",
+    "dag_sla_minutes": "120",
+    "dag_retries": "0",
+    "prod_email_on_failure": "TECH_DAS_Customer@nordstrom.com,nap-acp@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "dummy@n.com",
+    "dependencies": {
+        "upstream": {
+            "dags": [
+                {
+                    "external_dag_id": "sales_and_returns_fact_base_11521_ACE_ENG",
+                    "execution_delta": "timedelta(minutes=360)",
+                    "retries": "1",
+                    "poke_interval": 120,
+                    "timeout": 3600
+                }
+            ]
+        }
+    },
+    "stages": [
+        "run_cco"
+    ],
+    "run_cco": {
+        "job_1_cco_line_items": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "sensor_timeout_seconds": 7200,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CCO",
+                        "scripts": [
+                            "cco_refresh/cco_line_items_daily.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

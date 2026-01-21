@@ -1,0 +1,52 @@
+{
+  "dag_id": "appointment_cart_load",
+  "dag_schedule": "40 14 * * *",
+  "stages": [
+    "appointment_cart_v1"
+  ],
+  "appointment_cart_v1": {
+    "load_orc_td_stg": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "appointment_cart_load_orc_and_teradata_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__APPOINTMENT_CART_KAFKA__",
+            "sql_table_reference": "kafka_customer_appointment_cart_analytical_avro",
+            "data_source_name": "customer-appointment-cart-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__APPOINTMENT_CART_S3_ORC_SINK__",
+            "sql_table_reference": "appointment_cart_orc_output"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "appointment_cart_ldg",
+            "data_source_name": "APPOINTMENT_CART_LDG"
+          }
+        ]
+      }
+    },
+    "load_td_stg_to_dims": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "appointment_cart_load_teradata_stg_to_dim.sql",
+              "appointment_cart_engagement_load_teradata_stg_to_dim.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+
+
+

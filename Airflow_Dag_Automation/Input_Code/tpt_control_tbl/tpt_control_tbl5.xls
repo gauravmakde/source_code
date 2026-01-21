@@ -1,17 +1,0 @@
-﻿SELECT * FROM T2DL_DAS_TECHEX.TPT_CONTROL_TBL;
-
-10 Rows returned. DBS time = 00:00:01
-
-BLOB/CLOB files written to: C:\Users\x0tf\Documents
-
-job_name,database_name,object_name,object_type,batchusername,truncateindicator,errorlimit,textdelimiter_hexa_flag,textdelimiter,AcceptExcessColumns,AcceptMissingColumns,QuotedData,OpenQuoteMark,s3bucket,s3prefix,s3singlepartfile,s3connectioncount,collist_indicator_flag,collist,rcd_load_tmstp,rcd_update_tmstp,HeaderRcdIndicator,AllFilesHeaderRcdIndicator,APP_ID,DAG_ID,TASK_NAME
-techex_sn_incidents_ldg,T2DL_DAS_TECHEX,techex_sn_incidents_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,5/15/2024 12:14:26.990000,5/15/2024 12:14:26.990000,N,N,?,?,?
-techex_fetch_info_ldg,T2DL_DAS_TECHEX,techex_fetch_info_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,6/20/2024 13:55:01.840000,6/20/2024 13:55:01.840000,N,N,?,?,?
-techex_pd_services_appid_ldg,T2DL_DAS_TECHEX,techex_pd_services_appid_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,1/3/2024 12:44:57.430000,1/3/2024 12:44:57.430000,N,N,?,?,?
-techex_dag_ldg,T2DL_DAS_TECHEX,techex_dag_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,12/5/2023 15:27:39.050000,12/5/2023 15:27:39.050000,N,N,?,?,?
-techex_appid_nerds_info_ldg,T2DL_DAS_TECHEX,techex_appid_nerds_info_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,1/3/2024 12:45:08.990000,1/3/2024 12:45:08.990000,N,N,?,?,?
-techex_pd_incidents_ldg,T2DL_DAS_TECHEX,techex_pd_incidents_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,5/15/2024 15:29:13.670000,5/15/2024 15:29:13.670000,N,N,?,?,?
-nap_migration_move_groups_ldg,T2DL_DAS_TECHEX,nap_migration_move_groups_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,6/5/2024 16:45:42.170000,6/5/2024 16:45:42.170000,N,N,?,?,?
-techex_appid_airflow_dag_ldg,T2DL_DAS_TECHEX,techex_appid_airflow_dag_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,1/3/2024 12:43:29.760000,1/3/2024 12:43:29.760000,N,N,?,?,?
-techex_dag_run_ldg,T2DL_DAS_TECHEX,techex_dag_run_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,12/5/2023 15:32:42.390000,12/5/2023 15:32:42.390000,N,N,?,?,?
-nap_migration_sprints_ldg,T2DL_DAS_TECHEX,nap_migration_sprints_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,6/5/2024 16:45:42.290000,6/5/2024 16:45:42.290000,N,N,?,?,?

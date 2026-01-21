@@ -1,0 +1,72 @@
+{
+    "dag_id": "payment_reset_teradata",
+    "dag_schedule": "0 21,23,01 * * *",
+    "stages": [
+        "payment_reset_s3_avro_to_teradata_stage_0"
+    ],
+    "payment_reset_s3_avro_to_teradata_stage_0": {
+        "python_tag": {
+            "python_executor": {
+                "module": "python/s3_reset_preprocessor",
+                "version": "1.0.1",
+                "k8s_cpu_limit": 1,
+                "k8s_cpu_request": 1,
+                "k8s_memory_limit": "1Gi",
+                "k8s_memory_request": "1Gi",
+                "args": [
+                    "python/s3_reset_preprocessor/main.py"
+                ]
+            }
+        },
+        "s3_avro_to_teradata_stg_job": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "scripts": [
+                    "sparkSql/payment_reset_s3_avro_to_teradata_stg.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "__S3_NAP_SOURCE_RESET_BUCKET_ONLINE_MATCHED_AVRO__",
+                        "sql_table_reference": "s3_reset_online_matched_avro"
+                    },
+                    {
+                        "conn_name": "__S3_NAP_SOURCE_RESET_BUCKET_STORE_MATCHED_AVRO__",
+                        "sql_table_reference": "s3_reset_store_matched_avro"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__PAYMENT_TERADATA_NAP_STG__",
+                        "sql_table_reference": "payment_settlement_transaction_match_ldg",
+                        "data_source_name": "PAYMENT_SETTLEMENT_TRANSACTION_MATCH_LDG"
+                    }
+                ]
+            }
+        },
+        "teradata_stg_to_teradata_fct_job": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__PAYMENT_TERADATA_NAP_FCT__",
+                        "scripts": [
+                            "teradata/payment_reset_teradata_stg_to_teradata_fct.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "python_delete": {
+            "python_executor": {
+                "module": "python/s3_reset_postprocessor",
+                "version": "1.0.9",
+                "k8s_cpu_limit": 1,
+                "k8s_cpu_request": 1,
+                "k8s_memory_limit": "1Gi",
+                "k8s_memory_request": "1Gi",
+                "args": [
+                    "python/s3_reset_postprocessor/main.py"
+                ]
+            }
+        }
+    }
+}

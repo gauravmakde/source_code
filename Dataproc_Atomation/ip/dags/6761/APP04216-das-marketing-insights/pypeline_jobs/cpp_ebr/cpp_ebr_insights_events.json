@@ -1,0 +1,47 @@
+{
+  "dag_id": "event_producer_schema_v2_prod",
+  "dag_schedule": "0 13 * * *",
+  "prod_email_on_failure":"nap-marketing@nordstrom.pagerduty.com",
+  "nonprod_email_on_failure":"kinnari.uttarwar@nordstrom.com",
+  "stages": [
+    "write_to_insight_event_stg_0"
+  ],
+  "write_to_insight_event_stg_0": {
+    "job_0": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__CPP_EBR_TERADATA_SOURCE__",
+            "scripts": [
+              "cpp_ebr_history.sql",
+              "cpp_ebr.sql" ,
+              "cpp_ebr_delta.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "job_1": {
+      "event_producer_engine": {
+        "input_details": [
+          {
+            "conn_name": "__CPP_EBR_TERADATA_SOURCE__",
+            "table_name": "CPP_EBR_TRAN_DELTA_LDG",
+            "delta_column": "dw_sys_updt_tmstp"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__KAFKA_SOURCE_CPP_EBR__",
+            "topic_name": "cpp_ebr_insight_event_avro_v2"
+          }
+        ]
+      }
+    }
+  }
+}
+
+
+
+
+

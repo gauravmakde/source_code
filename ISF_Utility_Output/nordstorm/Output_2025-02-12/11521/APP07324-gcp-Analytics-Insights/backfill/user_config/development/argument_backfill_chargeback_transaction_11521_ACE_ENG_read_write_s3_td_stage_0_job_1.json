@@ -1,0 +1,11 @@
+--app_config_file gs://test-data-datametica/app09392/isf-artifacts/app-config/emr_application_dev.json
+--app_id APP07324  
+--target_tables_details 'chargeback_load_temp={"source_type": "TERADATA", "hostname": "tdnapprod.nordstrom.net", "port": "1025", "vault_connection_name": "nordsecrets/application/APP07324/ace/ae-isf-central/prod/tep/teradata/teradta_db_credentials", "database_name": "T2DL_DAS_TRUST_ENGINE_PROD","data_source_name":"chargeback_load"}'  
+--sql_file_location gs://test-data-datametica/app09392/isf-artifacts/sql/backfill_chargeback_transaction_11521_ACE_ENG_read_write_s3_td_stage_0_chargeback_load.sql  
+--stage_task_name backfill_chargeback_transaction_11521_ACE_ENG_read_write_s3_td_stage_0_job_1  
+--offset_table '`jwn-nap-user1-nonprod-zmnb.onehop_etl_app_db.kafka_consumer_offset_batch_details`'
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_ROLE_ID-Psikfr
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_SECRET_ID-themT6
+--aws_user_role_arn arn:aws:iam::290445963451:role/APP09392_AWS_Secrets_Role
+--aws_user_role_external_id=testUser
+--gcp_project_id jwn-nap-user1-nonprod-zmnb

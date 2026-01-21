@@ -1,0 +1,1 @@
+call `{{params.gcp_project_id}}`.{{params.dbenv}}_NAP_UTL.ELT_CONTROL_END_LOAD('NAP_ASCP_INVENTORY_STOCK_QUANTITY_LOGICAL_V1');

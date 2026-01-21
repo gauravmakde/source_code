@@ -1,0 +1,24 @@
+{
+    "dag_id": "marketability_last12month",
+    "dag_schedule": "0 0 1 * *",
+    "prod_email_on_failure": "dsa-app08805-marketabilityl12m@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "jingnan.miao@nordstrom.com",
+    "stages": [
+        "run_terdata_sql"
+    ],
+    "run_terdata_sql": {
+        "job_0_run_marketability_last12month": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 14400,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_AUD",
+                        "scripts": [
+                            "audience_marketability/marketability_last12month.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -1,10 +1,0 @@
-﻿SELECT * FROM T2DL_DAS_PO_AUDIT.tpt_control_tbl;
-
-3 Rows returned. DBS time = 00:00:02
-
-BLOB/CLOB files written to: C:\Users\x0tf\Documents
-
-job_name,database_name,object_name,object_type,batchusername,truncateindicator,errorlimit,textdelimiter_hexa_flag,textdelimiter,AcceptExcessColumns,AcceptMissingColumns,QuotedData,OpenQuoteMark,s3bucket,s3prefix,s3singlepartfile,s3connectioncount,collist_indicator_flag,collist,rcd_load_tmstp,rcd_update_tmstp,HeaderRcdIndicator,AllFilesHeaderRcdIndicator,APP_ID,DAG_ID,TASK_NAME
-MHE_SORT,T2DL_DAS_PO_AUDIT,MHE_SORT,T,T2DL_NAP_SCT_BATCH,Y,   1,Y,2C,N  ,N  ,N,?,?,?,?,  20,N,?,5/17/2023 12:51:56.260000,5/17/2023 12:51:56.260000,N,N,?,?,?
-WIT_INBOUND_TRANSFORMED_DATA_TEST_JOB,T2DL_DAS_PO_AUDIT,test_table,T,T2DL_NAP_SCT_BATCH,Y,   1,Y,2C,N  ,N  ,N,?,?,?,?,  20,N,?,5/9/2023 17:33:57.760000,5/9/2023 17:33:57.760000,N,N,?,?,?
-AUDIT_COMPLETED_S3_TO_LDG,T2DL_DAS_PO_AUDIT,audit_completed_tpt_load,T,T2DL_NAP_SCT_BATCH,Y,   1,Y,2C,N  ,N  ,Y,   ,?,?,?,  20,N,?,10/21/2022 11:52:24.410000,10/21/2022 11:52:24.410000,Y,N,?,?,?

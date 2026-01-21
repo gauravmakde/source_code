@@ -1,0 +1,8 @@
+--app_config_file s3://analytics-insights-dags-prod/apps/etl_framework/prod/application_config/emr_application_prod.json   
+--app_id APP07324    
+--sql_file_location s3://analytics-insights-dags-prod/apps/etl_framework/airflow_nsk_dag_job_artifacts/prod/11521/ACE/ENG/sql/speed/session_path_events_expanded_digital_11521_ACE_ENG_product_detail_viewed_event_attributes_product_detail_viewed_event_attributes.sql  
+--stage_task_name session_path_events_expanded_digital_11521_ACE_ENG_product_detail_viewed_event_attributes_job_0  
+--hive_offset_table onehop_etl_app_db.kafka_consumer_offset_batch_details   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:401438132124:secret:AI_PROD_VAULT_APPROLE_ROLE_ID-WJJbVC  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:401438132124:secret:AI_PROD_VAULT_APPROLE_SECRET_ID-NxqoEW  
+--aws_user_role_arn arn:aws:iam::401438132124:role/ae-isf-vault-prod 

@@ -1,0 +1,68 @@
+{
+    "dag_id": "device_pricetype_shipmethod_transtype_dim",
+    "dag_schedule": "0 8 * * *",
+    "prod_email_on_failure": "dsa-app08818-universal-semantic-layer@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "irene.ma@nordstrom.com",
+    "stages": [
+        "device_dim",
+        "price_type_dim",
+        "ship_method_dim",
+        "transaction_type_dim"
+    ],
+    "device_dim": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_USL",
+                        "scripts": [
+                            "universal_semantic_layer/device_dim.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "price_type_dim": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_USL",
+                        "scripts": [
+                            "universal_semantic_layer/price_type_dim.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "ship_method_dim": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_USL",
+                        "scripts": [
+                            "universal_semantic_layer/ship_method_dim.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "transaction_type_dim": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_USL",
+                        "scripts": [
+                            "universal_semantic_layer/transaction_type_dim.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

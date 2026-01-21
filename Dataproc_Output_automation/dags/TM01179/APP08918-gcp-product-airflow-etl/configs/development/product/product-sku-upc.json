@@ -1,0 +1,287 @@
+{
+  "domain": "merch",
+  "name" : "product_sku_upc",
+  "sources" : [
+    {
+      "name" : "mainDataTable",
+      "description" : "Ultimate Source of data for daily incremental loads",
+      "type" : "KAFKA",
+      "cache" : "MEMORY_AND_DISK",
+      "enable" : true,
+      "properties" : {
+        "kafka.bootstrap.servers": "meadow.prod.us-west-2.aws.proton.nordstrom.com:9093",
+        "schemaRegistryUrl": "https://schema-registry.prod.us-west-2.aws.proton.nordstrom.com",
+        "group.id": "nordlytics_001",
+        "subscribe": "nap-product-sku-object-model",
+        "headers" : "",
+        "enable.auto.commit": "false",
+        "proton_accessKey":"APP09392.YPJ4OTVDF57JWSKCU",
+        "proton_secret":"Ue8IhWG1E2zqe9tgY1J6jYBoTraSs5UUCSQWJKp7ijuRVxXwlDGcK0nnIXPegA7b1ig.3H4LuQhD6jROdwHfGVr8ivTZY4bDB.vgJCvuQUxDiABAM5dGUqJeHUdFR3Si",
+        "kafka.security.protocol": "sasl_ssl",
+        "sasl.kerberos.service.name": "kafka",
+        "kafka.sasl.mechanism": "SCRAM-SHA-512",
+        "pathPattern" : ""
+      }
+    }
+  ],
+  "dags" : [
+    {
+      "name" : "Main_dag",
+      "upstream" : ["mainDataTable"],
+      "operators" : [
+        {
+          "name": "PRODUCT_SKU_1",
+          "description": "Level 1 frame for PRODUCT_SKU extract",
+          "select": [
+            "Id"
+          , "MarketCode"
+          , "SourcePublishTimestamp"
+          , "Description"
+          , "explode_outer(VendorUpcs) VendorUpcs"
+          , "ParentEPMChoiceId"
+          , "ParentEPMStyleId"
+          , "PartnerRelationshipId"
+          , "PartnerRelationshipType"
+          , "WebStyleId"
+          , "WebSkuId"
+          , "BrandLabelId"
+          , "BrandLabelDisplayName"
+          , "RmsStyleGroupId"
+          , "LegacyRmsSkuId"
+          , "element_at(LegacyRmsStyleIds, 1) as LegacyRmsStyleIds"
+          , "LegacyRmsColorId"
+          , "element_at(FulfillmentTypeEligibilities, 1).FulfillmentTypeCode as FulfillmentTypeCode"
+          , "IsFpForecastEligible"
+          , "IsFpItemplanningEligible.member0 as IsFpItemplanningEligible_1"
+          , "IsFpReplenishmentEligible"
+          , "IsOpForecastEligible"
+          , "IsOpItemplanningEligible"
+          , "IsOpReplenishmentEligible"
+          , "IsRipEligible"
+          , "IsSample"
+          , "element_at(livedate,1) as LiveDate"
+          , "ProductActionTimestamp"
+          , "ReturnDispositionCode"
+          , "ReturnDispositionDescription"
+          , "SellingChannelEligibilities"
+          , "ShortDescription"
+          , "Sizes.EDINRFSizeCode as EdiNrFSizeCode"
+          , "Sizes.RangeCode as Sizes_RangeCode"
+          , "Sizes.RangeDescription as Sizes_RangeDescription"
+          , "Sizes.SequenceNumber as Sizes_SeqNum"
+          , "Sizes.Size1Code as Size1Code"
+          , "Sizes.Size1Description as Size1Description"
+          , "Sizes.Size2Code as Size2Code"
+          , "Sizes.Size2Description as Size2Description"
+          , "HazardousMaterialClassDescription"
+          , "HazardousMaterialClassCode"
+          , "MsrpCurrencyCode"
+          , "ProductAction"
+          , "ProductActionUser"
+          , "SellingStatusCode"
+          , "SellingStatusDescription"
+          , "MsrpAmountPlainTxt"
+          ]
+        },
+        {
+          "name": "PRODUCT_SKU_2",
+          "description": "Level 2 frame for PRODUCT_SKU extract",
+          "from" : ["PRODUCT_SKU_1"],
+          "select": [
+            "Id"
+          , "MarketCode"
+          , "SourcePublishTimestamp"
+          , "Description"
+          , "explode_outer(VendorUpcs.Vendors) as vendor"
+          , "ParentEPMChoiceId"
+          , "ParentEPMStyleId"
+          , "PartnerRelationshipId partnerrelationshipid"
+          , "PartnerRelationshipType partnerrelationshiptype"
+          , "WebStyleId"
+          , "WebSkuId"
+          , "BrandLabelId"
+          , "BrandLabelDisplayName"
+          , "RmsStyleGroupId"
+          , "LegacyRmsSkuId"
+          , "LegacyRmsStyleIds"
+          , "LegacyRmsColorId"
+          , "FulfillmentTypeCode"
+          , "IsFpForecastEligible"
+          , "IsFpItemplanningEligible_1"
+          , "IsFpReplenishmentEligible"
+          , "IsOpForecastEligible"
+          , "IsOpItemplanningEligible"
+          , "IsOpReplenishmentEligible"
+          , "IsRipEligible"
+          , "IsSample"
+          , "LiveDate"
+          , "ProductActionTimestamp"
+          , "ReturnDispositionCode"
+          , "ReturnDispositionDescription"
+          , "SellingChannelEligibilities"
+          , "ShortDescription"
+          , "EdiNrfSizeCode"
+          , "Sizes_RangeCode"
+          , "Sizes_RangeDescription"
+          , "Sizes_SeqNum"
+          , "Size1Code"
+          , "Size1Description"
+          , "Size2Code"
+          , "Size2Description"
+          , "HazardousMaterialClassDescription"
+          , "HazardousMaterialClassCode"
+          , "MsrpCurrencyCode"
+          , "ProductAction"
+          , "ProductActionUser"
+          , "SellingStatusCode"
+          , "SellingStatusDescription"
+          , "MsrpAmountPlainTxt"
+          ]
+        },
+        {
+          "name": "PRODUCT_SKU_FINAL",
+          "description": "Final data frame for PRODUCT_SKU extract",
+          "from" : ["PRODUCT_SKU_2"],
+          "select": [
+            "Id"
+          , "MarketCode"
+          , "SourcePublishTimestamp"
+          , "Description"
+          , "cast(vendor.IsDropShipEligible as string) vendorupcs_vendors_isdropshipeligible"
+          , "cast(vendor.IsNpgVendor as string) vendorupcs_vendors_isnpgvendor"
+          , "cast(vendor.IsPrimary as string) vendorupcs_vendors_isprimary"
+          , "vendor.Name vendorupcs_vendors_name"
+          , "vendor.Number vendorupcs_vendors_number"
+          , "cast(vendor.OrderQuantityMultiple as string) vendorupcs_vendors_orderquantitymultiple"
+          , "vendor.VendorColorDescription vendorupcs_vendors_vendorcolordescription"
+          , "vendor.VendorSizeDescription vendorupcs_vendors_vendorsizedescription"
+          , "element_at(vendor.VendorProductNumbers, 1).Code AS vendorupcs_vendors_vendorproductnumbers_code"
+          , "CASE WHEN element_at( (filter(vendor.VendorRoles, x -> x.Code == 'SUP')) , 1).Code == 'SUP' THEN 'True' ELSE 'False' END AS vendor_is_supplier"
+          , "CASE WHEN element_at( (filter(vendor.VendorRoles, x -> x.Code == 'MFR')) , 1).Code == 'MFR' THEN 'True' ELSE 'False' END AS vendor_is_manufacturer"
+          , "ParentEPMChoiceId"
+          , "ParentEPMStyleId"
+          , "PartnerRelationshipId partnerrelationshipid"
+          , "PartnerRelationshipType partnerrelationshiptype"
+          , "WebStyleId"
+          , "WebSkuId webskuid"
+          , "BrandLabelId brandlabelid"
+          , "BrandLabelDisplayName brandlabeldisplayname"
+          , "RmsStyleGroupId rmsstylegroupid"
+          , "LegacyRmsSkuId legacyrmsskuid"
+          , "LegacyRmsStyleIds legacyrmsstyleids_"
+          , "LegacyRmsColorId legacyrmscolorid"
+          , "FulfillmentTypeCode fulfillmenttypeeligibilities_fulfillmenttypecode"
+          , "IsFpForecastEligible"
+          , "IsFpItemplanningEligible_1 isfpitemplanningeligible"
+          , "IsFpReplenishmentEligible"
+          , "IsOpForecastEligible"
+          , "IsOpItemplanningEligible"
+          , "IsOpReplenishmentEligible"
+          , "IsRipEligible"
+          , "IsSample"
+          , "LiveDate"
+          , "ProductActionTimestamp"
+          , "ReturnDispositionCode"
+          , "ReturnDispositionDescription"
+          , "array_join(array_sort(transform(sellingchanneleligibilities,x->x['Description'])),',') AS SellingChannelEligibilities"
+          , "ShortDescription"
+          , "EdiNrfSizeCode sizes_edinrfsizecode"
+          , "Sizes_RangeCode"
+          , "Sizes_RangeDescription"
+          , "Sizes_SeqNum"
+          , "Size1Code sizes_size1code"
+          , "Size1Description sizes_size1description"
+          , "Size2Code sizes_size2code"
+          , "Size2Description sizes_size2description"
+          , "HazardousMaterialClassDescription"
+          , "HazardousMaterialClassCode"
+          , "MsrpCurrencyCode msrpcurrcycd"
+          , "ProductAction"
+          , "ProductActionUser productactionuser"
+          , "SellingStatusCode sellingstatuscode"
+          , "SellingStatusDescription sellingstatusdescription"
+          , "MsrpAmountPlainTxt msrpamtplaintxt"
+          ]
+        },
+        {
+          "name" : "PRODUCT_SKU_count",
+          "description" : "Count of PRODUCT_SKU records generated",
+          "from" : ["PRODUCT_SKU_final"],
+          "select" : [ "count(*)" ]
+        },
+        {
+          "name": "PRODUCT_UPC_DIM_st1",
+          "description": "Level 1 frame for PRODUCT_UPC_DIM extract",
+          "select": [ "Id"
+          , "LegacyRmsSkuId"
+          , "MarketCode"
+          , "SourcePublishTimestamp"
+          , "ProductActionTimestamp"
+          , "VendorUpcs.ChangeControlGroup as ChangeControlGroup"
+          , "explode_outer(VendorUpcs.Upcs) Upcs"
+          , "element_at( (filter(VendorUpcs.Vendors, x -> x.IsDropShipEligible == True)) , 1).IsDropShipEligible AS vendorupcs_vendors_isdropshipeligible"
+          ],
+          "from" : [ "PRODUCT_SKU_1" ],
+          "where": ["VendorUpcs.Upcs is not null" ]
+        },
+        {
+          "name": "PRODUCT_UPC_DIM_final",
+          "description": "Final data frame for PRODUCT_UPC_DIM extract",
+          "select": [ "Id"
+          , "LegacyRmsSkuId"
+          , "MarketCode"
+          , "SourcePublishTimestamp"
+          , "ChangeControlGroup.ProductAction vendorupcs_changecontrolgroup_productaction"
+          , "COALESCE(ChangeControlGroup.ProductActionTimestamp, ProductActionTimestamp) AS vendorupcs_changecontrolgroup_productactiontimestamp"
+          , "ChangeControlGroup.ProductActionUser vendorupcs_changecontrolgroup_productactionuser"
+          , "Upcs.Code vendorupcs_upcs_code"
+          , "Upcs.Description vendorupcs_upcs_description"
+          , "Upcs.IsPrimaryUpc vendorupcs_upcs_isprimaryupc"
+          , "Upcs.UpcType vendorupcs_upcs_upctype"
+          , "vendorupcs_vendors_isdropshipeligible"
+          ],
+          "from": [ "PRODUCT_UPC_DIM_st1" ],
+          "where": ["Upcs.Code is not null" ]
+        },
+        {
+          "name" : "PRODUCT_UPC_DIM_count",
+          "description" : "Count of PRODUCT_UPC_DIM records generated",
+          "from" : ["PRODUCT_UPC_DIM_final"],
+          "select" : [ "count(*)" ]
+        }
+      ]
+    }
+  ],
+  "sinks" : [
+    {
+      "name" : "PRODUCT_SKU_sink",
+      "description" : "Output PRODUCT_SKU records (normally CSV-GZIP format)",
+      "type" : "bigquery",
+      "upstream" : "PRODUCT_SKU_final",
+      "active" : true,
+      "properties" : {
+        "project": "jwn-nap-user1-nonprod-zmnb",
+        "dataset": "DEV_NAP_STG",
+        "table": "PRODUCT_SKU_LDG",
+        "temp_bucket": "test-data-datametica",
+        "mode": "overwrite"
+      }
+    },
+    
+    {
+      "name" : "PRODUCT_UPC_DIM_sink",
+      "description" : "Output PRODUCT_UPC_DIM records (normally CSV-GZIP format)",
+      "type" : "bigquery",
+      "upstream" : "PRODUCT_UPC_DIM_final",
+      "active" : true,
+      "properties" : {
+        "project": "jwn-nap-user1-nonprod-zmnb",
+        "dataset": "DEV_NAP_STG",
+        "table": "PRODUCT_UPC_DIM_LDG",
+        "temp_bucket": "test-data-datametica",
+        "mode": "overwrite"
+      }
+    }
+    
+  ]
+}

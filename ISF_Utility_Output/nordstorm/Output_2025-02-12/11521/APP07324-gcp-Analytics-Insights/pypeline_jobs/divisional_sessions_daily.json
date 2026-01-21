@@ -1,0 +1,27 @@
+{
+    "dag_id": "divisional_sessions_daily",
+    "prod_email_on_failure": "app08227-product-funnel@nordstrom.pagerduty.com, ace.promo@nordstrom.com",
+    "nonprod_email_on_failure": "rasagnya.avala@nordstrom.com",
+    "sql_env_vars": {
+        "start_date": "current_date()-3",
+        "end_date": "current_date()-1"
+    },
+    "stages": [
+        "run_divisional_sessions_daily_sql"
+    ],
+    "run_divisional_sessions_daily_sql": {
+        "run_divisional_sessions_daily_table": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3000,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_PFD",
+                        "scripts": [
+                            "product_funnel/divisional_sessions_daily.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,13 @@
+--app_config_file gs://dev-nap-dataplex-internal/app09203/isf-artifacts/app-config/emr_application_dev.json
+--app_id APP05039
+--source_tables_details 'kafka_clienteling_ended_avro={"source_type": "KAFKA", "kafka_cluster_name": "meadow", "vault_connection_name": "nordsecrets/application/APP09392/meadow/onix/oauth","kafka.sasl.mechanism": "OAUTHBEARER", "data_source_name": "customer-clienteling-relationship-ended-avro"}'
+--target_tables_details 'write_teradata_clienteling_ended_tbl={"source_type": "BIGQUERY", "dataset": "DEV_NAP_STG", "table": "CLIENTELING_RELATIONSHIP_ENDED_LDG", "project": "jwn-nap-user1-nonprod-zmnb", "mode": "overwrite", "temp_bucket": "test-data-datametica"}'
+--sql_file_location gs://test-data-datametica/app09392/isf-artifacts/sql/clienteling_ended_kafka_to_stg.sql
+--stage_task_name clienteling_ongoing_17168_styling_styling_insights_kpi_read_kafka_to_teradata_job_1
+--offset_table '`jwn-nap-user1-nonprod-zmnb.onehop_etl_app_db.kafka_consumer_offset_batch_details`'
+--consumer_group_name onix-customer-clienteling-relationship-ended-avro_clienteling_ongoing_17168_styling_styling_insights_kpi_read_kafka_to_teradata_job_1
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_ROLE_ID-Psikfr
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_SECRET_ID-themT6
+--aws_user_role_arn arn:aws:iam::290445963451:role/APP09392_AWS_Secrets_Role
+--gcp_project_id jwn-nap-user1-nonprod-zmnb
+--aws_user_role_external_id=testUser

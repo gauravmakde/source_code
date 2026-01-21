@@ -1,0 +1,181 @@
+{
+  "dag_id": "hr_outoforder_worker_data_historic_load",
+  "dag_schedule": null,
+  "stages": [
+    "s3_avro_historic_outoforder_data_load"
+  ],
+  "s3_avro_historic_outoforder_data_load": {
+    "load_0_employee_details_stg_tables": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "hr_historic_outoforder_employee_details_data_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__HR_OUTOFORDER_WORKER_S3_EVENT_EMPLOYMENT_STATUS_AVRO_INPUT__",
+            "sql_table_reference": "s3_avro_input_for_employee_details"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_HR_STG__",
+            "sql_table_reference": "hr_worker_v1_ldg",
+            "data_source_name": "hr_worker_v1_ldg"
+
+          }
+        ]
+      }
+    },
+    "load_1_employee_details_dim_tables": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "hr_employee_status_details_load_dim.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "load_2_org_details_stg_tables": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "hr_historic_outoforder_org_details_data_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__HR_OUTOFORDER_WORKER_S3_EVENT_ORG_DETAILS_AVRO_INPUT__",
+            "sql_table_reference": "s3_avro_input_for_org_details"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_HR_STG__",
+            "sql_table_reference": "hr_worker_v1_ldg",
+            "data_source_name": "hr_worker_v1_ldg"
+          }
+        ]
+      }
+    },
+    "load_3_org_details_dim_tables": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "hr_org_details_load_dim.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "load_4_job_details_stg_tables": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "hr_historic_outoforder_job_details_data_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__HR_OUTOFORDER_WORKER_S3_EVENT_JOB_DETAILS_AVRO_INPUT__",
+            "sql_table_reference": "s3_avro_input_for_job_details"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_HR_STG__",
+            "sql_table_reference": "hr_worker_v1_ldg",
+            "data_source_name": "hr_worker_v1_ldg"
+          }
+        ]
+      }
+    },
+    "load_5_job_details_dim_tables": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "hr_job_details_load_dim.sql"
+
+            ]
+          }
+        ]
+      }
+    },
+    "load_6_lineposition_details_stg_tables": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "hr_historic_outoforder_lineposition_details_data_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__HR_OUTOFORDER_WORKER_S3_EVENT_LINEPOSITION_DETAILS_AVRO_INPUT__",
+            "sql_table_reference": "s3_avro_input_for_lineposition_details"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_HR_STG__",
+            "sql_table_reference": "hr_worker_v1_ldg",
+            "data_source_name": "hr_worker_v1_ldg"
+          }
+        ]
+      }
+    },
+    "load_7_lineposition_details_dim_tables": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "hr_line_position_details_load_dim.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "load_8_workcontact_details_stg_tables": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "hr_historic_outoforder_workcontact_details_data_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__HR_OUTOFORDER_WORKER_S3_EVENT_WORKCONTACT_DETAILS_AVRO_INPUT__",
+            "sql_table_reference": "s3_avro_input_for_workcontact_details"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_HR_STG__",
+            "sql_table_reference": "hr_worker_v1_ldg",
+            "data_source_name": "hr_worker_v1_ldg"
+          }
+        ]
+      }
+    },
+
+    "load_9_workcontact_details_dim_tables": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__NEW_VAULT_TERADATA_NAP_HR_STG__",
+            "scripts": [
+              "hr_work_contact_details_load_dim.sql"
+
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+
+
+

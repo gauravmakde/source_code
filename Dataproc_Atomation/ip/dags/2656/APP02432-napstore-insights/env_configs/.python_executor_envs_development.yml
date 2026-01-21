@@ -1,0 +1,7 @@
+k8s_envs:
+  ENV : development
+  FILE_CHECK_BUCKET : eta-markets-nonprod
+  FILE_CHECK_KEY : DATA_EXISTS
+  NAUTH_CONN_ID : napstore_nauth_eta_markets
+  GITLAB_CONN_ID : napstore_gitlab
+  AWS_CONN_ID : napstore_aws_eta_markets

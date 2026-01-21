@@ -1,0 +1,112 @@
+SET QUERY_BAND = 'App_ID=APP08047;
+     DAG_ID=mta_11521_ACE_ENG;
+     Task_Name=mta_tpt_job_insert;'
+     FOR SESSION VOLATILE;
+
+DELETE FROM  T2DL_DAS_MTA.TPT_CONTROL_TBL where job_name = 'mta_mta_last_touch_ldg';
+
+INSERT INTO T2DL_DAS_MTA.TPT_CONTROL_TBL (
+  job_name,
+  database_name,
+  object_name,
+  object_type,
+  batchusername,
+  truncateindicator,
+  errorlimit,
+  textdelimiter_hexa_flag,
+  textdelimiter,
+  AcceptExcessColumns,
+  AcceptMissingColumns,
+  QuotedData,
+  OpenQuoteMark,
+  s3bucket,
+  s3prefix,
+  s3singlepartfile,
+  s3connectioncount,
+  collist_indicator_flag,
+  collist,
+  rcd_load_tmstp,
+  rcd_update_tmstp, 
+  HeaderRcdIndicator,
+  AllFilesHeaderRcdIndicator
+)
+VALUES (
+	'mta_mta_last_touch_ldg',
+	'T2DL_DAS_MTA',
+	'mta_last_touch_ldg',
+	'T',
+	 '*', 
+	'Y',
+	'1',
+	'Y',
+	'1F',
+	'N',
+	'N',
+	'N',
+	null,
+	null,
+	null,
+	null,
+	'20',
+	'N',
+	null,
+	current_timestamp,
+	current_timestamp,
+	'N',
+	'N'
+ ); 
+
+DELETE FROM  T2DL_DAS_MTA.TPT_CONTROL_TBL where job_name = 'mta_mta_acp_scoring_fact_ldg';
+
+INSERT INTO T2DL_DAS_MTA.TPT_CONTROL_TBL (
+  job_name,
+  database_name,
+  object_name,
+  object_type,
+  batchusername,
+  truncateindicator,
+  errorlimit,
+  textdelimiter_hexa_flag,
+  textdelimiter,
+  AcceptExcessColumns,
+  AcceptMissingColumns,
+  QuotedData,
+  OpenQuoteMark,
+  s3bucket,
+  s3prefix,
+  s3singlepartfile,
+  s3connectioncount,
+  collist_indicator_flag,
+  collist,
+  rcd_load_tmstp,
+  rcd_update_tmstp, 
+  HeaderRcdIndicator,
+  AllFilesHeaderRcdIndicator
+)
+VALUES (
+	'mta_mta_acp_scoring_fact_ldg',
+	'T2DL_DAS_MTA',
+	'mta_acp_scoring_fact_ldg',
+	'T',
+	 '*', 
+	'Y',
+	'1',
+	'Y',
+	'1F',
+	'N',
+	'N',
+	'N',
+	null,
+	null,
+	null,
+	null,
+	'20',
+	'N',
+	null,
+	current_timestamp,
+	current_timestamp,
+	'N',
+	'N'
+ ); 
+
+SET QUERY_BAND = NONE FOR SESSION;

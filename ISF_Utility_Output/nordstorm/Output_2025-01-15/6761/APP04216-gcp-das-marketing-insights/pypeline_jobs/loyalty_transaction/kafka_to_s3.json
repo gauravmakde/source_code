@@ -1,0 +1,82 @@
+{
+    "dag_id": "loyalty_transaction_promo_kafka_to_s3",
+    "dag_schedule": "00 22 * * *",
+    "dag_sla_minutes": "180",
+    "prod_email_on_failure": "nap-marketing@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "jianyuan.gan@nordstrom.com",
+    "stages": [
+        "load_loyaltytransaction_object_model",
+        "extracted_and_audit_files_copy"
+    ],
+    "stage_dependencies": {
+        "load_loyaltytransaction_object_model": [
+            "extracted_and_audit_files_copy"
+        ],
+        "extracted_and_audit_files_copy": [
+            "save_status_of_the_dag"
+        ]
+    },
+    "load_loyaltytransaction_object_model": {
+        "kafka_to_s3": {
+            "spark_engine": {
+                "spark_run_mode": "low",
+                "scripts": [
+                    "loyalty_transaction_kafka_to_s3.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "KAFKA_DAS_SINK",
+                        "sql_table_reference": "kafka_source",
+                        "data_source_name": "loyaltyactivity_object_model_avro"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__S3_LOYALTY_TRANSACTION_DATA_CSV_SINK__",
+                        "sql_table_reference": "loyalty_transaction_data_extract"
+                    },
+                    {
+                        "conn_name": "__S3_LOYALTY_TRANSACTION_AUDIT_CSV_SINK__",
+                        "sql_table_reference": "loyalty_transaction_final_count"
+                    },
+                    {
+                        "conn_name": "__S3_LOYALTY_PROMO_DATA_CSV_SINK__",
+                        "sql_table_reference": "loyalty_promo_data_extract"
+                    },
+                    {
+                        "conn_name": "__S3_LOYALTY_PROMO_AUDIT_CSV_SINK__",
+                        "sql_table_reference": "loyalty_promo_final_count"
+                    }
+                ]
+            }
+        }
+    },
+    "extracted_and_audit_files_copy": {
+        "to_s3_path_folder": {
+            "python_executor": {
+                "module": "python/utils",
+                "version": "1.3.18",
+                "args": [
+                    "python/utils/src/bulk_s3_copy.py",
+                    "--s3_source_bucket_env_name",
+                    "S3_MKTG_BUCKET",
+                    "--s3_target_bucket_env_name",
+                    "S3_MKTG_BUCKET",
+                    "--source_to_target_path_pair",
+                    "{'source': 'isf/data/loyalty_transaction/loyalty_transaction_data_extract/', 'target': 'isf/data/loyalty_transaction/incremental/year=<year>/month=<month>/day=<day>/hour=<hour>/'}",
+                    "--source_to_target_path_pair",
+                    "{'source': 'isf/audit/loyalty_transaction/loyalty_transaction_final_count/', 'target': 'isf/audit/loyalty_transaction/incremental/year=<year>/month=<month>/day=<day>/hour=<hour>/'}",
+                    "--source_to_target_path_pair",
+                    "{'source': 'isf/data/loyalty_promo/loyalty_promo_data_extract/', 'target': 'isf/data/loyalty_promo/incremental/year=<year>/month=<month>/day=<day>/hour=<hour>/'}",
+                    "--source_to_target_path_pair",
+                    "{'source': 'isf/audit/loyalty_promo/loyalty_promo_final_count/', 'target': 'isf/audit/loyalty_promo/incremental/year=<year>/month=<month>/day=<day>/hour=<hour>/'}",
+                    "--base_date_iso_env_name",
+                    "DAG_EXECUTION_DATE"
+                ]
+            },
+            "macros": {
+                "DAG_EXECUTION_DATE": "execution_date"
+            }
+        }
+    }
+}

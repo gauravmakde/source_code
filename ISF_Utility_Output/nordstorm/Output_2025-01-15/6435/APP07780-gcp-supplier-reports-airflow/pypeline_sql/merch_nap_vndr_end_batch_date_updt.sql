@@ -1,0 +1,17 @@
+SET QUERY_BAND = '
+App_ID=APP07780;
+DAG_ID=merch_nap_vndr_portal_extract;
+Task_Name=etl_batch_updt;'
+FOR SESSION VOLATILE;
+
+ET;
+
+UPDATE  {db_env}_NAP_base_VWS.ETL_BATCH_DT_LKUP
+SET DW_BATCH_DT = DW_BATCH_DT + INTERFACE_FREQ
+WHERE INTERFACE_CODE = 'MRCH_NAP_VNDR_END_DT'
+AND DW_BATCH_DT < current_date;
+
+
+SET QUERY_BAND = NONE FOR SESSION;
+
+ET;

@@ -1,0 +1,146 @@
+{
+    "dag_id": "nap_to_allocation_product_location_extracts",
+    "dag_schedule": "00 23 * * 0,1,2,3,4,5",
+    "timezone": "US/Pacific",
+    "dependencies": {
+        "upstream": {
+            "other_app_id": {
+                "dags": [
+                    {
+                        "external_dag_id": "org_object_model_to_orc_load",
+                        "conn_id": "OKTA_CONN_TO_APP08918",
+                        "retries": 1,
+                        "poke_interval": 120,
+                        "timeout": 3600,
+                        "python_query_code": "upstream_dependency.py",
+                        "date_query_function_name": "upstream_dependency.date_query_function"
+                    },
+                    {
+                        "external_dag_id": "PRODUCT_OBJECT_MODEL_TO_SEMANTIC_LOAD_V1",
+                        "conn_id": "OKTA_CONN_TO_APP08918",
+                        "retries": 1,
+                        "poke_interval": 120,
+                        "timeout": 3600,
+                        "python_query_code": "upstream_dependency.py",
+                        "date_query_function_name": "upstream_dependency.date_query_function"
+                    }
+                ]
+            }
+        }
+    },
+    "stages": [
+        "nap_to_allocation_1",
+        "nap_to_allocation_2",
+        "nap_to_allocation_3",
+        "nap_to_allocation_4"
+    ],
+    "stage_dependencies": {
+        "nap_to_allocation_1": [
+            "nap_to_allocation_2",
+            "nap_to_allocation_3",
+            "nap_to_allocation_4"
+        ]
+    },
+    "nap_to_allocation_1": {
+        "location_extracts": {
+            "spark_engine": {
+                "spark_run_mode": "high",
+                "scripts": [
+                    "nap_to_allocation_location_extracts.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "ALLOCATION_LOCATION_EXTRACTS_TAB",
+                        "sql_table_reference": "location_tab"
+                    },
+                    {
+                        "conn_name": "ALLOCATION_LOCATION_EXTRACTS_AUDIT",
+                        "sql_table_reference": "location_audit"
+                    }
+                ]
+            }
+        },
+        "export_department_class_subclass_dim": {
+            "tpt_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TPT_SOURCE",
+                        "text_delimiter_hexa_flag": "'Y'",
+                        "text_delimiter": "01",
+                        "quoted_flag": "N",
+                        "quoted_data": "''",
+                        "database_name": "{db_env}_NAP_USR_VWS",
+                        "table_name": "DEPARTMENT_CLASS_SUBCLASS_DIM",
+                        "s3_file_path": "s3://{tpt_bucket_name}/table_extracts/department_class_subclass_dim/department_class_subclass_dim.csv",
+                        "sql_file_name": "department_class_subclass_dim_export.sql"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    },
+    "nap_to_allocation_2": {
+        "dept_extract": {
+            "spark_engine": {
+                "spark_run_mode": "high",
+                "scripts": [
+                    "nap_to_allocation_dept_extract.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "ALLOCATION_DEPT_EXTRACTS_TAB",
+                        "sql_table_reference": "dept_tab"
+                    },
+                    {
+                        "conn_name": "ALLOCATION_DEPT_EXTRACTS_AUDIT",
+                        "sql_table_reference": "dept_audit"
+                    }
+                ]
+            }
+        }
+    },
+    "nap_to_allocation_3": {
+        "class_extract": {
+            "spark_engine": {
+                "spark_run_mode": "high",
+                "scripts": [
+                    "nap_to_allocation_class_extract.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "ALLOCATION_CLASS_EXTRACTS_TAB",
+                        "sql_table_reference": "class_tab"
+                    },
+                    {
+                        "conn_name": "ALLOCATION_CLASS_EXTRACTS_AUDIT",
+                        "sql_table_reference": "class_audit"
+                    }
+                ]
+            }
+        }
+    },
+    "nap_to_allocation_4": {
+        "sbclass_extract": {
+            "spark_engine": {
+                "spark_run_mode": "high",
+                "scripts": [
+                    "nap_to_allocation_sbclass_extract.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "ALLOCATION_SBCLASS_EXTRACTS_TAB",
+                        "sql_table_reference": "sbclass_tab"
+                    },
+                    {
+                        "conn_name": "ALLOCATION_SBCLASS_EXTRACTS_AUDIT",
+                        "sql_table_reference": "sbclass_audit"
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,26 @@
+{
+    "dag_id": "session_product_discovery_funnel_daily",
+    "prod_email_on_failure": "TECH_ISF_DAS_STYLING@nordstrom.com, nap-digital-styling@nordstrom.pagerduty.com,dummy001@isf.inc.org",
+    "nonprod_email_on_failure": "dummy001@isf.inc.org",
+    "sql_env_vars": {
+        "start_date": "current_date()-2",
+        "end_date": "current_date()-1"
+    },
+    "stages": [
+        "pdf_daily_sql"
+    ],
+    "pdf_daily_sql": {
+        "job_0": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "speed/session_product_discovery_funnel_daily.sql"
+                ],
+                "input_details": [],
+                "output_details": []
+            }
+        }
+    }
+}

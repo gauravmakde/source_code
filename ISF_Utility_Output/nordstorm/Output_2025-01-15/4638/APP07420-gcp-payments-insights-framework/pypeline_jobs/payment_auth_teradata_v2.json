@@ -1,0 +1,90 @@
+{
+  "dag_id": "payment_auth_teradata_v2",
+  "dag_schedule": "0 3/4 * * *",
+  "stages": [
+    "payment_auth_kafka_to_teradata_stg_stage",
+    "payment_auth_teradata_hdr_stg_to_teradata_hdr_fct_stage",
+    "payment_auth_teradata_tender_stg_to_teradata_tender_fct_stage",
+    "payment_auth_teradata_hdr_fct_update_payment_id_stage"
+  ],
+  "stage_dependencies": {
+    "payment_auth_kafka_to_teradata_stg_stage": [
+      "payment_auth_teradata_hdr_stg_to_teradata_hdr_fct_stage",
+      "payment_auth_teradata_tender_stg_to_teradata_tender_fct_stage"
+    ],
+    "payment_auth_teradata_hdr_stg_to_teradata_hdr_fct_stage": "payment_auth_teradata_hdr_fct_update_payment_id_stage",
+    "payment_auth_teradata_tender_stg_to_teradata_tender_fct_stage": "payment_auth_teradata_hdr_fct_update_payment_id_stage"
+
+  },
+  "payment_auth_kafka_to_teradata_stg_stage": {
+    "kafka_to_teradata_stg_job": {
+      "spark_engine": {
+        "spark_run_mode": "high",
+        "scripts": [
+          "sparkSql/payment_auth_kafka_to_teradata_stg_v2.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__KAFKA_CONFLUENT_CLOUD_OAUTH__",
+            "data_source_name": "customer-payment-authorization-analytical-avro",
+            "sql_table_reference": "customer_payment_authorization_analytical_avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_STG__",
+            "data_source_name": "PAYMENT_AUTHORIZATION_TENDER_V2_LDG",
+            "sql_table_reference": "PAYMENT_AUTHORIZATION_TENDER_V2_LDG"
+          },
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_STG__",
+            "data_source_name": "PAYMENT_AUTHORIZATION_HDR_V2_LDG",
+            "sql_table_reference": "PAYMENT_AUTHORIZATION_HDR_V2_LDG"
+          }
+        ]
+      }
+    }
+  },
+  "payment_auth_teradata_hdr_stg_to_teradata_hdr_fct_stage": {
+    "teradata_hdr_stg_to_teradata_hdr_fct_job": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_FCT__",
+            "scripts": [
+              "teradata/payment_auth_teradata_hdr_stg_to_teradata_hdr_fct_v2.sql"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "payment_auth_teradata_tender_stg_to_teradata_tender_fct_stage": {
+    "teradata_tender_stg_to_teradata_tender_fct_job": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_FCT__",
+            "scripts": [
+              "teradata/payment_auth_teradata_tender_stg_to_teradata_tender_fct_v2.sql"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "payment_auth_teradata_hdr_fct_update_payment_id_stage": {
+    "teradata_hdr_fct_update_job": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_FCT__",
+            "scripts": [
+              "teradata/payment_auth_teradata_hdr_fct_update_payment_id.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

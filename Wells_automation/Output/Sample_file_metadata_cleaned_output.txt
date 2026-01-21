@@ -1,0 +1,3 @@
+--- Clean Metadata for file: Input\Sample_file.sql ---
+INSERT INTO {{ params.stg_dataset_nm}}.CURATION_STYLING_INTERACTION_FACT,
+FROM abc.CURATION_STYLING_INTERACTION_STG,

@@ -1,0 +1,31 @@
+{
+    "dag_id": "consented_customer_relationship_hist",
+    "dag_schedule": "30 1 * * MON",
+    "prod_email_on_failure": "dsa-app09267-consented-customer@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "agatha.mak@nordstrom.com",
+    "dependencies": {
+        "downstream": {
+            "dags": [
+                "consented_customer_seller_monthly_11521_ACE_ENG",
+                "appointments_driven_value_11521_ACE_ENG"
+            ]
+        }
+    },
+    "stages": [
+        "run_terdata_sql_stg_0"
+    ],
+    "run_terdata_sql_stg_0": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CLI",
+                        "scripts": [
+                            "consented_customer/consented_customer_relationship_hist.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,82 @@
+{
+  "domain": "merch",
+  "name": "vendor_brand_label_dim",
+  "sources" : [
+    {
+      "name" : "mainDataTable",
+      "description" : "Ultimate Source of data for daily incremental loads",
+      "type" : "KAFKA",
+      "cache" : "MEMORY_AND_DISK",
+      "enable" : true,
+      "properties" : {
+        "kafka.bootstrap.servers": "meadow.prod.us-west-2.aws.proton.nordstrom.com:9093",
+        "schemaRegistryUrl": "https://schema-registry.prod.us-west-2.aws.proton.nordstrom.com",
+        "group.id": "vendor_load",
+        "subscribe": "nap-vendor-brand-object-model",
+        "headers" : "",
+        "enable.auto.commit": "false",
+        "proton_accessKey":"APP09392.SSSO748MV19KX9ENZ",
+       "proton_secret":"Hj1zhGbJlrZLqhm9jKVYEjQInKlBd8XzVJon7tB8saRmcAkls2se6snWZF2v437C9ScCtKFVQTRr6Ky5iUgSqtnVbE9tzTlXATpr3ZE.PVB8MQHZihEKiIU09C70zK6B",
+        "kafka.security.protocol": "sasl_ssl",
+        "sasl.kerberos.service.name": "kafka",
+        "kafka.sasl.mechanism": "SCRAM-SHA-512"
+      }
+    }
+  ],
+  "dags": [
+    {
+      "name" : "Main_dag",
+      "upstream" : ["mainDataTable"],
+      "operators": [
+        {
+          "name": "VENDOR_LABEL_DIM_st1",
+          "description": "Level 1 frame for VENDOR_LABEL_DIM extract",
+          "select": [ "EventSequence.member0", "EventCreateDate", "EventPublishedDate"
+            , "explode_outer(VendorBrand) VendorBrand" ]
+        },
+        {
+          "name": "VENDOR_LABEL_DIM_st2",
+          "description": "Level 2 frame for VENDOR_LABEL_DIM extract",
+          "select": [ "cast(member0 as INT)  as EventSequence", "EventCreateDate", "EventPublishedDate", "VendorBrand.Code"
+            , "VendorBrand.Name", "VendorBrand.BrandStatus"
+            , "explode_outer(VendorBrand.VendorLabel) VendorLabel" ],
+          "from": [ "VENDOR_LABEL_DIM_st1" ]
+        },
+        {
+          "name": "VENDOR_LABEL_DIM_LDG_final",
+          "description": "Final data frame for VENDOR_LABEL_DIM extract",
+          "select": [ "cast(EventSequence as INT) eventsequence", "EventCreateDate eventcreatedate", "EventPublishedDate eventpublisheddate", "Code vendorbrand_code"
+            , "Name vendorbrand_name", "BrandStatus vendorbrand_brandstatus"
+            , "VendorLabel.Code vendorbrand_vendorlabel_code"
+            , "VendorLabel.LabelStatus vendorbrand_vendorlabel_labelstatus"
+            , "VendorLabel.Name vendorbrand_vendorlabel_name"
+            , "VendorLabel.Description vendorbrand_vendorlabel_description"
+            , "VendorLabel.LabelInactiveDate vendorbrand_vendorlabel_labelinactivedate" ],
+          "from": [ "VENDOR_LABEL_DIM_st2" ]
+        },
+        {
+          "name" : "VENDOR_LABEL_DIM_count",
+          "description" : "Count of VENDOR_LABEL_DIM records generated",
+          "from" : ["VENDOR_LABEL_DIM_LDG_final"],
+          "select" : [ "count(*)" ]
+        }
+      ]
+    }
+  ],
+  "sinks": [
+      {
+        "name": "VENDOR_LABEL_DIM_LDG_sink",
+        "description": "Output VENDOR_LABEL_DIM_LDG records (normally CSV-GZIP format)",
+        "type": "bigquery",
+        "upstream": "VENDOR_LABEL_DIM_LDG_final",
+        "active": true,
+        "properties": {
+          "project": "jwn-nap-user1-nonprod-zmnb",
+          "dataset": "DEV_NAP_STG",
+          "table": "VENDOR_LABEL_DIM_LDG",
+          "temp_bucket": "test-data-datametica",
+          "mode": "overwrite"
+        }
+      }
+  ]
+}

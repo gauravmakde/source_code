@@ -1,0 +1,214 @@
+{
+    "dag_id": "rack_nmn_cost_data",
+    "dag_schedule": "0 18 * * *",
+    "dag_sla_minutes": "90",
+    "nonprod_email_on_failure": "Anandkumar.Patel@nordstrom.com",
+    "prod_email_on_failure": "cia-nmn-email.yxfv9c17@nordstrom.pagerduty.com",
+    "sql_env_vars": {
+        "start_date": "current_date()-90",
+        "end_date": "current_date()",
+        "year": "202[3|4]"
+    },
+    "stages": [
+        "rack_nmn_create_td_ldg_tables",
+        "rack_nmn_load_to_csv",
+        "rack_nmn_ldg_to_t2",
+        "collect_stats",
+        "tpt_load_nmn_rack_meta_data_ldg",
+        "tpt_load_nmn_rack_tiktok_data_ldg",
+        "tpt_load_nmn_rack_criteo_data_ldg",
+        "tpt_load_nmn_rack_dv_three_sixty_data_ldg",
+        "tpt_load_nmn_rack_pinterest_data_ldg"
+    ],
+    "stage_dependencies": {
+        "rack_nmn_create_td_ldg_tables": "rack_nmn_load_to_csv",
+        "rack_nmn_load_to_csv": [
+            "tpt_load_nmn_rack_meta_data_ldg",
+            "tpt_load_nmn_rack_tiktok_data_ldg",
+            "tpt_load_nmn_rack_criteo_data_ldg",
+            "tpt_load_nmn_rack_dv_three_sixty_data_ldg",
+            "tpt_load_nmn_rack_pinterest_data_ldg"
+        ],
+        "tpt_load_nmn_rack_meta_data_ldg": "rack_nmn_ldg_to_t2",
+        "tpt_load_nmn_rack_tiktok_data_ldg": "rack_nmn_ldg_to_t2",
+        "tpt_load_nmn_rack_criteo_data_ldg": "rack_nmn_ldg_to_t2",
+        "tpt_load_nmn_rack_dv_three_sixty_data_ldg": "rack_nmn_ldg_to_t2",
+        "tpt_load_nmn_rack_pinterest_data_ldg": "rack_nmn_ldg_to_t2",
+        "rack_nmn_ldg_to_t2": "collect_stats"
+    },
+    "rack_nmn_create_td_ldg_tables": {
+        "job_1_create_td_landing_tables": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_NMN",
+                        "scripts": [
+                            "nmn/nmn_sprint/rack/nmn_rack_tpt_job_insert.sql",
+                            "nmn/nmn_sprint/rack/ddl/ddl_nmn_rack_meta_data_ldg.sql",
+                            "nmn/nmn_sprint/rack/ddl/ddl_nmn_rack_tiktok_data_ldg.sql",
+                            "nmn/nmn_sprint/rack/ddl/ddl_nmn_rack_criteo_data_ldg.sql",
+                            "nmn/nmn_sprint/rack/ddl/ddl_nmn_rack_dv_three_sixty_data_ldg.sql",
+                            "nmn/nmn_sprint/rack/ddl/ddl_nmn_rack_pinterest_data_ldg.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "rack_nmn_load_to_csv": {
+        "job_2_load_data_to_csv": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "nmn/nmn_sprint/rack/nmn_rack_meta_data_ldg.sql",
+                    "nmn/nmn_sprint/rack/nmn_rack_tiktok_data_ldg.sql",
+                    "nmn/nmn_sprint/rack/nmn_rack_criteo_data_ldg.sql",
+                    "nmn/nmn_sprint/rack/nmn_rack_dv_three_sixty_data_ldg.sql",
+                    "nmn/nmn_sprint/rack/nmn_rack_pinterest_data_ldg.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TPT_CSV_OUTPUT",
+                        "sql_table_reference": "nmn_rack_meta_data_ldg_output"
+                    },
+                    {
+                        "conn_name": "TPT_CSV_OUTPUT",
+                        "sql_table_reference": "nmn_rack_tiktok_data_ldg_output"
+                    },
+                    {
+                        "conn_name": "TPT_CSV_OUTPUT",
+                        "sql_table_reference": "nmn_rack_criteo_data_ldg_output"
+                    },
+                    {
+                        "conn_name": "TPT_CSV_OUTPUT",
+                        "sql_table_reference": "nmn_rack_dv_three_sixty_data_ldg_output"
+                    },
+                    {
+                        "conn_name": "TPT_CSV_OUTPUT",
+                        "sql_table_reference": "nmn_rack_pinterest_data_ldg_output"
+                    }
+                ]
+            }
+        }
+    },
+    "tpt_load_nmn_rack_meta_data_ldg": {
+        "tpt_nmn_rack_nmn_rack_meta_data_ldg": {
+            "tpt_engine": {
+                "retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TPT_NMN",
+                        "delimiter": "1F",
+                        "table_name": "nmn_rack_meta_data_ldg",
+                        "s3_file_path": "s3://{tpt_path}/nmn_rack_meta_data_ldg_output/*.csv.gz",
+                        "job_name": "nmn_rack_nmn_rack_meta_data_ldg"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    },
+    "tpt_load_nmn_rack_tiktok_data_ldg": {
+        "tpt_nmn_rack_nmn_rack_tiktok_data_ldg": {
+            "tpt_engine": {
+                "retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TPT_NMN",
+                        "delimiter": "1F",
+                        "table_name": "nmn_rack_tiktok_data_ldg",
+                        "s3_file_path": "s3://{tpt_path}/nmn_rack_tiktok_data_ldg_output/*.csv.gz",
+                        "job_name": "nmn_rack_nmn_rack_tiktok_data_ldg"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    },
+    "tpt_load_nmn_rack_criteo_data_ldg": {
+        "tpt_nmn_rack_nmn_rack_criteo_data_ldg": {
+            "tpt_engine": {
+                "retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TPT_NMN",
+                        "delimiter": "1F",
+                        "table_name": "nmn_rack_criteo_data_ldg",
+                        "s3_file_path": "s3://{tpt_path}/nmn_rack_criteo_data_ldg_output/*.csv.gz",
+                        "job_name": "nmn_rack_nmn_rack_criteo_data_ldg"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    },
+    "tpt_load_nmn_rack_dv_three_sixty_data_ldg": {
+        "tpt_nmn_rack_nmn_rack_dv_three_sixty_data_ldg": {
+            "tpt_engine": {
+                "retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TPT_NMN",
+                        "delimiter": "1F",
+                        "table_name": "nmn_rack_dv_three_sixty_data_ldg",
+                        "s3_file_path": "s3://{tpt_path}/nmn_rack_dv_three_sixty_data_ldg_output/*.csv.gz",
+                        "job_name": "nmn_rack_nmn_rack_dv_three_sixty_data_ldg"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    },
+    "tpt_load_nmn_rack_pinterest_data_ldg": {
+        "tpt_nmn_rack_nmn_rack_pinterest_data_ldg": {
+            "tpt_engine": {
+                "retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TPT_NMN",
+                        "delimiter": "1F",
+                        "table_name": "nmn_rack_pinterst_data_ldg",
+                        "s3_file_path": "s3://{tpt_path}/nmn_rack_pinterest_data_ldg_output/*.csv.gz",
+                        "job_name": "nmn_rack_nmn_rack_pinterest_data_ldg"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    },
+    "rack_nmn_ldg_to_t2": {
+        "job_3_update_t2_tables_from_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_NMN",
+                        "scripts": [
+                            "nmn/nmn_sprint/rack/nmn_rack_meta_data.sql",
+                            "nmn/nmn_sprint/rack/nmn_rack_tiktok_data.sql",
+                            "nmn/nmn_sprint/rack/nmn_rack_criteo_data.sql",
+                            "nmn/nmn_sprint/rack/nmn_rack_dv_three_sixty_data.sql",
+                            "nmn/nmn_sprint/rack/nmn_rack_pinterest_data.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "collect_stats": {
+        "job_4_collect_stats": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_NMN",
+                        "scripts": [
+                            "nmn/nmn_sprint/rack/rack_nmn_statistics.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

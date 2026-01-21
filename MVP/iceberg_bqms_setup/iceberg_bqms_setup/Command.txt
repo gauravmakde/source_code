@@ -1,0 +1,10 @@
+gcloud dataproc batches submit pyspark gs://conversionfactory/VaibhavThorat/Code/CreateMultipleIcebergTablesViaSpark.py \
+    --batch=cf-testing-dataproc-job-testing-1297119811 \
+    --service-account=custom-sa-spark-bq@dmgcp-del-160.iam.gserviceaccount.com \
+    --region=us-central1 \
+    --version=1.2 \
+    --jars=gs://conversionfactory/VaibhavThorat/Jar/jars_iceberg-spark-runtime-3.5_2.12-1.5.2.jar,gs://spark-lib/bigquery/iceberg-bigquery-catalog-1.5.2-0.1.0.jar \
+    --subnet='projects/dmgcp-del-160/regions/us-central1/subnetworks/vaisat-poc' \
+    -- \
+    gs://conversionfactory/VaibhavThorat/Json/Properties.json \
+    gs://conversionfactory/VaibhavThorat/test_1

@@ -1,0 +1,69 @@
+{
+    "dag_id": "camelot_data",
+    "dag_schedule": "0 18 7 * *",
+    "prod_email_on_failure": "Aditi.Gupta@nordstrom.com",
+    "nonprod_email_on_failure": "isha.rankawat@nordstrom.com",
+    "sql_env_vars": {
+        "start_date": "current_date()-7",
+        "end_date": "current_date()-1"
+    },
+    "stages": [
+        "load_to_csv",
+        "ldg_to_t2",
+        "tpt_load_ldg"
+    ],
+    "stage_dependencies": {
+        "load_to_csv": "tpt_load_ldg",
+        "tpt_load_ldg": "ldg_to_t2"
+    },
+    "load_to_csv": {
+        "job_1_load_data_to_csv": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "mmm/mmm_data_optimine/camelot_data_load.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TPT_CSV_OUTPUT",
+                        "sql_table_reference": "camelot_data_ldg_output"
+                    }
+                ]
+            }
+        }
+    },
+    "tpt_load_ldg": {
+        "job_2_load_data_to_t2_ldg": {
+            "tpt_engine": {
+                "retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TPT_MMM",
+                        "delimiter": "1F",
+                        "table_name": "camelot_data_ldg",
+                        "s3_file_path": "s3://{tpt_path}/camelot_data_ldg_output/*.csv.gz",
+                        "job_name": "camelot_data_ldg"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    },
+    "ldg_to_t2": {
+        "job_3_update_t2_tables_from_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MMM",
+                        "scripts": [
+                            "mmm/mmm_data_optimine/camelot_data.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

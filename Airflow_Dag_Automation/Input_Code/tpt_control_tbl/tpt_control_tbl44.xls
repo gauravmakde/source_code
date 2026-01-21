@@ -1,8 +1,0 @@
-﻿SELECT * FROM T2DL_DAS_APT_REPORTING.tpt_control_tbl;
-
-1 Rows returned. DBS time = 00:00:02
-
-BLOB/CLOB files written to: C:\Users\x0tf\Documents
-
-job_name,database_name,object_name,object_type,batchusername,truncateindicator,errorlimit,textdelimiter_hexa_flag,textdelimiter,AcceptExcessColumns,AcceptMissingColumns,QuotedData,OpenQuoteMark,s3bucket,s3prefix,s3singlepartfile,s3connectioncount,collist_indicator_flag,collist,rcd_load_tmstp,rcd_update_tmstp,HeaderRcdIndicator,AllFilesHeaderRcdIndicator,APP_ID,DAG_ID,TASK_NAME
-load_supplier_cluster_table,T2DL_DAS_APT_REPORTING,merch_assortment_supplier_cluster_plan_fact,T,T2DL_NAP_APT_BATCH,Y,1,Y,7E,N  ,N  ,N,?,?,?,?,10,N,?,2/27/2024 21:40:52.022000,2/27/2024 21:40:52.022000,N,N,?,?,?

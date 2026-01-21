@@ -1,0 +1,56 @@
+{
+    "dag_id": "chargeback_transaction",
+    "dag_schedule": "0 20 * * *",
+    "prod_email_on_failure": "t3--app09301-data-science--trust-engine-email.ywau3s38@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "rujira.achawanantakun@nordstrom.com",
+    "stages": [
+        "read_write_s3_td_stage_0"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-7",
+        "end_date": "current_date()"
+    },
+    "read_write_s3_td_stage_0": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_TEP",
+                        "scripts": [
+                            "chargeback/ddl/ddl_chargeback_load.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_1": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "2",
+                "scripts": [
+                    "chargeback/chargeback_load.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_TEP",
+                        "sql_table_reference": "chargeback_load_temp",
+                        "data_source_name": "chargeback_load"
+                    }
+                ]
+            }
+        },
+        "job_2": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_TEP",
+                        "scripts": [
+                            "chargeback/chargeback_transaction.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

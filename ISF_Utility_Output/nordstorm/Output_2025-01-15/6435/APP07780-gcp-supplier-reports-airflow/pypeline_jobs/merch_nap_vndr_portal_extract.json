@@ -1,0 +1,578 @@
+{
+    "dag_id": "merch_nap_vndr_portal_extract",
+    "dag_schedule": "0 20 * * 0",
+    "prod_email_on_failure": "ds-merchfullprice-medium-priority@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "jjpi@nordstrom.com",
+    "_metadata": {
+        "version": "1.0",
+        "sla": "10:00PM PT",
+        "slo": "5:00PM PT",
+        "sla_weekday": "0",
+        "extract_name": "Vndr portal extracts"
+    },
+	"stages":  [
+	"JOB_0_1",
+	"JOB_0_2",
+    "JOB_1_1",
+    "JOB_1_2",
+    "JOB_1_3",
+	"JOB_1_4",
+	"JOB_1_5",
+	"JOB_1_6",
+	"JOB_1_7",
+	"JOB_1_8",
+	"JOB_1_9",
+	"JOB_2_1",
+	"JOB_2_2",
+	"JOB_2_3",
+	"JOB_2_4",
+	"JOB_2_5",
+	"JOB_2_6",
+	"JOB_2_7",
+	"JOB_2_8",
+	"JOB_2_9",
+	"JOB_3_6",
+	"JOB_3_7",
+	"JOB_3_8",
+	"JOB_3_9",
+	"JOB_4_0",
+	"JOB_5_0"
+  ],
+  "stage_dependencies": {
+	"JOB_0_1": "JOB_0_2",
+	"JOB_0_2": ["JOB_1_1","JOB_1_2"],
+	"JOB_1_1": "JOB_1_3",
+	"JOB_1_2": "JOB_1_4",
+	"JOB_1_3": "JOB_1_5",
+	"JOB_1_4": "JOB_1_6",
+	"JOB_1_5": "JOB_1_7",
+	"JOB_1_6": "JOB_1_8",
+	"JOB_1_7": "JOB_1_9",
+	"JOB_1_8": "JOB_3_6",
+	"JOB_1_9": "JOB_3_7",
+	"JOB_3_6": "JOB_3_8",
+	"JOB_3_7": "JOB_3_9",
+	"JOB_3_8": "JOB_2_1",
+	"JOB_3_9": "JOB_2_1",
+	"JOB_2_1": ["JOB_2_2","JOB_2_3"],
+	"JOB_2_2": "JOB_2_4",
+	"JOB_2_3": "JOB_2_5",
+	"JOB_2_4": "JOB_2_6",
+	"JOB_2_5": "JOB_2_7",
+	"JOB_2_6": "JOB_2_8",	
+	"JOB_2_7": "JOB_2_9",
+	"JOB_2_8": "JOB_4_0",
+	"JOB_2_9": "JOB_4_0",
+	"JOB_4_0": "JOB_5_0"
+		},
+	"JOB_0_1": {
+		"EXPORT_WK_RNG_DATA": {
+			"tpt_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TPT_SOURCE__",
+            "text_delimiter_hexa_flag": "'Y'",
+            "text_delimiter": "01",
+			"quoted_flag": "N",
+			"quoted_data": "''",
+			"database_name": "{db_env}_NAP_BASE_VWS",
+			"table_name": "MERCH_TRANSACTION_STYLE_STORE_WEEK_AGG_FACT",
+            "s3_file_path": "s3://{tpt_bucket_name}/vendor_portal/bkup/week_range/week_range.csv",
+            "sql_file_name": "wr_vendor_portal_dim_wk_rng.sql"
+          }
+        ],
+        "output_details": []
+      }
+    }
+  },
+  "JOB_0_2": {
+		"READ_WK_RNG_DATA": {
+			"spark_engine": {
+				"spark_run_mode": "high",
+				"pause_idle_cluster_termination": "after_app",
+                "scripts": ["rd_vendor_portal_dim_wk_rng.sql"],
+                "input_details": [
+                    {
+					"conn_name": "__S3_NAP_READ_WK_RNG_CAL__",
+					"sql_table_reference": "week_range"
+					}
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__S3_DAS_MERCH_WRITE_WK_RNG_DAT__",
+                        "sql_table_reference": "week_range"
+                    }
+                ]
+            }
+		}
+	},
+	"JOB_1_1": {
+		"EXPORT_DEPT_DATA": {
+			"tpt_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TPT_SOURCE__",
+            "text_delimiter_hexa_flag": "'Y'",
+            "text_delimiter": "01",
+			"quoted_flag": "N",
+			"quoted_data": "''",
+			"database_name": "{db_env}_NAP_BASE_VWS",
+			"table_name": "MERCH_TRANSACTION_STYLE_STORE_WEEK_AGG_FACT",
+            "s3_file_path": "s3://{tpt_bucket_name}/vendor_portal/bkup/vndr_portal_dept/vndr_portal_dept.csv",
+            "sql_file_name": "wr_vendor_portal_dim_department.sql"
+          }
+        ],
+        "output_details": []
+      }
+    }
+  },
+  "JOB_2_1": {
+		"READ_DEPT_DATA": {
+			"spark_engine": {
+				"spark_run_mode": "high",
+                "scripts": ["rd_vendor_portal_dim_department.sql"],
+                "input_details": [
+                    {
+					"conn_name": "__S3_NAP_READ_DEPT_CAL__",
+					"sql_table_reference": "vndr_portal_dept"
+					}
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__S3_DAS_MERCH_WRITE_DEPT_DAT__",
+                        "sql_table_reference": "vndr_portal_dept"
+                    }
+                ]
+            }
+		}
+	},
+	"JOB_1_2": {
+		"EXPORT_LOC_DATA": {
+			"tpt_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TPT_SOURCE__",
+            "text_delimiter_hexa_flag": "'Y'",
+            "text_delimiter": "01",
+			"quoted_flag": "N",
+			"quoted_data": "''",
+			"database_name": "{db_env}_NAP_BASE_VWS",
+			"table_name": "MERCH_TRANSACTION_STYLE_STORE_WEEK_AGG_FACT",
+            "s3_file_path": "s3://{tpt_bucket_name}/vendor_portal/bkup/vndr_portal_loc/vndr_portal_loc.csv",
+            "sql_file_name": "wr_vendor_portal_dim_location.sql"
+          }
+        ],
+        "output_details": []
+      }
+    }
+  },
+  "JOB_2_2": {
+		"READ_LOC_DATA": {
+			"spark_engine": {
+				"spark_run_mode": "high",
+                "scripts": ["rd_vendor_portal_dim_location.sql"],
+                "input_details": [
+                    {
+					"conn_name": "__S3_NAP_READ_LOC_CAL__",
+					"sql_table_reference": "vndr_portal_loc"
+					}
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__S3_DAS_MERCH_WRITE_LOC_DAT__",
+                        "sql_table_reference": "vndr_portal_loc"
+                    }
+                ]
+            }
+		}
+	},
+	"JOB_1_3": {
+		"EXPORT_SUPP_DATA": {
+			"tpt_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TPT_SOURCE__",
+            "text_delimiter_hexa_flag": "'Y'",
+            "text_delimiter": "01",
+			"quoted_flag": "N",
+			"quoted_data": "''",
+			"database_name": "{db_env}_NAP_BASE_VWS",
+			"table_name": "MERCH_TRANSACTION_STYLE_STORE_WEEK_AGG_FACT",
+            "s3_file_path": "s3://{tpt_bucket_name}/vendor_portal/bkup/vndr_portal_supp/vndr_portal_supp.csv",
+            "sql_file_name": "wr_vendor_portal_dim_supplier.sql"
+          }
+        ],
+        "output_details": []
+      }
+    }
+  },
+  "JOB_2_3": {
+		"READ_SUPP_DATA": {
+           "spark_engine": {
+				"spark_run_mode": "high",
+                "scripts": ["rd_vendor_portal_dim_supplier.sql"],
+                "input_details": [
+                    {
+					"conn_name": "__S3_NAP_READ_SUPP_CAL__",
+					"sql_table_reference": "vndr_portal_supp"
+					}
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__S3_DAS_MERCH_WRITE_SUPP_DAT__",
+                        "sql_table_reference": "vndr_portal_supp"
+                    }
+                ]
+            }
+		}
+	},
+	"JOB_1_4": {
+		"EXPORT_SKU_DATA": {
+           "tpt_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TPT_SOURCE__",
+            "text_delimiter_hexa_flag": "'Y'",
+            "text_delimiter": "01",
+			"quoted_flag": "N",
+			"quoted_data": "''",
+			"database_name": "{db_env}_NAP_BASE_VWS",
+			"table_name": "MERCH_TRANSACTION_STYLE_STORE_WEEK_AGG_FACT",
+            "s3_file_path": "s3://{tpt_bucket_name}/vendor_portal/bkup/vndr_portal_sku/vndr_portal_sku.csv",
+            "sql_file_name": "wr_vendor_portal_dim_sku.sql"
+          }
+        ],
+        "output_details": []
+      }
+    }
+  },
+  "JOB_2_4": {
+		"READ_SKU_DATA": {
+			"spark_engine": {
+				"spark_run_mode": "high",
+                "scripts": ["rd_vendor_portal_dim_sku.sql"],
+                "input_details": [
+                    {
+					"conn_name": "__S3_NAP_READ_SKU_CAL__",
+					"sql_table_reference": "vndr_portal_sku"
+					}
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__S3_DAS_MERCH_WRITE_SKU_DAT__",
+                        "sql_table_reference": "vndr_portal_sku"
+                    }
+                ]
+            }
+		}
+	},
+	"JOB_1_5": {
+		"EXPORT_STYLE_DATA": {
+           "tpt_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TPT_SOURCE__",
+			"text_delimiter_hexa_flag": "'Y'",
+            "text_delimiter": "01",
+			"quoted_flag": "N",
+			"quoted_data": "''",
+			"database_name": "{db_env}_NAP_BASE_VWS",
+			"table_name": "MERCH_TRANSACTION_STYLE_STORE_WEEK_AGG_FACT",
+            "s3_file_path": "s3://{tpt_bucket_name}/vendor_portal/bkup/vndr_portal_style/vndr_portal_style.csv",
+            "sql_file_name": "wr_vendor_portal_dim_style.sql"
+          }
+        ],
+        "output_details": []
+      }
+    }
+  },
+  "JOB_2_5": {
+		"READ_STYLE_DATA": {
+			"spark_engine": {
+				"spark_run_mode": "high",
+                "scripts": ["rd_vendor_portal_dim_style.sql"],
+                "input_details": [
+                    {
+					"conn_name": "__S3_NAP_READ_STYLE_CAL__",
+					"sql_table_reference": "vndr_portal_style"
+					}
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__S3_DAS_MERCH_WRITE_STYLE_DAT__",
+                        "sql_table_reference": "vndr_portal_style"
+                    }
+                ]
+            }
+		}
+	},
+	"JOB_1_6": {
+		"EXPORT_VPN_DATA": {
+            "tpt_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TPT_SOURCE__",
+            "text_delimiter_hexa_flag": "'Y'",
+            "text_delimiter": "01",
+			"quoted_flag": "N",
+			"quoted_data": "''",
+			"database_name": "{db_env}_NAP_BASE_VWS",
+			"table_name": "MERCH_TRANSACTION_STYLE_STORE_WEEK_AGG_FACT",
+            "s3_file_path": "s3://{tpt_bucket_name}/vendor_portal/bkup/vndr_portal_vpn/vndr_portal_vpn.csv",
+            "sql_file_name": "wr_vendor_portal_rpt_vpn.sql"
+          }
+        ],
+        "output_details": []
+      }
+    }
+  },
+  "JOB_2_6": {
+		"READ_VPN_DATA": {
+			"spark_engine": {
+				"spark_run_mode": "high",
+                "scripts": ["rd_vendor_portal_rpt_vpn.sql"],
+                "input_details": [
+                    {
+					"conn_name": "__S3_NAP_READ_VPN_CAL__",
+					"sql_table_reference": "vndr_portal_vpn"
+					}
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__S3_DAS_MERCH_WRITE_VPN_DAT__",
+                        "sql_table_reference": "vndr_portal_vpn"
+                    }
+                ]
+            }
+		}
+	},
+	"JOB_1_7": {
+		"EXPORT_DEPT_LOC_DATA": {
+            "tpt_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TPT_SOURCE__",
+            "text_delimiter_hexa_flag": "'Y'",
+            "text_delimiter": "01",
+			"quoted_flag": "N",
+			"quoted_data": "''",
+			"database_name": "{db_env}_NAP_BASE_VWS",
+			"table_name": "merch_transaction_sbclass_store_week_agg_fact",
+            "s3_file_path": "s3://{tpt_bucket_name}/vendor_portal/bkup/vndr_portal_dept_loc/vndr_portal_dept_loc.csv",
+            "sql_file_name": "wr_vendor_portal_rpt_dep_loc.sql"
+          }
+        ],
+        "output_details": []
+      }
+    }
+  },
+  "JOB_2_7": {
+		"READ_DEPT_LOC_DATA": {
+			"spark_engine": {
+				"spark_run_mode": "high",
+                "scripts": ["rd_vendor_portal_rpt_dep_loc.sql"],
+                "input_details": [
+                    {
+					"conn_name": "__S3_NAP_READ_DEPT_LOC_CAL__",
+					"sql_table_reference": "vndr_portal_dept_loc"
+					}
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__S3_DAS_MERCH_WRITE_DEPT_LOC_DAT__",
+                        "sql_table_reference": "vndr_portal_dept_loc"
+                    }
+                ]
+            }
+		}
+	},
+	"JOB_1_8": {
+		"EXPORT_COLOR_SIZE_DATA": {
+            "tpt_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TPT_SOURCE__",
+            "text_delimiter_hexa_flag": "'Y'",
+            "text_delimiter": "01",
+			"quoted_flag": "N",
+			"quoted_data": "''",
+			"database_name": "{db_env}_NAP_BASE_VWS",
+			"table_name": "merch_transaction_sbclass_store_week_agg_fact",
+            "s3_file_path": "s3://{tpt_bucket_name}/vendor_portal/bkup/vndr_portal_color_size/vndr_portal_color_size.csv",
+            "sql_file_name": "wr_vendor_portal_rpt_color_size.sql"
+          }
+        ],
+        "output_details": []
+      }
+    }
+  },
+  "JOB_2_8": {
+		"READ_COLOR_SIZE_DATA": {
+			"spark_engine": {
+				"spark_run_mode": "high",
+                "scripts": ["rd_vendor_portal_rpt_color_size.sql"],
+                "input_details": [
+                    {
+					"conn_name": "__S3_NAP_READ_COLOR_SIZE_CAL__",
+					"sql_table_reference": "vndr_portal_color_size"
+					}
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__S3_DAS_MERCH_WRITE_COLOR_SIZE_DAT__",
+                        "sql_table_reference": "vndr_portal_color_size"
+                    }
+                ]
+            }
+		}
+	},
+	"JOB_1_9": {
+		"EXPORT_TY_LY_DATA": {
+            "tpt_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TPT_SOURCE__",
+            "text_delimiter_hexa_flag": "'Y'",
+            "text_delimiter": "01",
+			"quoted_flag": "N",
+			"quoted_data": "''",
+			"database_name": "{db_env}_NAP_BASE_VWS",
+			"table_name": "merch_transaction_sbclass_store_week_agg_fact",
+            "s3_file_path": "s3://{tpt_bucket_name}/vendor_portal/bkup/vndr_portal_dept_loc_ty_ly/vndr_portal_dept_loc_ty_ly.csv",
+            "sql_file_name": "wr_vendor_portal_rpt_ty_ly.sql"
+          }
+        ],
+        "output_details": []
+      }
+    }
+  },
+  "JOB_2_9": {
+		"READ_TY_LY_DATA": {
+			"spark_engine": {
+				"spark_run_mode": "high",
+                "scripts": ["rd_vendor_portal_rpt_ty_ly.sql"],
+                "input_details": [
+                    {
+					"conn_name": "__S3_NAP_READ_TY_LY_CAL__",
+					"sql_table_reference": "vndr_portal_dept_loc_ty_ly"
+					}
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__S3_DAS_MERCH_WRITE_TY_LY_DAT__",
+                        "sql_table_reference": "vndr_portal_dept_loc_ty_ly"
+                    }
+                ]
+            }
+		}
+	},
+	"JOB_3_6": {
+		"EXPORT_VPN_HIST_DATA": {
+            "tpt_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TPT_SOURCE__",
+            "text_delimiter_hexa_flag": "'Y'",
+            "text_delimiter": "01",
+			"quoted_flag": "N",
+			"quoted_data": "''",
+			"database_name": "{db_env}_NAP_BASE_VWS",
+			"table_name": "merch_transaction_sbclass_store_week_agg_fact",
+            "s3_file_path": "s3://{tpt_bucket_name}/vendor_portal/bkup/vndr_portal_vpn_hst/vndr_portal_vpn_hst.csv",
+            "sql_file_name": "wr_vendor_portal_rpt_vpn_hist.sql"
+          }
+        ],
+        "output_details": []
+      }
+    }
+  },
+	"JOB_3_7": {
+		"EXPORT_DEPT_LOC_HIST_DATA": {
+            "tpt_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TPT_SOURCE__",
+            "text_delimiter_hexa_flag": "'Y'",
+            "text_delimiter": "01",
+			"quoted_flag": "N",
+			"quoted_data": "''",
+			"database_name": "{db_env}_NAP_BASE_VWS",
+			"table_name": "merch_transaction_sbclass_store_week_agg_fact",
+            "s3_file_path": "s3://{tpt_bucket_name}/vendor_portal/bkup/vndr_portal_dept_loc_hst/vndr_portal_dept_loc_hst.csv",
+            "sql_file_name": "wr_vendor_portal_rpt_dep_loc_hist.sql"
+          }
+        ],
+        "output_details": []
+      }
+    }
+  },
+	"JOB_3_8": {
+		"EXPORT_COLOR_SIZE_HIST_DATA": {
+            "tpt_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TPT_SOURCE__",
+            "text_delimiter_hexa_flag": "'Y'",
+            "text_delimiter": "01",
+			"quoted_flag": "N",
+			"quoted_data": "''",
+			"database_name": "{db_env}_NAP_BASE_VWS",
+			"table_name": "merch_transaction_sbclass_store_week_agg_fact",
+            "s3_file_path": "s3://{tpt_bucket_name}/vendor_portal/bkup/vndr_portal_color_size_hst/vndr_portal_color_size_hst.csv",
+            "sql_file_name": "wr_vendor_portal_rpt_color_size_hist.sql"
+          }
+        ],
+        "output_details": []
+      }
+    }
+  },
+	"JOB_3_9": {
+		"EXPORT_TY_LY_HIST_DATA": {
+            "tpt_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TPT_SOURCE__",
+            "text_delimiter_hexa_flag": "'Y'",
+            "text_delimiter": "01",
+			"quoted_flag": "N",
+			"quoted_data": "''",
+			"database_name": "{db_env}_NAP_BASE_VWS",
+			"table_name": "merch_transaction_sbclass_store_week_agg_fact",
+            "s3_file_path": "s3://{tpt_bucket_name}/vendor_portal/bkup/vndr_portal_dept_loc_ty_ly_hst/vndr_portal_dept_loc_ty_ly_hst.csv",
+            "sql_file_name": "wr_vendor_portal_rpt_ty_ly_hist.sql"
+          }
+        ],
+        "output_details": []
+      }
+    }
+  },
+  "JOB_4_0": {
+		"DEL_BKUP_DATA": {
+			"spark_engine": {
+				"spark_run_mode": "high",
+                "scripts": ["vendor_portal_delete_bkup.sql"],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "__S3_DAS_MERCH_WRITE_DEL_BKUP_DAT__",
+                        "sql_table_reference": "bkup"
+                    }
+                ]
+            }
+		}
+	},
+	"JOB_5_0": {
+    "etl_batch_updt": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_BASE_VWS__",
+            "scripts": [
+              "merch_nap_vndr_end_batch_date_updt.sql"
+            ]
+          }
+        ]
+      }
+    }  
+  }
+}

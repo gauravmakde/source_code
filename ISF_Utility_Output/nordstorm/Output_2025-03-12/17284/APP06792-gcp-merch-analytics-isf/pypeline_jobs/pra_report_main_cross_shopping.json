@@ -1,0 +1,27 @@
+{
+    "dag_id": "pra_main_cross_shopping",
+    "dag_schedule": "00 08 * * MON",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "ACE.MerchPriceAlerts@nordstrom.com, dsa-app08348-cross-shopping@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "ACE.MerchPriceAlerts@nordstrom.com",
+    "stages": [
+        "run_teradata_sql_stg_0"
+    ],
+    "sql_env_vars": {
+        "environment_schema": "t2dl_das_crossshopping"
+    },
+    "run_teradata_sql_stg_0": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_SEL_BATCH__",
+                        "scripts": [
+                            "cross_shopping/pra_report_main_cross_shopping.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

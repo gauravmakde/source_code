@@ -1,0 +1,3 @@
+k8s_envs:
+  RESET_S3_BUCKET : tf-nap-prod-reset-landing
+  FRAUD_WORLDPAY_BIN_BUCKET : tf-nap-prod-master-merchant-bin-files

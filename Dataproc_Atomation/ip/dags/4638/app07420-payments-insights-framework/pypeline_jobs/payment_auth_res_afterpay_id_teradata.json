@@ -1,0 +1,20 @@
+{
+  "dag_id": "payment_auth_res_afterpay_id_teradata",
+  "stages": [
+    "payment_auth_res_afterpay_id_teradata_stg_to_teradata_fct_stage_0"
+  ],
+  "payment_auth_res_afterpay_id_teradata_stg_to_teradata_fct_stage_0": {
+    "teradata_stg_to_teradata_fct_job": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_FCT__",
+            "scripts": [
+              "teradata/payment_auth_result_afterpay_id_teradata_stg_to_teradata_fct.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

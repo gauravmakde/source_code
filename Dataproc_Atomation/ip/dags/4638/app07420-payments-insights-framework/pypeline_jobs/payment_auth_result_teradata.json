@@ -1,0 +1,48 @@
+{
+  "dag_id": "payment_auth_result_teradata",
+  "dag_schedule": "0 10-16/2 * * *",
+  "stages": [
+    "payment_auth_result_kafka_to_teradata_stg_stage_0"
+  ],
+  "payment_auth_result_kafka_to_teradata_stg_stage_0": {
+    "kafka_to_teradata_stg_job": {
+      "spark_engine": {
+        "spark_run_mode": "medium",
+        "scripts": [
+          "sparkSql/payment_auth_result_kafka_to_teradata_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__KAFKA_NAP_SOURCE_PAYMENTS__",
+            "sql_table_reference": "kafka_customer_payment_authorization_result_analytical_avro",
+            "data_source_name": "customer-payment-authorization-result-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_STG__",
+            "sql_table_reference": "payment_authorization_result_stg",
+            "data_source_name": "PAYMENT_AUTHORIZATION_RESULT_LDG"
+          },
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_STG__",
+            "sql_table_reference": "payment_bank_card_authorization_result_stg",
+            "data_source_name": "PAYMENT_BANK_CARD_AUTHORIZATION_RESULT_LDG"
+          }
+        ]
+      }
+    },
+    "teradata_stg_to_teradata_fct_job": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_FCT__",
+            "scripts": [
+              "teradata/payment_auth_result_teradata_stg_to_teradata_fct.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

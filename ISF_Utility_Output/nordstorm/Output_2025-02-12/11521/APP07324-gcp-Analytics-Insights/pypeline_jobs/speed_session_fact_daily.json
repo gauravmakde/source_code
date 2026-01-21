@@ -1,0 +1,84 @@
+{
+    "dag_id": "speed_session_fact_daily",
+    "dag_schedule": "30 18 * * *",
+    "prod_email_on_failure": "dsa-app08742-session-path-expanded-events-data-pipelines@nordstrom.pagerduty.com, sheeba.philip@nordstrom.com",
+    "nonprod_email_on_failure": "sheeba.philip@nordstrom.com",
+    "stages": [
+        "speed_hive_to_td"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-5",
+        "end_date": "current_date()-2"
+    },
+    "speed_hive_to_td": {
+        "job_0_check_speed": {
+            "python_executor": {
+                "module": "python/s3_file_sensor",
+                "version": "0.3.0",
+                "k8s_cpu_limit": 4,
+                "k8s_cpu_request": 3,
+                "k8s_memory_limit": "6Gi",
+                "k8s_memory_request": "2Gi",
+                "args": [
+                    "python/s3_file_sensor/main.py",
+                    "--function",
+                    "dir_check",
+                    "--bucket_nonprod",
+                    "",
+                    "--key_nonprod",
+                    "",
+                    "--bucket_prod",
+                    "tf-nap-prod-styling-intermediate",
+                    "--key_prod",
+                    "speed_tables/session_user_attributes/activity_date_partition=",
+                    "--max_retry_minutes",
+                    "60",
+                    "--dir_check_date_diff",
+                    "-3"
+                ]
+            }
+        },
+        "job_0_speed_session_fact_td_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_DEG",
+                        "scripts": [
+                            "speed/ddl/ddl_speed_session_fact_daily_ldg.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_1_speed_session_fact_hive_data_to_output": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "speed/speed_session_fact_daily_load.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_DEG",
+                        "sql_table_reference": "speed_session_fact_daily_ldg_output",
+                        "data_source_name": "speed_session_fact_daily_ldg"
+                    }
+                ]
+            }
+        },
+        "job_2_speed_session_fact_t2_table_from_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_DEG",
+                        "scripts": [
+                            "speed/speed_session_fact_daily.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

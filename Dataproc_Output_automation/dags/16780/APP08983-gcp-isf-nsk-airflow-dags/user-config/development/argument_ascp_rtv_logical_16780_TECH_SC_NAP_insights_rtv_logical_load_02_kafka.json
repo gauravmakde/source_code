@@ -1,0 +1,13 @@
+--app_config_file gs://test-data-datametica/app09392/isf-artifacts/app-config/emr_application_dev.json
+--app_id APP08983 
+--source_tables_details 'rtv_logical_avro={"source_type": "KAFKA", "kafka_cluster_name": "meadow", "vault_connection_name": "nordsecrets/application/APP09392/meadow/onix/oauth","kafka.sasl.mechanism": "OAUTHBEARER", "retry.backoff.ms": "500", "request.timeout.ms": "19000", "data_source_name": "ascp-rms-rtv-avro"}' 
+--target_tables_details 'rtv_rms_main_stg_err={"source_type": "GS", "format": "csv", "path": "gs://test-data-datametica/errors/rtv_rms_main_stg_err/"},rtv_rms_item_stg_err={"source_type": "GS", "format": "csv", "path": "gs://test-data-datametica/errors/rtv_rms_item_stg_err/"},rtv_logical_main_csv={"source_type": "BIGQUERY", "project": "jwn-nap-user1-nonprod-zmnb", "dataset": "DEV_NAP_STG", "table": "RTV_LOGICAL_LDG", "mode": "overwrite", "temp_bucket": "test-data-datametica"},rtv_logical_item_csv={"source_type": "BIGQUERY", "project": "jwn-nap-user1-nonprod-zmnb", "dataset": "DEV_NAP_STG", "table": "RTV_LOGICAL_ITEM_LDG", "mode": "overwrite", "temp_bucket": "test-data-datametica"},processed_data_spark_log_table={"source_type": "BIGQUERY", "project": "jwn-nap-user1-nonprod-zmnb", "dataset": "DEV_NAP_UTL", "table": "PROCESSED_DATA_SPARK_LOG", "mode": "overwrite","temp_bucket": "test-data-datametica"}'  
+--sql_file_location gs://test-data-datametica/app09392/isf-artifacts/sql/ascp_rtv_logical/read_rtv_logical_kafka_to_bigquery.sql  
+--stage_task_name ascp_rtv_logical_16780_TECH_SC_NAP_insights_rtv_logical_load_02_kafka  
+--offset_table '`jwn-nap-user1-nonprod-zmnb.onehop_etl_app_db.kafka_consumer_offset_batch_details`'
+--consumer_group_name onix-ascp-rms-rtv-avro_ascp_rtv_logical_16780_TECH_SC_NAP_insights_rtv_logical_load_02_kafka   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_ROLE_ID-Psikfr
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_SECRET_ID-themT6
+--aws_user_role_arn arn:aws:iam::290445963451:role/APP09392_AWS_Secrets_Role
+--aws_user_role_external_id=testUser
+--gcp_project_id jwn-nap-user1-nonprod-zmnb

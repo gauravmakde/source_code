@@ -1,0 +1,114 @@
+{
+  "dag_id": "gift_card_rpt_attributes_dim_export",
+  "dag_schedule": "0 12 * * 4",
+  "prod_email_on_failure": "nap-marketing@nordstrom.pagerduty.com",
+  "nonprod_email_on_failure": "Andrii.Usatov@nordstrom.com",
+  "stages": [
+    "gc_rpt_attr_exp"
+  ],
+  "dag_dynamic_vars": {
+    "database_env": "eval('{\"nonprod\": \"DEV\",\"test\": \"DEV\", \"prod\": \"PRD\"}[env]')",
+    "bucket": "eval('{\"test\": \"tf-das-marketing-nonprod-teradata-stage\",\"nonprod\": \"tf-das-marketing-nonprod-teradata-stage\", \"prod\": \"tf-das-marketing-prod-teradata-stage\"}[env]')",
+    "to_addresses": "eval('{\"test\": \"notification-test-cha-aaaaj3bbztfzioluiilnrmvf2y@nordstrom.slack.com\",\"nonprod\": \"notification-test-cha-aaaaj3bbztfzioluiilnrmvf2y@nordstrom.slack.com\", \"prod\": \"gift-card-notificatio-aaaakastua7yjrcq26s6uh63ai@nordstrom.slack.com\"}[env]')",
+    "year": "eval('str(datetime.now().strftime(\"%Y\"))')",
+    "month": "eval('str(datetime.now().strftime(\"%m\"))')",
+    "day": "eval('str(datetime.now().strftime(\"%d\"))')"
+  },
+  "gc_rpt_attr_exp": {
+    "s3_delete": {
+      "python_executor": {
+        "module": "python/utils",
+        "version": "1.3.19",
+        "args": [
+          "python/utils/src/s3_delete.py",
+          "--s3_source_bucket_env_name",
+          "S3_MKTG_BUCKET",
+          "--s3_source_prefix_format",
+          "data/gift_card_static_export/stg/gift_card_rpt_attributes/"
+        ]
+      }
+    },
+    "teradata_job": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__GIFT_CARD_TERADATA_SOURCE__",
+            "scripts": [
+              "collect_gc_data_for_tpt_export.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "tpt_export": {
+      "tpt_engine": {
+        "input_details": [
+          {
+            "conn_name": "__GIFT_CARD_TPT_EXPORT__",
+            "database_name": "?database_env?_NAP_BASE_VWS",
+            "table_name": "GIFT_CARD_RPT_ATTRIBUTES_DIM",
+            "s3_file_path": "s3://{marketing_s3_data_bucket}/data/gift_card_static_export/stg/gift_card_rpt_attributes/gift_card_rpt_export_?year?_?month?_?day?.csv",
+            "control_db_name": "?database_env?_NAP_UTL",
+            "sql_file_name": "gift_card_rpt_attributes_dim_export.sql",
+            "text_delimiter_hexa_flag": "N",
+            "text_delimiter": ",",
+            "file_count": "1",
+            "quoted_flag": "Y",
+            "quoted_data": "\\\\\\\""
+          }
+        ]
+      }
+    },
+    "s3_copy": {
+      "python_executor": {
+        "module": "python/utils",
+        "version": "1.3.18",
+        "args": [
+          "python/utils/src/s3_copy.py",
+          "--s3_source_bucket_env_name",
+          "S3_MKTG_BUCKET",
+          "--s3_target_bucket_env_name",
+          "S3_MKTG_BUCKET",
+          "--s3_source_prefix_format",
+          "data/gift_card_static_export/stg/gift_card_rpt_attributes/",
+          "--s3_target_prefix_format",
+          "data/gift_card_static_export/hist/gift_card_rpt_attributes/year=<year>/month=<month>/day=<day>/"
+        ]
+      }
+    },
+    "send_slack_notification": {
+      "python_executor": {
+        "module": "python/utils",
+        "version": "1.3.18",
+        "args": [
+          "python/utils/src/send_email.py",
+          "--vault_host_env_var",
+          "VAULT_PATH",
+          "--vault_port_env_var",
+          "VAULT_PORT",
+          "--k8s_vault_role_id_env_var",
+          "VAULT_ROLE_ID",
+          "--k8s_vault_secret_id_env_var",
+          "VAULT_SECRET",
+          "--vault_email_key_env_var",
+          "MAIL_SA_VAULT_PATH",
+          "--vault_email_value_user_key",
+          "user",
+          "--vault_email_value_password_key",
+          "password",
+          "--mail_subject",
+          "[<month>-<day>-<year>] Gift Cards RPT_ATTRIBUTES export - Successful",
+          "--mail_body",
+          "Exported data location: s3://<bucket>/data/gift_card_static_export/hist/gift_card_rpt_attributes/year=<year>/month=<month>/day=<day>/gift_card_rpt_export_<year>_<month>_<day>.csv",
+          "--from_address",
+          "das_marketing_isf_mb_auto@nordstrom.com",
+          "--to_addresses",
+          "<to_addresses>",
+          "--replace_mapping",
+          "{{\"year\": \"?year?\", \"month\": \"?month?\", \"day\": \"?day?\", \"bucket\": \"?bucket?\", \"to_addresses\": \"?to_addresses?\"}}"
+        ]
+      }
+    }
+  }
+}
+

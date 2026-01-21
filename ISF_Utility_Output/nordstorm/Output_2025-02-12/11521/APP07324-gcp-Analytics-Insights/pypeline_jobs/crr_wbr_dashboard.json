@@ -1,0 +1,27 @@
+{
+    "dag_id": "crr_wbr_dashboard",
+    "dag_schedule": "0 4 * * 1",
+    "prod_email_on_failure": "t2app02602-npr-credit-refund-request-email.i4sd81av@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "deboleena.ganguly@nordstrom.com",
+    "stages": [
+        "run_terdata_sql"
+    ],
+    "sql_env_vars": {
+        "which_table": "NAP",
+        "tran_type_code_sale": "SALE"
+    },
+    "run_terdata_sql": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CRR",
+                        "scripts": [
+                            "npr_credit_refund_request/crr_wbr_dashboard.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

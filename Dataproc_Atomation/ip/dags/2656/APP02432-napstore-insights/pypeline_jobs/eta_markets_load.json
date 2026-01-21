@@ -1,0 +1,77 @@
+{
+  "dag_id": "eta_markets_load",
+  "dag_schedule": "00 15 * * *",
+  "stages": [
+    "eta_markets_data_load"
+  ],
+  "eta_markets_data_load": {
+    "load_0_node_s3_ldg": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "eta_markets_node_load.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__ETA_MARKETS_NODE_KAFKA__",
+            "sql_table_reference": "kafka_eta_markets_node_input",
+            "data_source_name": "inventory-local-market-node-mapping-operational-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "eta_markets_node_ldg_table",
+            "data_source_name": "LOCAL_MARKET_NODE_LDG"
+          }
+        ]
+      }
+    },
+    "load_1_node_dim_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "eta_markets_node_load_dim.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "load_2_postal_s3_ldg": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "eta_markets_postal_load.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__ETA_MARKETS_POSTAL_KAFKA__",
+            "sql_table_reference": "kafka_eta_markets_postal_input",
+            "data_source_name": "inventory-local-market-postal-mapping-operational-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "eta_markets_postal_ldg_table",
+            "data_source_name": "LOCAL_MARKET_POSTAL_LDG"
+          }
+        ]
+      }
+    },
+    "load_3_postal_dim_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "eta_markets_postal_load_dim.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

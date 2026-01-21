@@ -1,0 +1,36 @@
+{
+  "dag_id": "lp_camera_load",
+  "dag_schedule": "30 9 * * *",
+  "stages": [
+    "lpcamera_events_to_csv"
+  ],
+  "lpcamera_events_to_csv": {
+    "load_0_stg": {
+      "spark_engine": {
+        "spark_run_mode": "medium",
+        "scripts": [
+          "lp_camera_load_stg.sql"
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "lp_camera_stg" ,
+            "data_source_name": "STORE_TRAFFIC_STG"
+          }
+        ]
+      }
+    },
+    "load_1_fct": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "lp_camera_load_fct.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

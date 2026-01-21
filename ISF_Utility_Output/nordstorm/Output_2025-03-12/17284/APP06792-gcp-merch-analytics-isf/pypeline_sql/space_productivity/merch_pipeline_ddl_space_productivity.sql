@@ -1,0 +1,47 @@
+CALL SYS_MGMT.DROP_IF_EXISTS_SP ('{environment_schema}', 'space_productivity{env_suffix}', OUT_RETURN_MSG);
+
+CREATE MULTISET TABLE {environment_schema}.space_productivity{env_suffix} ,FALLBACK ,
+     NO BEFORE JOURNAL,
+     NO AFTER JOURNAL,
+     CHECKSUM = DEFAULT,
+     DEFAULT MERGEBLOCKRATIO,
+     MAP = TD_MAP1
+     (
+      chnl_idnt INTEGER,
+      department VARCHAR(100) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      subdepartment VARCHAR(100) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      selling_type VARCHAR(50) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      store_num INTEGER,
+      store_name VARCHAR(150) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      comp_status_desc VARCHAR(60) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      region_detail VARCHAR(206) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      region VARCHAR(206) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      month_num INTEGER,
+      fiscal_year_num INTEGER,
+      area_sq_ft INTEGER,
+      net_sales_retail DECIMAL(38,9),
+      net_sales_cost DECIMAL(38,9),
+      eoh_r FLOAT,
+      eoh_c FLOAT,
+      store_sq_ft INTEGER,
+      pct_store_sq_ft DECIMAL(38,3),
+      no_space_ind BYTEINT,
+      store_volume DECIMAL(38,9),
+      pct_store_volume DECIMAL(38,12),
+      rank_area_fleet INTEGER,
+      rank_sales_fleet INTEGER,
+      sales_psf DECIMAL(38,9),
+      rank_sales_psf_fleet INTEGER,
+      eoh_r_psf FLOAT,
+      eoh_c_psf FLOAT,
+      gm_pct DECIMAL(38,9),
+      rank_gm_fleet INTEGER,
+      rank_pct_store_fleet INTEGER,
+      rank_volume_fleet INTEGER,
+      level VARCHAR(21) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      timeframe VARCHAR(5) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      store_city VARCHAR(150) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      updated_timestamp TIMESTAMP(6) WITH TIME ZONE)
+PRIMARY INDEX (store_num, month_num, subdepartment, level, timeframe );
+
+GRANT SELECT ON {environment_schema}.space_productivity{env_suffix} TO PUBLIC;

@@ -1,0 +1,26 @@
+{
+    "dag_id": "recs_dash",
+    "prod_email_on_failure": "dsa-app08742-session-path-expanded-events-data-pipelines@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "sobhan.nazari@nordstrom.com",
+    "stages": [
+        "run_hive_hive_recs_dashboard_sql"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-5",
+        "end_date": "current_date()-5"
+    },
+    "run_hive_hive_recs_dashboard_sql": {
+        "job_0": {
+            "spark_engine": {
+                "spark_run_mode": "high",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "recs/recs_dash.sql"
+                ],
+                "input_details": [],
+                "output_details": []
+            }
+        }
+    }
+}

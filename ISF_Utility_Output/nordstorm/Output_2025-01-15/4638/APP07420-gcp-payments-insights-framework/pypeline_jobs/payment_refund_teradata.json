@@ -1,0 +1,99 @@
+{
+  "dag_id": "payment_refund_teradata",
+  "dag_schedule": "0 3/4 * * *",
+  "stages": [
+    "payment_refund_kafka_to_teradata_stg_stage_1",
+    "payment_refund_hdr_td_stg_to_td_fct_stage_2",
+    "payment_refund_tender_td_stg_to_td_fct_stage_3"
+  ],
+  "stage_dependencies": {
+    "payment_refund_kafka_to_teradata_stg_stage_1": [
+      "payment_refund_hdr_td_stg_to_td_fct_stage_2",
+      "payment_refund_tender_td_stg_to_td_fct_stage_3"
+    ]
+  },
+  "payment_refund_kafka_to_teradata_stg_stage_1": {
+    "refund_succeeded_V2_kafka_to_teradata_stg_job": {
+      "spark_engine": {
+        "spark_run_mode": "medium",
+        "scripts": [
+          "sparkSql/payment_refund_succeeded_v2_kafka_to_teradata_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "KAFKA_NAP_SOURCE_PAYMENTS_REFUND_SUCCEEDED_V2",
+            "sql_table_reference": "kafka_payment_refund_succeeded_v2",
+            "data_source_name": "order-events-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_STG__",
+            "sql_table_reference": "payment_refund_success_hdr_stg",
+            "data_source_name": "PAYMENT_REFUND_HDR_LDG"
+          },
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_STG__",
+            "sql_table_reference": "payment_refund_success_tender_stg",
+            "data_source_name": "PAYMENT_REFUND_TENDER_LDG"
+          }
+        ]
+      }
+    },
+    "refund_failed_V2_kafka_to_teradata_stg_job": {
+      "spark_engine": {
+        "spark_run_mode": "medium",
+        "scripts": [
+          "sparkSql/payment_refund_failed_v2_kafka_to_teradata_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "KAFKA_NAP_SOURCE_PAYMENTS_REFUND_FAILED_V2",
+            "sql_table_reference": "kafka_payment_refund_failed_v2",
+            "data_source_name": "order-events-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_STG__",
+            "sql_table_reference": "payment_refund_failed_hdr_stg",
+            "data_source_name": "PAYMENT_REFUND_HDR_LDG"
+          },
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_STG__",
+            "sql_table_reference": "payment_refund_failed_tender_stg",
+            "data_source_name": "PAYMENT_REFUND_TENDER_LDG"
+          }
+        ]
+      }
+    }
+  },
+  "payment_refund_hdr_td_stg_to_td_fct_stage_2": {
+    "payment_refund_hdr_td_stg_to_td_fct_job": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_FCT__",
+            "scripts": [
+              "teradata/payment_refund_hdr_stg_to_teradata_fct.sql"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "payment_refund_tender_td_stg_to_td_fct_stage_3": {
+    "payment_refund_tender_td_stg_to_td_fct_job": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_FCT__",
+            "scripts": [
+              "teradata/payment_refund_tender_stg_to_teradata_fct.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

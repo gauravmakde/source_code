@@ -1,0 +1,55 @@
+{
+  "dag_id": "wfm_time_off_request_load",
+  "dag_schedule": "0 15 * * *",
+  "stages": [
+    "wfm_time_off_request"
+  ],
+  "wfm_time_off_request": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "wfm_time_off_request_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__WFM_TIME_OFF_REQUEST_KAFKA__",
+            "sql_table_reference": "kafka_wfm_time_off_request_input",
+            "data_source_name": "customer-time-off-request-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__WFM_TIME_OFF_REQUEST_KAFKA_TO_S3_ORC__",
+            "sql_table_reference": "wfm_time_off_request_orc_output"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_time_off_request_stg_table",
+            "data_source_name": "TIME_OFF_REQUEST_STG"
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_time_off_request_details_stg_table",
+            "data_source_name": "TIME_OFF_REQUEST_DETAILS_STG"
+          }
+        ]
+      }
+    },
+    "load_1_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "wfm_time_off_request_load_fact.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+
+

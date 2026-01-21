@@ -1,0 +1,83 @@
+{
+  "dag_id": "supplier_size",
+  "dag_schedule": "0 15 * * *",
+  "prod_email_on_failure": "nap-merch-analytics@nordstrom.pagerduty.com",
+  "dag_sla_minutes": "90",
+  "nonprod_email_on_failure": "DASProduct@nordstrom.com",
+  "stages": [
+    "load"
+  ],
+  "load": {
+    "elt_control_start_updt":{
+      "teradata_engine":{
+        "input_details":[
+          {
+            "conn_name":"__TERADATA_SOURCE__",
+            "scripts":[
+              "supplier_size/elt_control_start_updt.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "clear_ldg":{
+      "teradata_engine":{
+        "input_details":[
+          {
+            "conn_name":"__TERADATA_SOURCE__",
+            "scripts":[
+              "supplier_size/clean_staging_table.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "kafka_to_landing": {
+      "spark_engine": {
+        "spark_run_mode": "high",
+        "scripts": [
+          "supplier_size/read_kafka_write_teradata.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__KAFKA_SOURCE__",
+            "sql_table_reference": "kafka_product_item_supplier_size_object_model_avro",
+            "data_source_name":"product-item-supplier-size-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_SOURCE__",
+            "sql_table_reference": "ITEM_SUPPLIER_SIZE_LDG",
+            "data_source_name": "ITEM_SUPPLIER_SIZE_LDG"
+          }
+        ]
+      }
+    },
+    "ldg_to_dim": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_SOURCE__",
+            "scripts": [
+              "supplier_size/ldg_to_dim.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "elt_control_end_updt":{
+      "teradata_engine":{
+        "input_details":[
+          {
+            "conn_name":"__TERADATA_SOURCE__",
+            "scripts":[
+              "supplier_size/collect_stats.sql",
+              "supplier_size/elt_control_end_updt.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

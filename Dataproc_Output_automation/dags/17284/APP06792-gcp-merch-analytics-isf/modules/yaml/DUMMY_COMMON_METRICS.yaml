@@ -1,0 +1,11 @@
+- subject: COMMON
+  metric_name: spark_processed_rows
+  sql: "select
+           count(*)
+        from
+         {DBENV}_nap_utl.Test"
+  metric_value_position: 0
+  tags:
+    - isf_dag_nm: 0
+    - ldg_tbl_nm: 0
+    - execution_date: 0

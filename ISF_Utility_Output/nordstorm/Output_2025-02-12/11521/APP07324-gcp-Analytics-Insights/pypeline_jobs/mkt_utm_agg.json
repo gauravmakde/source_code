@@ -1,0 +1,53 @@
+{
+    "dag_id": "mkt_utm_agg",
+    "dag_schedule": "50 6 * * *",
+    "timezone": "US/Pacific",
+    "dag_sla_minutes": "170",
+    "prod_email_on_failure": "app08047-mta@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "yesenia.garcia@nordstrom.com",
+    "dependencies": {
+        "upstream": {
+            "dags": [
+                {
+                    "external_dag_id": "mta_11521_ACE_ENG",
+                    "retries": 3,
+                    "poke_interval": 120,
+                    "timeout": 3600
+                },
+                {
+                    "external_dag_id": "analytical_session_fact_11521_ACE_ENG",
+                    "retries": 3,
+                    "poke_interval": 120,
+                    "timeout": 3600
+                }
+            ]
+        },
+        "downstream": {
+            "dags": [
+                "mta_paid_campaign_daily_11521_ACE_ENG",
+                "refresh_mkt_utm_agg_11521_ACE_ENG"
+            ]
+        }
+    },
+    "stages": [
+        "run_teradata_sql"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-5",
+        "end_date": "current_date()-1"
+    },
+    "run_teradata_sql": {
+        "job_0_mkt_utm_agg_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTA",
+                        "scripts": [
+                            "mta/mkt_utm_agg.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

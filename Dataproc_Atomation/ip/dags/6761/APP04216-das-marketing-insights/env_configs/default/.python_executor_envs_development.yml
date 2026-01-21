@@ -1,0 +1,19 @@
+k8s_envs:
+  S3_MKTG_BUCKET: tf-das-marketing-nonprod-teradata-stage
+  S3_MMM_BUCKET: nonprod-mmm-marketing-mix-model
+  S3_OPTIMINE_BUCKET: nonprod-mft-optimine
+  ENV : development
+  TD_ENV : DEV
+  TD_HOST : tdnapqa.nordstrom.net
+  TD_VAULT_PATH : data/application/APP04216/6761/das_marketing/das-marketing-insights/dev/teradata/teradta_db_credentials
+  NR_VAULT_PATH : data/application/APP04216/6761/das_marketing/das-marketing-insights/dev/newrelic/newrelic_ingest_key
+  MAIL_SA_VAULT_PATH : data/application/APP04216/6761/das_marketing/das-marketing-insights/prod/service_account/sa_credentials
+  VAULT_PATH : vpce-01f9458aff654a035-ng0ubact.vpce-svc-00627e41a40fb1e3c.us-west-2.vpce.amazonaws.com
+  VAULT_PORT : 8200
+k8s_envs_secrets:
+  VAULT_ROLE_ID:
+    name : vault
+    key : roleid
+  VAULT_SECRET:
+    name : vault
+    key : secret

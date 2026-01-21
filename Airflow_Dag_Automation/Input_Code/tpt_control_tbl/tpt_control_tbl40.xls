@@ -1,15 +1,0 @@
-﻿SELECT * FROM T2DL_DAS_CRR.tpt_control_tbl;
-
-8 Rows returned. DBS time = 00:00:01
-
-BLOB/CLOB files written to: C:\Users\x0tf\Documents
-
-job_name,database_name,object_name,object_type,batchusername,truncateindicator,errorlimit,textdelimiter_hexa_flag,textdelimiter,AcceptExcessColumns,AcceptMissingColumns,QuotedData,OpenQuoteMark,s3bucket,s3prefix,s3singlepartfile,s3connectioncount,collist_indicator_flag,collist,rcd_load_tmstp,rcd_update_tmstp,HeaderRcdIndicator,AllFilesHeaderRcdIndicator,APP_ID,DAG_ID,TASK_NAME
-crr_model_output_tpt_load_val_high_test,T2DL_DAS_CRR,crr_model_output_tpt_load_val_high_test,T,T2DL_NAP_CRR_BATCH,Y,0,N,,,N  ,N  ,N,?,?,?,TRUE,20,N,?,1/29/2024 17:47:20.000000,1/29/2024 17:47:20.000000,Y,Y,?,?,?
-crr_model_output_tpt_load,T2DL_DAS_CRR,crr_model_output_tpt_load,T,T2DL_NAP_CRR_BATCH,N,0,N,,,N  ,N  ,N,?,?,?,TRUE,20,N,?,3/23/2023 12:50:00.230000,3/23/2023 12:50:00.230000,Y,Y,?,?,?
-crr_model_output_tpt_load_val_low_test,T2DL_DAS_CRR,crr_model_output_tpt_load_val_low_test,T,T2DL_NAP_CRR_BATCH,Y,0,N,,,N  ,N  ,N,?,?,?,TRUE,20,N,?,1/29/2024 17:48:51.000000,1/29/2024 17:48:51.000000,Y,Y,?,?,?
-crr_xbr_model_output_test,T2DL_DAS_CRR,crr_xbr_model_output_test,T,T2DL_NAP_CRR_BATCH,Y,0,N,,,N  ,N  ,N,?,?,?,TRUE,20,N,?,8/9/2023 17:34:09.000000,8/9/2023 17:34:09.000000,Y,Y,?,?,?
-crr_model_output_tpt_load_val_high,T2DL_DAS_CRR,crr_model_output_tpt_load_val_high,T,T2DL_NAP_CRR_BATCH,Y,0,N,,,N  ,N  ,N,?,?,?,TRUE,20,N,?,8/9/2023 17:27:42.000000,8/9/2023 17:27:42.000000,Y,Y,?,?,?
-crr_model_output_tpt_load_val_low,T2DL_DAS_CRR,crr_model_output_tpt_load_val_low,T,T2DL_NAP_CRR_BATCH,Y,0,N,,,N  ,N  ,N,?,?,?,TRUE,20,N,?,8/9/2023 17:23:28.000000,8/9/2023 17:23:28.000000,Y,Y,?,?,?
-user_agent_temp,T2DL_DAS_CRR,user_agent_temp,T,T2DL_NAP_CRR_BATCH,Y,0,N,,,N  ,N  ,N,?,?,?,TRUE,20,N,?,8/15/2023 14:54:48.000000,8/15/2023 14:54:48.000000,Y,Y,?,?,?
-crr_nefi_input,T2DL_DAS_CRR,crr_nefi_input,T,T2DL_NAP_CRR_BATCH,N,0,N,,,N  ,N  ,N,?,?,?,TRUE,20,N,?,8/11/2023 13:26:39.000000,8/11/2023 13:26:39.000000,Y,Y,?,?,?

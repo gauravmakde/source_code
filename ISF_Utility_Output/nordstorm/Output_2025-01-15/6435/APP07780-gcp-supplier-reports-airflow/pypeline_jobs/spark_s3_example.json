@@ -1,0 +1,32 @@
+{
+    "dag_id": "spark_s3_example",
+    "dag_schedule": "0 11 * * *",
+    "prod_email_on_failure":"tech_isf_team_arkansas@nordstrom.com",
+    "nonprod_email_on_failure":"tech_isf_team_arkansas@nordstrom.com",
+    "stages": [
+      "read_write_kafka_jdbc_s3_stage_0"
+    ],
+    "read_write_kafka_jdbc_s3_stage_0": {
+      "job_1": {
+        "spark_engine": {
+          "spark_run_mode": "medium",
+          "scripts": [
+            "spark_s3_example.sql"
+          ],
+          "input_details": [
+            {
+              "conn_name": "KAFKA_NAP_SINK_READ_FROM_LATEST",
+              "sql_table_reference": "kafka_cpp_object_model_avro",
+              "data_source_name": "customer-activity-arrived-avro"
+            }
+          ],
+          "output_details": [
+            {
+              "conn_name": "S3_NAP_WRITE_TEST",
+              "sql_table_reference": "s3_cpp_object_tbl_parquet_write"
+            }
+          ]
+        }
+      }
+    }
+  }

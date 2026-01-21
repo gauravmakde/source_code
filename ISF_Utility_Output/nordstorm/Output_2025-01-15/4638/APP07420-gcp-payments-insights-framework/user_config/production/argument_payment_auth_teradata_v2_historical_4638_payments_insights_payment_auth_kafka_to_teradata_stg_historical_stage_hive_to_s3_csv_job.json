@@ -1,0 +1,9 @@
+--app_config_file gs://prod-nap-dataplex-internal/app09203/isf-artifacts/app-config/emr_application_prod.json   
+--app_id app07420  
+--target_tables_details 'PAYMENT_AUTHORIZATION_HDR_V2_LDG={"source_type": "S3", "format": "csv", "path": "s3://tf-nap-prod-payments-object-model-presentation/data/csv/customer-payment-authorization-analytical-avro/", "header": "false"},PAYMENT_AUTHORIZATION_TENDER_V2_LDG={"source_type": "S3", "format": "csv", "path": "s3://tf-nap-prod-payments-object-model-presentation/data/csv/customer-payment-authorization-analytical-avro/", "header": "false"}'  
+--sql_file_location s3://tf-nap-prod-credit-payments-isf-airflow/apps/etl_framework/airflow_nsk_dag_job_artifacts/prod/4638/payments/insights/sql/sparkSql/payment_auth_teradata_v2_historical_4638_payments_insights_payment_auth_kafka_to_teradata_stg_historical_stage_payment_auth_kafka_to_teradata_stg_historical_v2.sql  
+--stage_task_name payment_auth_teradata_v2_historical_4638_payments_insights_payment_auth_kafka_to_teradata_stg_historical_stage_hive_to_s3_csv_job  
+--offset_table '`jwn-nap-dataplex-prod-emue.nap_credit_and_payments_isf_kafka_offsets.kafka_consumer_offset_batch_details`'
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:594668836985:secret:VAULT_APPROLE_ROLE_ID  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:594668836985:secret:VAULT_APPROLE_SECRET_ID  
+--aws_user_role_arn arn:aws:iam::594668836985:role/big_data/tf-nap-prod-payments-big-data 

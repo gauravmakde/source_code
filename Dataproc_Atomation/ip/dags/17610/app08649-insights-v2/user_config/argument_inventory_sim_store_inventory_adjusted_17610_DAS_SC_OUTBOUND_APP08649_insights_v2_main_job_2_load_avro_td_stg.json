@@ -1,0 +1,11 @@
+--app_config_file s3://napstoreinvtry-prod-common-etl/apps/etl_framework/prod/application_config/emr_application_prod.json   
+--app_id APP08649 
+--source_tables_details 'kafka_inventory_return_store_inventory_sim_adjusted={"source_type": "KAFKA", "kafka_cluster_name": "meadow", "vault_connection_name": "nordsecrets/application/APP08649/shared/prod/kafka/oauth", "kafka.sasl.mechanism": "OAUTHBEARER", "request.timeout.ms": "20000", "retry.backoff.ms": "500", "schema_name": "inventory-store-inventoryevent-avro-com.nordstrom.inventory.event.StoreInventoryAdjusted", "topicType": "RecordNameStrategy", "header_filter_key_name": "Type", "eventFilter": "STORE_INVENTORY_ADJUSTED","data_source_name":"inventory-store-inventoryevent-avro"}' 
+--target_tables_details 'store_inventory_sim_adjusted_event_ldg={"source_type": "TERADATA", "hostname": "tdnapprod.nordstrom.net", "port": "1025", "vault_connection_name": "nordsecrets/application/APP08649/shared/prod/teradata/nap/service_account", "database_name": "PRD_NAP_STG","data_source_name":"INVENTORY_SIM_STORE_INVENTORY_ADJUSTED_LDG"}'  
+--sql_file_location s3://napstoreinvtry-prod-common-etl/apps/etl_framework/airflow_nsk_dag_job_artifacts/prod/17610/DAS_SC_OUTBOUND/APP08649_insights_v2/sql/inventory_sim_store_inventory_adjusted/inventory_sim_store_inventory_adjusted_17610_DAS_SC_OUTBOUND_APP08649_insights_v2_main_kafka_avro_to_td_stg.sql  
+--stage_task_name inventory_sim_store_inventory_adjusted_17610_DAS_SC_OUTBOUND_APP08649_insights_v2_main_job_2_load_avro_td_stg  
+--hive_offset_table onehop_etl_app_db.kafka_consumer_offset_batch_details   
+--consumer_group_name inventory-store-inventoryevent-avro_inventory_sim_store_inventory_adjusted_17610_DAS_SC_OUTBOUND_APP08649_insights_v2_main_job_2_load_avro_td_stg   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:483375294780:secret:xyzzy-vault-approle-role-id-subTxd  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:483375294780:secret:xyzzy-vault-approle-secret-id-aK56E0  
+--aws_user_role_arn arn:aws:iam::483375294780:role/xyzzy 

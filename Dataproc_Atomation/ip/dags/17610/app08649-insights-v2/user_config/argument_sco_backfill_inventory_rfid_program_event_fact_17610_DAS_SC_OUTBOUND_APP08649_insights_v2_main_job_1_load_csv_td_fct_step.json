@@ -1,0 +1,10 @@
+--app_config_file s3://napstoreinvtry-prod-common-etl/apps/etl_framework/prod/application_config/emr_application_prod.json   
+--app_id APP08649 
+--source_tables_details 'backfill_inventory_rfid_program_event={"source_type": "S3", "format": "csv", "path": "s3://napstoreinvtry-prod-common-etl/backfill_inventory_rfid_program_event_fact/"}' 
+--target_tables_details 'INVENTORY_RFID_PROGRAM_EVENT_FACT={"source_type": "TERADATA", "hostname": "tdnapprod.nordstrom.net", "port": "1025", "vault_connection_name": "nordsecrets/application/APP08649/shared/prod/teradata/nap/service_account", "database_name": "PRD_NAP_FCT","data_source_name":"INVENTORY_RFID_PROGRAM_EVENT_FACT"}'  
+--sql_file_location s3://napstoreinvtry-prod-common-etl/apps/etl_framework/airflow_nsk_dag_job_artifacts/prod/17610/DAS_SC_OUTBOUND/APP08649_insights_v2/sql/backfill_inventory_rfid_program_event/sco_backfill_inventory_rfid_program_event_fact_17610_DAS_SC_OUTBOUND_APP08649_insights_v2_main_csv_to_td_fct.sql  
+--stage_task_name sco_backfill_inventory_rfid_program_event_fact_17610_DAS_SC_OUTBOUND_APP08649_insights_v2_main_job_1_load_csv_td_fct_step  
+--hive_offset_table score_app08649.kafka_consumer_offset_batch_details   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:483375294780:secret:VAULT_APPROLE_ROLE_ID-unT0nO  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:483375294780:secret:VAULT_APPROLE_SECRET_ID-OrqVrS  
+--aws_user_role_arn arn:aws:iam::483375294780:role/APP08649_AirflowV2SparkEngineRole 

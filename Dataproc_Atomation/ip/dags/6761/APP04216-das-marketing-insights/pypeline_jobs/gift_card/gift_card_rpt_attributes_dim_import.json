@@ -1,0 +1,179 @@
+{
+    "dag_id": "gift_card_rpt_attributes_dim_import",
+    "dag_schedule": "0 22 * * *",
+    "prod_email_on_failure": "nap-marketing@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "Andrii.Usatov@nordstrom.com",
+    "stages": [
+        "check_csv_presence",
+        "gc_rpt_attr_import",
+        "save_orig_input",
+        "save_transformed_input",
+        "newrelic",
+        "skip_run"
+    ],
+    "stage_dependencies": {
+        "check_csv_presence": [
+            "gc_rpt_attr_import",
+            "skip_run"
+        ],
+        "gc_rpt_attr_import": [
+            "save_orig_input",
+            "save_transformed_input",
+            "newrelic"
+        ]
+    },
+    "check_csv_presence": {
+        "branching": {
+            "branch_engine": {
+                "python_code": "utils/src/branching/gift_card_rpt_attributes_dim_import_branching.py",
+                "callable_function_name": "gc_attributes_import_branching_callable",
+                "provide_context": "False",
+                "callable_return_vars": {
+                    "task1_name": "gc_rpt_attr_import",
+                    "task2_name": "skip_run"
+                }
+            }
+        }
+    },
+    "gc_rpt_attr_import": {
+        "transform_data": {
+            "spark_engine": {
+                "spark_run_mode": "low",
+                "scripts": [
+                    "gift_card_rpt_attributes_dim_import/gc_rpt_attr_import_transform.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "__S3_GIFTCARD_RPT_ATTRIBUTES_IMPORT_CSV_SOURCE",
+                        "sql_table_reference": "gift_card_rpt_attr_src"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__S3_GIFTCARD_RPT_ATTRIBUTES_EXPORT_CSV_SINK",
+                        "sql_table_reference": "gift_card_rpt_attributes"
+                    }
+                ]
+            }
+        },
+        "elt_control_activate": {
+            "teradata_engine": {
+                "retries": 0,
+                "input_details": [
+                    {
+                        "conn_name": "__GIFT_CARD_TERADATA_SOURCE__",
+                        "scripts": [
+                            "gift_card_rpt_attributes_dim_import/elt_control_activate.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "s3_to_ldg": {
+            "tpt_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__GIFT_CARD_TPT_LOAD__",
+                        "table_name": "GIFT_CARD_RPT_ATTRIBUTES_LDG",
+                        "job_name": "GIFT_CARD_RPT_ATTRIBUTES",
+                        "s3_file_path": "s3://{marketing_s3_data_bucket}/data/gift_card_static_import_transformed/stg/gift_card_rpt_attributes/*.csv*"
+                    }
+                ]
+            }
+        },
+        "ldg_to_dim": {
+            "teradata_engine": {
+                "retries": 0,
+                "input_details": [
+                    {
+                        "conn_name": "__GIFT_CARD_TERADATA_SOURCE__",
+                        "scripts": [
+                            "gift_card_rpt_attributes_dim_import/gift_card_rpt_attributes_dim_final.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "elt_control_deactivate": {
+            "teradata_engine": {
+                "retries": 0,
+                "input_details": [
+                    {
+                        "conn_name": "__GIFT_CARD_TERADATA_SOURCE__",
+                        "scripts": [
+                            "gift_card_rpt_attributes_dim_import/elt_control_deactivate.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "save_orig_input": {
+        "rpt_attributes_copy_stg_to_hist": {
+            "python_executor": {
+                "module": "python/utils",
+                "version": "1.2.2",
+                "args": [
+                    "python/utils/src/s3_copy.py",
+                    "--s3_source_bucket_env_name",
+                    "S3_MKTG_BUCKET",
+                    "--s3_source_prefix_format",
+                    "data/gift_card_static_import/stg/gift_card_rpt_attributes/",
+                    "--s3_target_bucket_env_name",
+                    "S3_MKTG_BUCKET",
+                    "--s3_target_prefix_format",
+                    "data/gift_card_static_import/hist/gift_card_rpt_attributes/year=<year>/month=<month>/day=<day>/",
+                    "--clear_source_path_on_success"
+                ]
+            }
+        }
+    },
+    "save_transformed_input": {
+        "rpt_attributes_copy_stg_to_hist": {
+            "python_executor": {
+                "module": "python/utils",
+                "version": "1.2.2",
+                "args": [
+                    "python/utils/src/s3_copy.py",
+                    "--s3_source_bucket_env_name",
+                    "S3_MKTG_BUCKET",
+                    "--s3_source_prefix_format",
+                    "data/gift_card_static_import_transformed/stg/gift_card_rpt_attributes/",
+                    "--s3_target_bucket_env_name",
+                    "S3_MKTG_BUCKET",
+                    "--s3_target_prefix_format",
+                    "data/gift_card_static_import_transformed/hist/gift_card_rpt_attributes/year=<year>/month=<month>/day=<day>/",
+                    "--clear_source_path_on_success"
+                ]
+            }
+        }
+    },
+    "newrelic": {
+        "send_metrics": {
+            "python_executor": {
+                "module": "python/send_metric",
+                "version": "0.0.26",
+                "args": [
+                    "python/send_metric/src/main.py",
+                    "--metrics_yaml_file",
+                    "../metrics/metricGiftCardRptAttributesDim.yaml",
+                    "--nr_metrics_endpoint",
+                    "https://metric-api.newrelic.com/metric/v1",
+                    "--default_database",
+                    "{DBENV}_NAP_STG"
+                ]
+            }
+        }
+    },
+    "skip_run": {
+        "end_load_dummy": {
+            "python_executor": {
+                "module": "python/utils",
+                "version": "1.2.2",
+                "args": [
+                    "python/utils/src/dummy.py"
+                ]
+            }
+        }
+    }
+}

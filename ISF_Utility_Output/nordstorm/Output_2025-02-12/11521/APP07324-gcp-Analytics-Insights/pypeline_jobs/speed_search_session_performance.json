@@ -1,0 +1,38 @@
+{
+    "dag_id": "speed_search_session_performance",
+    "dag_schedule": "0 16 * * 2",
+    "prod_email_on_failure": "dsa-app08742-session-path-expanded-events-data-pipelines@nordstrom.pagerduty.com, soren.stime1@nordstrom.com",
+    "nonprod_email_on_failure": "soren.stime1@nordstrom.com",
+    "dependencies": {
+        "upstream": {
+            "dags": [
+                {
+                    "external_dag_id": "search_session_analytical_v2_11521_ACE_ENG",
+                    "retries": 3,
+                    "poke_interval": 120,
+                    "timeout": 3600
+                }
+            ]
+        }
+    },
+    "stages": [
+        "run_hive_hive_search_session_performance"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-9",
+        "end_date": "current_date()-3"
+    },
+    "run_hive_hive_search_session_performance": {
+        "job_0": {
+            "spark_engine": {
+                "spark_run_mode": "low",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "speed/speed_search_session_performance.sql"
+                ],
+                "input_details": [],
+                "output_details": []
+            }
+        }
+    }
+}

@@ -1,0 +1,85 @@
+{
+    "dag_id": "cco_tables_week_grain",
+    "dag_schedule": "30 03 * * 0",
+    "dag_sla_minutes": "330",
+    "dag_retries": "0",
+    "prod_email_on_failure": "TECH_DAS_Customer@nordstrom.com,nap-acp@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "dummy@n.com",
+    "dependencies": {
+        "upstream": {
+            "dags": [
+                {
+                    "external_dag_id": "cco_tables_11521_ACE_ENG",
+                    "external_task_id": "run_cco_job_1_cco_line_items_sensor",
+                    "execution_delta": "timedelta(minutes=270)",
+                    "retries": "0"
+                }
+            ]
+        }
+    },
+    "stages": [
+        "run_cco"
+    ],
+    "run_cco": {
+        "buyer_flow_cust_channel_week": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "sensor_timeout_seconds": 7200,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CCO",
+                        "scripts": [
+                            "cco_refresh/cco_buyer_flow_cust_channel_week.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "cust_week_attributes": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "sensor_timeout_seconds": 7200,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CCO",
+                        "scripts": [
+                            "cco_refresh/cco_cust_week_attributes.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "cust_channel_week_attributes": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "sensor_timeout_seconds": 5400,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CCO",
+                        "scripts": [
+                            "cco_refresh/cco_cust_channel_week_attributes.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "cust_attributes": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "sensor_timeout_seconds": 5400,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CCO",
+                        "scripts": [
+                            "cco_refresh/cco_cust_attributes.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

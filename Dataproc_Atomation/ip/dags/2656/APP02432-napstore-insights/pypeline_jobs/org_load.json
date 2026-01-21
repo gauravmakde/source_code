@@ -1,0 +1,74 @@
+{
+    "dag_id": "org_load",
+    "dag_schedule": "56 03 * * *",
+    "prod_email_on_failure": "nap_store_experience_analytics@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "TECH_NAP_Store_Analytics@nordstrom.com",
+    "stages": [
+        "org_store_dim_2"
+    ],
+    "org_store_dim_2": {
+        "load_0_stg_table": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "scripts": [
+                    "org_store_dim_load_stg.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "__ORG_STORE_DIM_KAFKA__",
+                        "sql_table_reference": "kafka_org_store_dim_input",
+                        "data_source_name": "nap-org-store-v2-object-model"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__TERADATA_NAP_STG__",
+                        "sql_table_reference": "org_store_dim_stg_table",
+                        "data_source_name": "STORE_DIM_LDG"
+                    },
+                    {
+                        "conn_name": "__TERADATA_NAP_STG__",
+                        "sql_table_reference": "org_store_peer_group_dim_stg_table",
+                        "data_source_name": "STORE_PEER_GROUP_DIM_LDG"
+                    }
+                ]
+            }
+        },
+        "update_start_batch_date": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_NAP_UTL__",
+                        "scripts": [
+                            "org_store_etl_control_start_macro.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "load_1_fct_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_NAP__",
+                        "scripts": [
+                            "org_store_dim_load_fact.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "update_end_batch_date": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_NAP_UTL__",
+                        "scripts": [
+                            "org_store_etl_control_end_macro.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

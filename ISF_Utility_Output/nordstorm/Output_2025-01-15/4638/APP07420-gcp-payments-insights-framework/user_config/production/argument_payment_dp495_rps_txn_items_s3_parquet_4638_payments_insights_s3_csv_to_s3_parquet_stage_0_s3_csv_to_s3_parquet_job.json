@@ -1,0 +1,9 @@
+--app_config_file gs://prod-nap-dataplex-internal/app09203/isf-artifacts/app-config/emr_application_prod.json   
+--app_id app07420  
+--target_tables_details 'rps_txn_items={"source_type": "S3", "path": "s3://tf-nap-prod-payments-dp495-archive-presentation/data/parquet/", "format": "parquet"}'  
+--sql_file_location s3://tf-nap-prod-credit-payments-isf-airflow/apps/etl_framework/airflow_nsk_dag_job_artifacts/prod/4638/payments/insights/sql/sparkSql/dp4945_archive_tables/payment_dp495_rps_txn_items_s3_parquet_4638_payments_insights_s3_csv_to_s3_parquet_stage_0_payment_rps_txn_items.sql  
+--stage_task_name payment_dp495_rps_txn_items_s3_parquet_4638_payments_insights_s3_csv_to_s3_parquet_stage_0_s3_csv_to_s3_parquet_job  
+--offset_table '`jwn-nap-dataplex-prod-emue.nap_credit_and_payments_isf_kafka_offsets.kafka_consumer_offset_batch_details`'
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:594668836985:secret:VAULT_APPROLE_ROLE_ID  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:594668836985:secret:VAULT_APPROLE_SECRET_ID  
+--aws_user_role_arn arn:aws:iam::594668836985:role/big_data/tf-nap-prod-payments-big-data 

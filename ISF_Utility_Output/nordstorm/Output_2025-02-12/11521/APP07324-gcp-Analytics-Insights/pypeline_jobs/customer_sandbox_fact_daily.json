@@ -1,0 +1,407 @@
+{
+    "dag_id": "customer_sandbox_fact_daily",
+    "dag_schedule": "30 02 * * 0",
+    "dag_sla_minutes": "180",
+    "dag_retries": "0",
+    "prod_email_on_failure": "TECH_DAS_Customer@nordstrom.com,nap-acp@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "dummy@n.com",
+    "dependencies": {
+        "upstream": {
+            "dags": [
+                {
+                    "external_dag_id": "cco_tables_11521_ACE_ENG",
+                    "execution_delta": "timedelta(minutes=210)",
+                    "timeout": 7200,
+                    "retries": "0"
+                }
+            ]
+        }
+    },
+    "stages": [
+        "customer_store_distance_buckets",
+        "reporting_year_shopped_lkp",
+        "cust_tenure_bucket_years_lkp",
+        "cust_jwn_trip_bucket_lkp",
+        "cust_jwn_net_spend_bucket_lkp",
+        "cust_age_group_lkp",
+        "cust_channel_lkp",
+        "cust_channel_combo_lkp",
+        "cust_loyalty_type_lkp",
+        "cust_loyalty_level_lkp",
+        "cust_nms_market_lkp",
+        "cust_dma_lkp",
+        "rack_sol_dist_bucket_lkp",
+        "nord_sol_dist_bucket_lkp",
+        "closest_store_banner_lkp",
+        "closest_sol_dist_bucket_lkp",
+        "item_delivery_method_lkp",
+        "cust_chan_buyer_flow_lkp",
+        "audience_engagement_cohort_lkp",
+        "store_lkp",
+        "customer_sandbox_fact"
+    ],
+    "stage_dependencies": {
+        "customer_store_distance_buckets": [
+            "rack_sol_dist_bucket_lkp",
+            "nord_sol_dist_bucket_lkp",
+            "closest_store_banner_lkp",
+            "closest_sol_dist_bucket_lkp"
+        ],
+        "reporting_year_shopped_lkp": "customer_sandbox_fact",
+        "cust_tenure_bucket_years_lkp": "customer_sandbox_fact",
+        "cust_jwn_trip_bucket_lkp": "customer_sandbox_fact",
+        "cust_jwn_net_spend_bucket_lkp": "customer_sandbox_fact",
+        "cust_age_group_lkp": "customer_sandbox_fact",
+        "cust_channel_lkp": "customer_sandbox_fact",
+        "cust_channel_combo_lkp": "customer_sandbox_fact",
+        "cust_loyalty_type_lkp": "customer_sandbox_fact",
+        "cust_loyalty_level_lkp": "customer_sandbox_fact",
+        "cust_nms_market_lkp": "customer_sandbox_fact",
+        "cust_dma_lkp": "customer_sandbox_fact",
+        "rack_sol_dist_bucket_lkp": "customer_sandbox_fact",
+        "nord_sol_dist_bucket_lkp": "customer_sandbox_fact",
+        "closest_store_banner_lkp": "customer_sandbox_fact",
+        "closest_sol_dist_bucket_lkp": "customer_sandbox_fact",
+        "item_delivery_method_lkp": "customer_sandbox_fact",
+        "cust_chan_buyer_flow_lkp": "customer_sandbox_fact",
+        "audience_engagement_cohort_lkp": "customer_sandbox_fact",
+        "store_lkp": "customer_sandbox_fact"
+    },
+    "customer_store_distance_buckets": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/customer_store_distance_buckets.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "reporting_year_shopped_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/reporting_year_shopped_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_tenure_bucket_years_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/cust_tenure_bucket_years_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_jwn_trip_bucket_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/cust_jwn_trip_bucket_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_jwn_net_spend_bucket_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/cust_jwn_net_spend_bucket_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_age_group_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/cust_age_group_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_channel_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/cust_channel_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_channel_combo_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/cust_channel_combo_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_loyalty_type_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/cust_loyalty_type_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_loyalty_level_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/cust_loyalty_level_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_nms_market_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/cust_nms_market_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_dma_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/cust_dma_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "rack_sol_dist_bucket_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/rack_sol_dist_bucket_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "nord_sol_dist_bucket_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/nord_sol_dist_bucket_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "closest_store_banner_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/closest_store_banner_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "closest_sol_dist_bucket_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/closest_sol_dist_bucket_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "item_delivery_method_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/item_delivery_method_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_chan_buyer_flow_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/cust_chan_buyer_flow_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "audience_engagement_cohort_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/audience_engagement_cohort_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "store_lkp": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/store_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "customer_sandbox_fact": {
+        "build": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "sensor_timeout_seconds": 7200,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox_daily/customer_sandbox_fact.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

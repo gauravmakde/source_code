@@ -1,0 +1,28 @@
+{
+    "dag_id": "merch_main_lifecycle_phase",
+    "dag_schedule": "01 18 * * 0",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "ACE.promo@nordstrom.com,dsa-app09478-lifecycle-phase@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "jevon.barlas@nordstrom.com",
+    "stages": [
+        "run_teradata_sql_stg_00"
+    ],
+    "sql_env_vars": {
+        "environment_schema": "T2DL_DAS_IN_SEASON_MANAGEMENT_REPORTING"
+    },
+    "run_teradata_sql_stg_00": {
+        "job_0_populate_tables": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 10800,
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_AIS_BATCH__",
+                        "scripts": [
+                            "lifecycle_phase/ma_pipeline_prod_main_lifecycle_phase.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

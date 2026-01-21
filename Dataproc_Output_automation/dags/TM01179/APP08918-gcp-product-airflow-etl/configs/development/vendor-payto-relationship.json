@@ -1,0 +1,102 @@
+{
+  "domain": "merch",
+  "name": "vendor_payto_relationship",
+  "sources": [
+    {
+      "name": "mainDataTable",
+      "description": "Ultimate Source of data for daily incremental loads",
+      "type": "KAFKA",
+      "cache": "MEMORY_AND_DISK",
+      "enable": true,
+      "properties": {
+        "kafka.bootstrap.servers": "meadow.prod.us-west-2.aws.proton.nordstrom.com:9093",
+        "schemaRegistryUrl": "https://schema-registry.prod.us-west-2.aws.proton.nordstrom.com",
+        "group.id": "vendor_load",
+        "subscribe": "nap-vendor-pay-to-object-model",
+        "headers": "",
+        "enable.auto.commit": "false",
+        "proton_accessKey":"APP09392.SSSO748MV19KX9ENZ",
+       "proton_secret":"Hj1zhGbJlrZLqhm9jKVYEjQInKlBd8XzVJon7tB8saRmcAkls2se6snWZF2v437C9ScCtKFVQTRr6Ky5iUgSqtnVbE9tzTlXATpr3ZE.PVB8MQHZihEKiIU09C70zK6B",
+        "kafka.security.protocol": "sasl_ssl",
+        "sasl.kerberos.service.name": "kafka",
+        "kafka.sasl.mechanism": "SCRAM-SHA-512"
+      }
+    }
+  ],
+  "dags": [
+    {
+      "name": "Main_dag",
+      "upstream": [
+        "mainDataTable"
+      ],
+      "operators": [
+        {
+          "name": "VENDOR_PAYTO_RELATIONSHIP_explode",
+          "description": "Explode the VendorRelationship array",
+          "select": [
+            "CAST(EventSequence.member0 AS INT) EventSequence",
+            "EventCreateDate",
+            "VendorNumber",
+            "VendorName",
+            "VendorStatus",
+            "explode_outer(VendorRelationship) as Vendor_relationship"
+          ]
+        },
+        {
+          "name": "VENDOR_PAYTO_RELATIONSHIP_LDG_final",
+          "description": "Extract data for VENDOR_PAYTO_RELATIONSHIP_LDG",
+          "from": [
+            "VENDOR_PAYTO_RELATIONSHIP_explode"
+          ],
+          "select": [
+            "CAST(EventSequence AS INT) eventsequence",
+            "EventCreateDate eventcreatedate",
+            "VendorNumber vendornumber",
+            "VendorName vendorname",
+            "VendorStatus vendorstatus",
+            "Vendor_relationship.RelatedPayToCreateDate vendorrelationship_relatedpaytocreatedate",
+            "Vendor_relationship.RelatedPayToStatus vendorrelationship_relatedpaytostatus",
+            "Vendor_relationship.RelatedPayToDropshipPaymentTerms vendorrelationship_relatedpaytodropshippaymentterms ",
+            "Vendor_relationship.IsRelationshipPrimary vendorrelationship_isrelationshipprimary",
+            "Vendor_relationship.IsRelationshipAssociated vendorrelationship_isrelationshipassociated",
+            "Vendor_relationship.FromVendorCategory vendorrelationship_fromvendorcategory",
+            "Vendor_relationship.FromVendorType vendorrelationship_fromvendortype",
+            "Vendor_relationship.ToVendorCategory vendorrelationship_tovendorcategory",
+            "Vendor_relationship.ToVendorType vendorrelationship_tovendortype",
+            "Vendor_relationship.RelatedVendorName vendorrelationship_relatedvendorname",
+            "Vendor_relationship.RelatedVendorNumber vendorrelationship_relatedvendornumber",
+            "Vendor_relationship.VendorRelationshipType vendorrelationship_vendorrelationshiptype",
+            "Vendor_relationship.VendorRelationshipTicketType vendorrelationship_vendorrelationshiptickettype",
+            "Vendor_relationship.RelationshipStatus vendorrelationship_vendorrelationshipstatus"
+          ]
+        },
+        {
+          "name": "VENDOR_PAYTO_RELATIONSHIP_LDG_count",
+          "description": "Count of VENDOR_PAYTO_RELATIONSHIP_LDG records generated",
+          "from": [
+            "VENDOR_PAYTO_RELATIONSHIP_LDG_final"
+          ],
+          "select": [
+            "count(*)"
+          ]
+        }
+      ]
+    }
+  ],
+  "sinks": [
+    {
+      "name": "VENDOR_PAYTO_RELATIONSHIP_LDG_sink",
+      "description": "Output VENDOR_PAYTO_RELATIONSHIP_LDG records (normally CSV-GZIP format)",
+      "type": "bigquery",
+      "upstream": "VENDOR_PAYTO_RELATIONSHIP_LDG_final",
+      "active": true,
+      "properties": {
+        "project": "jwn-nap-user1-nonprod-zmnb",
+        "dataset": "DEV_NAP_STG",
+        "table": "VENDOR_PAYTO_RELATIONSHIP_LDG",
+        "temp_bucket": "test-data-datametica",
+        "mode": "overwrite"
+      }
+    }
+  ]
+}

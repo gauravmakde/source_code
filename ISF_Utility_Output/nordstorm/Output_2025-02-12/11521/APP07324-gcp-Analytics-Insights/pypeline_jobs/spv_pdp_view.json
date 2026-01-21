@@ -1,0 +1,57 @@
+{
+    "dag_id": "sales_person_video_pdp_view",
+    "dag_schedule": "0 8 * * *",
+    "prod_email_on_failure": "Anfernee.Calloway@Nordstrom.com",
+    "nonprod_email_on_failure": "Anfernee.Calloway@Nordstrom.com",
+    "stages": [
+        "read_write_hive_td_stage_0"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date() - 10",
+        "end_date": "current_date() - 1"
+    },
+    "read_write_hive_td_stage_0": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_SPV",
+                        "scripts": [
+                            "sales_person_video/ddl/ddl_pdp_view_landing.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_1": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "sales_person_video/pdp_view_load.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_SPV",
+                        "sql_table_reference": "pdp_view_landing_table",
+                        "data_source_name": "pdp_view_landing"
+                    }
+                ]
+            }
+        },
+        "job_2": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_SPV",
+                        "scripts": [
+                            "sales_person_video/pdp_view.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

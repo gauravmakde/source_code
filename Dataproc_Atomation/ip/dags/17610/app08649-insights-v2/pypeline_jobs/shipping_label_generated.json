@@ -1,0 +1,81 @@
+{
+  "dag_id": "shipping_label_generated_load",
+  "prod_email_on_failure":"TECH_NAP_SUPPLYCHAIN_OUTBOUND@nordstrom.com,nap-sco-high-pri@nordstrom.pagerduty.com",
+  "nonprod_email_on_failure": "TECH_NAP_SUPPLYCHAIN_OUTBOUND@nordstrom.com",
+  "dag_schedule": "0 21 * * *",
+  "stages": [  "stage_1_2" ],
+  "stage_1_2": {
+    "job_1_td_batch_start": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_FCT__",
+            "scripts": [
+              "shipping_label_generated/batch_start.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "job_2_load_kafka_to_db_stg": {
+      "spark_engine": {
+        "spark_run_mode": "medium",
+        "scripts": [
+          "shipping_label_generated/shipping_label_gen_from_kafka_to_teradata_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__SHIPPING_LABEL_GENERATED_KAFKA__",
+            "sql_table_reference": "kafka_order_shipping_label_gen_input",
+            "data_source_name": "inventory-supply-chain-delivery-non-customer-order-shipping-label-generated-avro"
+          }
+        ],
+        "output_details": [
+
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "order_shipping_label_gen_stg_table",
+            "data_source_name": "INVENTORY_STORE_NON_CUSTOMER_ORDER_SHIPPING_LABEL_GENERATED_LDG"
+          }
+        ]
+      }
+    },
+    "job_3_load_stg_to_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_FCT__",
+            "scripts": [
+              "shipping_label_generated/shipping_label_gen_from_stg_to_fact.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "job_31_teradata_fact_dqc": {
+      "teradata_engine": {
+        "retries": 0,
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_FCT__",
+            "scripts": [
+              "shipping_label_generated/td_fact_dqc.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "job_4_td_batch_end": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_FCT__",
+            "scripts": [
+              "shipping_label_generated/batch_end.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

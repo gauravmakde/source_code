@@ -1,0 +1,49 @@
+{
+  "dag_id": "afterpay_auth_details_update_teradata",
+  "dag_schedule": "0 17 * * *",
+  "dependencies": {
+    "upstream": {
+      "dags": [
+        {
+          "external_dag_id": "payment_auth_result_teradata_4638_payments_insights",
+          "execution_delta": "timedelta(hours=1)",
+          "timeout": 7200,
+          "allowed_states": [
+            "success"
+          ],
+          "failed_states": [
+            "failed"
+          ]
+        },
+        {
+          "external_dag_id": "payment_bin_teradata_4638_payments_insights",
+          "execution_delta": "timedelta(hours=1)",
+          "timeout": 7200,
+          "allowed_states": [
+            "success"
+          ],
+          "failed_states": [
+            "failed"
+          ]
+        }
+      ]
+    }
+  },
+  "stages": [
+    "afterpay_auth_update_teradata_stg_stage_0"
+  ],
+  "afterpay_auth_update_teradata_stg_stage_0": {
+    "job_insert_update": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_FCT__",
+            "scripts": [
+              "teradata/afterpay_auth_details_update_teradata_fct.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

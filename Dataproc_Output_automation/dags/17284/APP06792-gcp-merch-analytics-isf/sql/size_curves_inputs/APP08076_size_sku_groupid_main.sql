@@ -1,0 +1,1 @@
+SELECT 'gcp_app08076_size_curves_monthly_main_17284_MERCH_ANALYTICS_insights_framework';

@@ -1,0 +1,16 @@
+k8s_envs:
+    TIER : 3
+    EXEC_ENV : GITLAB
+    STATSD_HOST : statsd.k8s-newrelic.svc.cluster.local
+    STATSD_PORT : 8128
+    EXECUTE_COMMAND : python /app/jobs/executor.py
+k8s_envs_secrets:
+    K8S_BEARER_TOKEN:
+        name: k8s
+        key: token_prod
+    K8S_NAMESPACE:
+        name: k8s
+        key: namespace
+    K8S_CLUSTER:
+        name : k8s
+        key : cluster_prod

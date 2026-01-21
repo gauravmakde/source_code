@@ -1,0 +1,127 @@
+{
+    "dag_id": "cust_chan_buyer_flow_lkp",
+    "prod_email_on_failure": "dsa-app08737-customer-sandbox@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "niharika.srivastava@nordstrom.com",
+    "stages": [
+        "cust_chan_buyer_flow",
+        "cust_jwn_buyer_flow",
+        "cust_nord_buyer_flow",
+        "cust_rack_buyer_flow",
+        "cust_ns_buyer_flow",
+        "cust_rs_buyer_flow",
+        "cust_ncom_buyer_flow",
+        "cust_rcom_buyer_flow"
+    ],
+    "cust_chan_buyer_flow": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox/cust_chan_buyer_flow_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_jwn_buyer_flow": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox/cust_jwn_buyer_flow_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_nord_buyer_flow": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox/cust_nord_buyer_flow_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_rack_buyer_flow": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox/cust_rack_buyer_flow_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_ns_buyer_flow": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox/cust_ns_buyer_flow_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_rs_buyer_flow": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox/cust_rs_buyer_flow_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_ncom_buyer_flow": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox/cust_ncom_buyer_flow_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "cust_rcom_buyer_flow": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_STR",
+                        "scripts": [
+                            "customer_sandbox/cust_rcom_buyer_flow_lkp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

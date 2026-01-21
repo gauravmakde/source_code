@@ -1,0 +1,32 @@
+{
+    "dag_id": "post_anniversary_survey_onetime_load",
+    "dag_schedule": "00 22 * * *",
+    "prod_email_on_failure": "nap-marketing@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "jianyuan.gan@nordstrom.com",
+    "stages": [
+        "read_s3_to_teradata"
+    ],
+    "read_s3_to_teradata": {
+        "job_0": {
+            "spark_engine": {
+                "spark_run_mode": "low",
+                "scripts": [
+                    "s3_to_stg.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "__S3_SURVEY_DATA_CSV__",
+                        "sql_table_reference": "s3_read_survey_tbl"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__Teradata_NAP_Source__",
+                        "sql_table_reference": "write_teradata_survey_tbl",
+                        "data_source_name": "POST_ANNIVERSARY_SURVEY_STG"
+                    }
+                ]
+            }
+        }
+    }
+}

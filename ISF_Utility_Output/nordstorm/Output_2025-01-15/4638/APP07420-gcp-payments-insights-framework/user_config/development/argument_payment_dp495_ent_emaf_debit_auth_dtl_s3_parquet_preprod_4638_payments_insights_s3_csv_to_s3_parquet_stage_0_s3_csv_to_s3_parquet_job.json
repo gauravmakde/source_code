@@ -1,0 +1,11 @@
+--app_config_file gs://test-data-datametica/app09392/isf-artifacts/app-config/emr_application_dev.json
+--app_id app07420  
+--target_tables_details 'ent_emaf_debit_auth_dtl={"source_type": "S3", "path": "s3://tf-nap-preprod-payments-dp495-archive-presentation/data/parquet/", "format": "parquet"}'  
+--sql_file_location gs://test-data-datametica/app09392/isf-artifacts/sql/payment_dp495_ent_emaf_debit_auth_dtl_s3_parquet_preprod_4638_payments_insights_s3_csv_to_s3_parquet_stage_0_payment_ent_emaf_debit_auth_dtl_preprod.sql  
+--stage_task_name payment_dp495_ent_emaf_debit_auth_dtl_s3_parquet_preprod_4638_payments_insights_s3_csv_to_s3_parquet_stage_0_s3_csv_to_s3_parquet_job  
+--offset_table '`jwn-nap-user1-nonprod-zmnb.onehop_etl_app_db.kafka_consumer_offset_batch_details`'
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_ROLE_ID-Psikfr
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_SECRET_ID-themT6
+--aws_user_role_arn arn:aws:iam::290445963451:role/APP09392_AWS_Secrets_Role
+--aws_user_role_external_id=testUser
+--gcp_project_id jwn-nap-user1-nonprod-zmnb

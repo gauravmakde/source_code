@@ -1,0 +1,83 @@
+{
+  "dag_id": "inventory_navi_store_inventory_adjusted",
+  "dag_schedule": "0 8 * * *",
+  "prod_email_on_failure":"TECH_NAP_SUPPLYCHAIN_OUTBOUND@nordstrom.com,nap-sco-high-pri@nordstrom.pagerduty.com",
+  "nonprod_email_on_failure": "TECH_NAP_SUPPLYCHAIN_OUTBOUND@nordstrom.com",
+  "stages": [
+    "main_v1"
+  ],
+  "main_v1": {
+    "job_1_td_batch_start": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_FCT__",
+            "scripts": [
+              "inventory_navi_store_inventory_adjusted/batch_start.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "job_2_load_avro_td_stg": {
+      "spark_engine": {
+        "spark_run_mode": "medium",
+        "scripts": [
+          "inventory_navi_store_inventory_adjusted/kafka_avro_to_td_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__KAFKA_SOURCE_INVENTORY_ADJUSTED_STORE_EVENT__",
+            "sql_table_reference": "kafka_inventory_store_event_avro",
+            "data_source_name": "inventory-store-event-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "inventory_navi_store_inventory_adjusted_ldg",
+            "data_source_name": "INVENTORY_NAVI_STORE_INVENTORY_ADJUSTED_LDG"
+          }
+        ]
+      }
+    },
+    "job_3_td_stg_to_fact": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_FCT__",
+            "scripts": [
+              "inventory_navi_store_inventory_adjusted/td_stg_to_td_fact.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "job_31_teradata_fact_dqc": {
+      "teradata_engine": {
+        "retries": 0,
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_FCT__",
+            "scripts": [
+              "inventory_navi_store_inventory_adjusted/td_fact_dqc.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "job_4_td_batch_end": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_FCT__",
+            "scripts": [
+              "inventory_navi_store_inventory_adjusted/batch_end.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+

@@ -1,0 +1,27 @@
+{
+    "dag_id": "manual_adjustment_daily",
+    "dag_schedule": "0 14 * * FRI",
+    "prod_email_on_failure": "analytics-insights@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "ricky.medrano@nordstrom.com",
+    "stages": [
+        "run_loyalty_adjustment_sql"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-10",
+        "end_date": "current_date()-3"
+    },
+    "run_loyalty_adjustment_sql": {
+        "job_1_run_loyalty_adjustment_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_LYT",
+                        "scripts": [
+                            "loyalty_fix/manual_adjustment_daily.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

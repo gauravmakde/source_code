@@ -1,0 +1,11 @@
+--app_config_file gs://prod-nap-dataplex-internal/app09203/isf-artifacts/app-config/emr_application_prod.json   
+--app_id APP06788 
+--source_tables_details 'kafka_credit_application_approved={"source_type": "KAFKA", "kafka.sasl.mechanism": "OAUTHBEARER", "vault_connection_name": "nordsecrets/application/APP07420/3678/credit/insights/prod/kafka_oauth_credentials", "kafka_cluster_name": "columbia-prod", "identity_pool_id": "pool-mz7v", "reset_offset_to_latest": "false", "retry.backoff.ms": "500", "request.timeout.ms": "20000","data_source_name":"creditgateway-creditapplicationapproved-avro"}' 
+--target_tables_details 'credit_application_approved_parquet={"source_type": "S3", "path": "s3://tf-nap-prod-credit-object-model-presentation/data/parquet/", "format": "parquet"}'  
+--sql_file_location s3://tf-nap-prod-credit-payments-isf-airflow/apps/etl_framework/airflow_nsk_dag_job_artifacts/prod/3678/credit/insights/sql/sparkSql/connectors/credit_connectors_s3_parquet_3678_credit_insights_credit_connectors_s3_parquet_stage_0_credit_application_approved_kafka_to_s3_parquet.sql  
+--stage_task_name credit_connectors_s3_parquet_3678_credit_insights_credit_connectors_s3_parquet_stage_0_kafka_to_s3_parquet_job  
+--offset_table '`jwn-nap-dataplex-prod-emue.nap_credit_and_payments_isf_kafka_offsets.kafka_consumer_offset_batch_details`'
+--consumer_group_name gcp-creditgateway-creditapplicationapproved-avro_credit_connectors_s3_parquet_3678_credit_insights_credit_connectors_s3_parquet_stage_0_kafka_to_s3_parquet_job   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:594668836985:secret:VAULT_APPROLE_ROLE_ID  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:594668836985:secret:VAULT_APPROLE_SECRET_ID  
+--aws_user_role_arn arn:aws:iam::594668836985:role/big_data/tf-nap-prod-payments-big-data 

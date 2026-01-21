@@ -1,0 +1,10 @@
+--app_config_file s3://napstoreinvtry-prod-common-etl/apps/etl_framework/prod/application_config/emr_application_prod.json   
+--app_id APP08649 
+--source_tables_details 'orc_tmp={"source_type": "S3", "path": "s3://tf-nap-storinvtry-prod-objectmodel-orc/temporary/ascp-store-invalid-carton-lifecycle-tmp", "format": "orc"}' 
+--target_tables_details 'ascp-store-invalid-carton-lifecycle-v1={"source_type": "S3", "path": "s3://tf-nap-storinvtry-prod-objectmodel-orc/data", "format": "orc"}'  
+--sql_file_location s3://napstoreinvtry-prod-common-etl/apps/etl_framework/airflow_nsk_dag_job_artifacts/prod/17610/DAS_SC_OUTBOUND/APP08649_insights_v2/sql/ascp_store_invalid_carton/ascp_store_invalid_carton_from_kafka_to_teradata_17610_DAS_SC_OUTBOUND_APP08649_insights_v2_store_invalid_carton_load_v9_store_invalid_carton_orc_overwrite.sql  
+--stage_task_name ascp_store_invalid_carton_from_kafka_to_teradata_17610_DAS_SC_OUTBOUND_APP08649_insights_v2_store_invalid_carton_load_v9_load_04_orc_tgt  
+--hive_offset_table score_app08649.kafka_consumer_offset_batch_details   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:483375294780:secret:VAULT_APPROLE_ROLE_ID-unT0nO  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:483375294780:secret:VAULT_APPROLE_SECRET_ID-OrqVrS  
+--aws_user_role_arn arn:aws:iam::483375294780:role/APP08649_AirflowV2SparkEngineRole 

@@ -1,0 +1,24 @@
+{
+    "cdm_process_id": "a8097712-3b8c-408c-866d-ad79b9fc354a",
+   "app_id": "BMG",
+   "drt_id": "drttest",
+   "data_pipeline_type": "INGRESS_HISTORICAL_G2C",
+   "object_source_type":"EDL",
+   "cdm_object_mapping":
+   [
+   {"object_name":"testing",
+   "cdm_landing_type": "GCS",
+   "cdm_landing_path": "gs://cdm_history_sandbox-corp-gdw-sfr-cdb8/customer_demo",
+   "cdm_landing_format": "parquet",
+   "cdm_target_type": "BQ",
+   "cdm_target_path":"projects/sandbox-corp-gdw-dev2-fcc8/datasets/nonsar_gdw/tables/customer_demo",
+   "dataplex_object_identifier":"WRITE_TRUNCATE",
+   "filter_criteria":""}],
+   "autosys_parms":{
+                    "scheduler_job_id": "",
+                    "scheduler_service_id": "",
+                    "scheduler_restapi_url": ""
+               
+            }
+
+}

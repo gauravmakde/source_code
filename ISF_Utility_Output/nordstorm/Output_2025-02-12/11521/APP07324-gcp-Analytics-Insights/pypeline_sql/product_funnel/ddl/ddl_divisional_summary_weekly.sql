@@ -1,0 +1,61 @@
+SET QUERY_BAND = 'App_ID=APP08227;
+     DAG_ID=ddl_divisional_summary_weekly_11521_ACE_ENG;
+     Task_Name=ddl_divisional_summary_weekly;'
+     FOR SESSION VOLATILE;
+
+--Table Definition for T2DL_DAS_PRODUCT_FUNNEL.divisional_summary_weekly
+
+--CALL SYS_MGMT.DROP_IF_EXISTS_SP ('{product_funnel_t2_schema}', 'divisional_summary_weekly', OUT_RETURN_MSG);
+CREATE MULTISET TABLE {product_funnel_t2_schema}.divisional_summary_weekly,
+     FALLBACK ,
+     NO BEFORE JOURNAL,
+     NO AFTER JOURNAL,
+     CHECKSUM = DEFAULT,
+     DEFAULT MERGEBLOCKRATIO,
+     MAP = TD_MAP1
+     (
+      week_end_date DATE FORMAT 'YY/MM/DD',
+      --week_idnt INTEGER,
+      fiscal_week BYTEINT,
+      fiscal_month VARCHAR(10) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      fiscal_year INTEGER,
+      fiscal_quarter VARCHAR(10) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      ty_ly_ind VARCHAR(5) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      channelcountry VARCHAR(10) CHARACTER SET LATIN NOT CASESPECIFIC,
+      channel VARCHAR(50) CHARACTER SET LATIN NOT CASESPECIFIC,
+      platform VARCHAR(50) CHARACTER SET LATIN NOT CASESPECIFIC,
+      division VARCHAR(172) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      subdiv VARCHAR(172) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      department VARCHAR(172) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      "class" VARCHAR(82) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      subclass VARCHAR(82) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      brand_name VARCHAR(100) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      supplier VARCHAR(100) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      product_type_1 VARCHAR(40) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      event_type VARCHAR(15) CHARACTER SET LATIN NOT CASESPECIFIC,
+      category VARCHAR(100) CHARACTER SET UNICODE NOT CASESPECIFIC,
+	 category_group VARCHAR(100) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      rp VARCHAR(3) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      mp_ind VARCHAR(2) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      npg_ind VARCHAR(2) CHARACTER SET UNICODE NOT CASESPECIFIC,	
+	 anchor_brand_ind BYTEINT,	
+	 rack_strategic_brand_ind BYTEINT,
+      price_type VARCHAR(7) CHARACTER SET LATIN NOT CASESPECIFIC,
+      price_band_one VARCHAR(12) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      price_band_two VARCHAR(13) CHARACTER SET UNICODE NOT CASESPECIFIC,
+      product_views DECIMAL(38,2),
+      viewing_sessions DECIMAL(38,2),
+      add_to_bag_quantity INTEGER,
+      adding_sessions INTEGER,
+      order_demand DECIMAL(38,2),
+      order_quantity INTEGER,
+      buying_sessions INTEGER,
+      instock_views DECIMAL(38,6),
+      scored_views DECIMAL(38,2),
+      dw_sys_load_tmstp  TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) NOT NULL
+     )
+PRIMARY INDEX ( fiscal_year, fiscal_week )
+PARTITION BY (RANGE_N(fiscal_year BETWEEN 2022 AND 2025 EACH 1 ) 
+,RANGE_N(fiscal_week BETWEEN 01 AND 53 EACH 1 )) ;
+
+SET QUERY_BAND = NONE FOR SESSION;

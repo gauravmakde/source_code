@@ -1,0 +1,242 @@
+- subject: RTV_LOGICAL
+  metric_name: napdw.stg_distinct_count
+  sql: "select job_name, subj_area, src_db_name, src_tb_name, 'src', coalesce(src_metric, 0)
+        from {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        where job_name = 'RTV_LOGICAL_LDG_TO_BASE'
+        and dw_batch_date in (select curr_batch_date FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL where subject_area_nm = 'NAP_ASCP_RTV_LOGICAL')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+
+- subject: RTV_LOGICAL
+  metric_name: napdw.stg_distinct_count
+  sql: "select job_name, subj_area, src_db_name, src_tb_name, 'src', coalesce(src_metric, 0)
+        from {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        where job_name = 'RTV_LOGICAL_ITEM_LDG_TO_BASE'
+        and dw_batch_date in (select curr_batch_date FROM {DBENV}_NAP_BASE_VWS.ELT_CONTROL where subject_area_nm = 'NAP_ASCP_RTV_LOGICAL')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+
+- subject: RTV_LOGICAL
+  metric_name: napdw.base_distinct_count
+  sql: "select job_name, subj_area, tgt_db_name, tgt_tb_name, 'tgt', coalesce(tgt_metric, 0)
+        from {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        where job_name = 'RTV_LOGICAL_LDG_TO_BASE'
+        and dw_batch_date in (select curr_batch_date from {DBENV}_NAP_BASE_VWS.ELT_CONTROL where subject_area_nm = 'NAP_ASCP_RTV_LOGICAL')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+
+- subject: RTV_LOGICAL
+  metric_name: napdw.base_distinct_count
+  sql: "select job_name, subj_area, tgt_db_name, tgt_tb_name, 'tgt', coalesce(tgt_metric, 0)
+        from {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        where job_name = 'RTV_LOGICAL_ITEM_LDG_TO_BASE'
+        and dw_batch_date in (select curr_batch_date from {DBENV}_NAP_BASE_VWS.ELT_CONTROL where subject_area_nm = 'NAP_ASCP_RTV_LOGICAL')"
+  metric_value_position: 5
+  tags:
+    - job_name: 0
+    - subject_area: 1
+    - db_name: 2
+    - tbl_name: 3
+    - type: 4
+
+
+- subject: RTV_LOGICAL
+  metric_name: spark_processed_messages
+  sql: "select
+           ISF_DAG_NM,
+           cast(ISF_DAG_START_TMSTP as STRING),
+           cast(TIMESTAMP(CURRENT_DATETIME('GMT')) + INTERVAL '6' MINUTE as STRING),
+           cast(SPARK_JOB_START_TMSTP as STRING),
+           cast(SPARK_JOB_END_TMSTP as STRING),
+           cast(TPT_JOB_START_TMSTP as STRING),
+           cast(TPT_JOB_END_TMSTP as STRING),
+           cast(TERADATA_JOB_START_TMSTP as STRING),
+           cast(TERADATA_JOB_END_TMSTP as STRING),
+           cast(ISF_DAG_START_TMSTP as STRING),
+           cast(SPARK_PROCESSED_MESSAGE_CNT as INTEGER)
+        from
+         (
+           select ISF_DAG_NM, BATCH_ID, METRIC_NM, METRIC_VALUE from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG 
+           where isf_dag_nm = 'ascp_rtv_logical_16780_TECH_SC_NAP_insights'
+           and METRIC_NM not in ('TPT_JOB_START_TMSTP', 'TPT_JOB_END_TMSTP', 'TERADATA_JOB_START_TMSTP', 'TERADATA_JOB_END_TMSTP')
+           and batch_id = (select BATCH_ID from {DBENV}_NAP_BASE_VWS.ELT_CONTROL where SUBJECT_AREA_NM = 'NAP_ASCP_RTV_LOGICAL')
+           union all
+           select ISF_DAG_NM, BATCH_ID, METRIC_NM, max(METRIC_VALUE) as METRIC_VALUE from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG 
+           where isf_dag_nm = 'ascp_rtv_logical_16780_TECH_SC_NAP_insights'
+           and METRIC_NM in ('TPT_JOB_END_TMSTP', 'TERADATA_JOB_END_TMSTP')
+           and batch_id = (select BATCH_ID from {DBENV}_NAP_BASE_VWS.ELT_CONTROL where SUBJECT_AREA_NM = 'NAP_ASCP_RTV_LOGICAL')
+           group by ISF_DAG_NM, BATCH_ID, METRIC_NM
+           union all
+           select ISF_DAG_NM, BATCH_ID, METRIC_NM, min(METRIC_VALUE) as METRIC_VALUE from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG 
+           where isf_dag_nm = 'ascp_rtv_logical_16780_TECH_SC_NAP_insights'
+           and METRIC_NM in ('TPT_JOB_START_TMSTP', 'TERADATA_JOB_START_TMSTP')
+           and batch_id = (select BATCH_ID from {DBENV}_NAP_BASE_VWS.ELT_CONTROL where SUBJECT_AREA_NM = 'NAP_ASCP_RTV_LOGICAL')
+           group by ISF_DAG_NM, BATCH_ID, METRIC_NM
+        ) src
+        pivot (min(METRIC_VALUE) for METRIC_NM in ('SPARK_PROCESSED_MESSAGE_CNT' as SPARK_PROCESSED_MESSAGE_CNT, 
+                                                   'ISF_DAG_START_TMSTP' as ISF_DAG_START_TMSTP, 
+                                                   'ISF_DAG_END_TMSTP' as ISF_DAG_END_TMSTP,
+                                                   'TPT_JOB_START_TMSTP' as TPT_JOB_START_TMSTP,
+                                                   'TPT_JOB_END_TMSTP' as  TPT_JOB_END_TMSTP,
+                                                   'TERADATA_JOB_START_TMSTP' as TERADATA_JOB_START_TMSTP,
+                                                   'TERADATA_JOB_END_TMSTP' as TERADATA_JOB_END_TMSTP,
+                                                   'SPARK_JOB_START_TMSTP' as SPARK_JOB_START_TMSTP,
+                                                   'SPARK_JOB_END_TMSTP' as SPARK_JOB_END_TMSTP
+                                                  )
+        ) metrics"
+  metric_value_position: 10
+  tags:
+    - isf_dag_nm: 0
+    - isf_dag_start_tmstp: 1
+    - isf_dag_end_tmstp: 2
+    - spark_job_start_tmstp: 3
+    - spark_job_end_tmstp: 4
+    - tpt_job_start_tmstp: 5
+    - tpt_job_end_tmstp: 6
+    - teradata_job_start_tmstp: 7
+    - teradata_job_end_tmstp: 8
+    - execution_date: 9
+
+
+- subject: RTV_LOGICAL
+  metric_name: ldg_loaded_cnt
+  sql: "select
+           ISF_DAG_NM,
+           TBL_NM,
+           TPT_JOB_START_TMSTP,
+           TPT_JOB_END_TMSTP,
+           LOADED_TO_CSV_CNT,
+           cast(ISF_DAG_START_TMSTP as STRING),
+           cast(LOADED_TO_LDG_CNT as INTEGER)
+        from
+         (
+           select ISF_DAG_NM, METRIC_NM, METRIC_VALUE, coalesce(TBL_NM, '{DBENV}_NAP_STG.RTV_LOGICAL_LDG') as TBL_NM
+           from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG
+           where isf_dag_nm = 'ascp_rtv_logical_16780_TECH_SC_NAP_insights'
+           and batch_id = (select BATCH_ID from {DBENV}_NAP_BASE_VWS.ELT_CONTROL where SUBJECT_AREA_NM = 'NAP_ASCP_RTV_LOGICAL')
+           and (TBL_NM = '{DBENV}_NAP_STG.RTV_LOGICAL_LDG' or metric_nm = 'ISF_DAG_START_TMSTP')
+         ) src
+        pivot (min(METRIC_VALUE) for METRIC_NM in ('LOADED_TO_CSV_CNT' as LOADED_TO_CSV_CNT, 
+                                                   'ISF_DAG_START_TMSTP' as ISF_DAG_START_TMSTP, 
+                                                   'TPT_JOB_START_TMSTP' as TPT_JOB_START_TMSTP,
+                                                   'TPT_JOB_END_TMSTP' as  TPT_JOB_END_TMSTP,
+                                                   'LOADED_TO_LDG_CNT' as LOADED_TO_LDG_CNT
+                                                  )
+        ) metrics"
+  metric_value_position: 6
+  tags:
+    - isf_dag_nm: 0
+    - ldg_tbl_nm: 1
+    - tpt_job_start_tmstp: 2
+    - tpt_job_end_tmstp: 3
+    - csv_loaded_cnt: 4
+    - execution_date: 5
+
+
+- subject: RTV_LOGICAL
+  metric_name: ldg_loaded_cnt
+  sql: "select
+           ISF_DAG_NM,
+           TBL_NM,
+           TPT_JOB_START_TMSTP,
+           TPT_JOB_END_TMSTP,
+           LOADED_TO_CSV_CNT,
+           cast(ISF_DAG_START_TMSTP as STRING),
+           cast(LOADED_TO_LDG_CNT as INTEGER)
+        from
+         (
+           select ISF_DAG_NM, METRIC_NM, METRIC_VALUE, coalesce(TBL_NM, '{DBENV}_NAP_STG.RTV_LOGICAL_ITEM_LDG') as TBL_NM
+           from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG
+           where isf_dag_nm = 'ascp_rtv_logical_16780_TECH_SC_NAP_insights'
+           and batch_id = (select BATCH_ID from {DBENV}_NAP_BASE_VWS.ELT_CONTROL where SUBJECT_AREA_NM = 'NAP_ASCP_RTV_LOGICAL')
+           and (TBL_NM = '{DBENV}_NAP_STG.RTV_LOGICAL_ITEM_LDG' or metric_nm = 'ISF_DAG_START_TMSTP')
+         ) src
+        pivot (min(METRIC_VALUE) for METRIC_NM in ('LOADED_TO_CSV_CNT' as LOADED_TO_CSV_CNT, 
+                                                   'ISF_DAG_START_TMSTP' as ISF_DAG_START_TMSTP, 
+                                                   'TPT_JOB_START_TMSTP' as TPT_JOB_START_TMSTP,
+                                                   'TPT_JOB_END_TMSTP' as  TPT_JOB_END_TMSTP,
+                                                   'LOADED_TO_LDG_CNT' as LOADED_TO_LDG_CNT
+                                                  )
+        ) metrics"
+  metric_value_position: 6
+  tags:
+    - isf_dag_nm: 0
+    - ldg_tbl_nm: 1
+    - tpt_job_start_tmstp: 2
+    - tpt_job_end_tmstp: 3
+    - csv_loaded_cnt: 4
+    - execution_date: 5
+
+
+- subject: RTV_LOGICAL
+  metric_name: spark_processed_rows
+  sql: "select
+           ISF_DAG_NM,
+           TBL_NM,
+           cast(ISF_DAG_START_TMSTP as STRING),
+           cast(LOADED_TO_CSV_CNT as INTEGER)
+        from
+         (
+           select ISF_DAG_NM, METRIC_NM, METRIC_VALUE, coalesce(TBL_NM, '{DBENV}_NAP_STG.RTV_LOGICAL_LDG') as TBL_NM
+           from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG
+           where isf_dag_nm = 'ascp_rtv_logical_16780_TECH_SC_NAP_insights'
+           and batch_id = (select BATCH_ID from {DBENV}_NAP_BASE_VWS.ELT_CONTROL where SUBJECT_AREA_NM = 'NAP_ASCP_RTV_LOGICAL')
+           and (TBL_NM = '{DBENV}_NAP_STG.RTV_LOGICAL_LDG' or metric_nm = 'ISF_DAG_START_TMSTP')
+         ) src
+        pivot (min(METRIC_VALUE) for METRIC_NM in ('LOADED_TO_CSV_CNT' as LOADED_TO_CSV_CNT,
+                                                   'ISF_DAG_START_TMSTP' as ISF_DAG_START_TMSTP,
+                                                   'TPT_JOB_START_TMSTP' as TPT_JOB_START_TMSTP,
+                                                   'TPT_JOB_END_TMSTP' as  TPT_JOB_END_TMSTP
+                                                  )
+        ) metrics"
+  metric_value_position: 3
+  tags:
+    - isf_dag_nm: 0
+    - ldg_tbl_nm: 1
+    - execution_date: 2
+
+
+- subject: RTV_LOGICAL
+  metric_name: spark_processed_rows
+  sql: "select
+           ISF_DAG_NM,
+           TBL_NM,
+           cast(ISF_DAG_START_TMSTP as STRING),
+           cast(LOADED_TO_CSV_CNT as INTEGER)
+        from
+         (
+           select ISF_DAG_NM, METRIC_NM, METRIC_VALUE, coalesce(TBL_NM, '{DBENV}_NAP_STG.RTV_LOGICAL_ITEM_LDG') as TBL_NM
+           from {DBENV}_NAP_BASE_VWS.ISF_DAG_CONTROL_LOG
+           where isf_dag_nm = 'ascp_rtv_logical_16780_TECH_SC_NAP_insights'
+           and batch_id = (select BATCH_ID from {DBENV}_NAP_BASE_VWS.ELT_CONTROL where SUBJECT_AREA_NM = 'NAP_ASCP_RTV_LOGICAL')
+           and (TBL_NM = '{DBENV}_NAP_STG.RTV_LOGICAL_ITEM_LDG' or metric_nm = 'ISF_DAG_START_TMSTP')
+         ) src
+        pivot (min(METRIC_VALUE) for METRIC_NM in ('LOADED_TO_CSV_CNT' as LOADED_TO_CSV_CNT,
+                                                   'ISF_DAG_START_TMSTP' as ISF_DAG_START_TMSTP,
+                                                   'TPT_JOB_START_TMSTP' as TPT_JOB_START_TMSTP,
+                                                   'TPT_JOB_END_TMSTP' as  TPT_JOB_END_TMSTP
+                                                  )
+        ) metrics"
+  metric_value_position: 3
+  tags:
+    - isf_dag_nm: 0
+    - ldg_tbl_nm: 1
+    - execution_date: 2

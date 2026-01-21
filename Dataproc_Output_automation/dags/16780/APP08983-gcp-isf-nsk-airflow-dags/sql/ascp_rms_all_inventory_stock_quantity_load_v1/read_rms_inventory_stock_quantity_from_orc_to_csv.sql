@@ -1,0 +1,57 @@
+create temporary table rms_inventory_stock_quantity_csv as
+select
+    cast(valueUpdatedTime as string) as value_updated_time,
+    cast(rmsSkuId as string) as rms_sku_id,
+    cast(locationId as string) as location_id,
+    cast(immediatelySellableQty as string) as immediately_sellable_qty,
+    cast(stockOnHandQty as string) as stock_on_hand_qty,
+    cast(unavailableQty as string) as unavailable_qty,
+    cast(custOrderReturn as string) as cust_order_return,
+    cast(preInspectCustomerReturn as string) as pre_inspect_customer_return,
+    cast(unusableQty as string) as unusable_qty,
+    cast(rtvReqstResrv as string) as rtv_reqst_resrv,
+    cast(metReqstResrv as string) as met_reqst_resrv,
+    cast(tcPreview as string) as tc_preview,
+    cast(tcClubhouse as string) as tc_clubhouse,
+    cast(tcMini1 as string) as tc_mini_1,
+    cast(tcMini2 as string) as tc_mini_2,
+    cast(tcMini3 as string) as tc_mini_3,
+    cast(problem as string) as problem,
+    cast(damagedReturn as string) as damaged_return,
+    cast(damagedCosmeticReturn as string) as damaged_cosmetic_return,
+    cast(ertmHolds as string) as ertm_holds,
+    cast(ndUnavailableQty as string) as nd_unavailable_qty,
+    cast(pbHoldsQty as string) as pb_holds_qty,
+    cast(comCOHolds as string) as com_co_holds,
+    cast(wmHolds as string) as wm_holds,
+    cast(storeReserve as string) as store_reserve,
+    cast(tcHolds as string) as tc_holds,
+    cast(returnsHolds as string) as returns_holds,
+    cast(fpHolds as string) as fp_holds,
+    cast(transfersReserveQty as string) as transfers_reserve_qty,
+    cast(returnToVendorQty as string) as return_to_vendor_qty,
+    cast(inTransitQty as string) as in_transit_qty,
+    cast(storeTransferReservedQty as string) as store_transfer_reserved_qty,
+    cast(storeTransferExpectedQty as string) as store_transfer_expected_qty,
+    cast(backOrderReserveQty as string) as back_order_reserve_qty,
+    cast(omsBackOrderReserveQty as string) as oms_back_order_reserve_qty,
+    cast(onReplenishment as string) as on_replenishment,
+    cast(lastReceivedDate as string) as last_received_date,
+    cast(locationType as string) as location_type,
+    cast(epmId as string) as epm_id,
+    cast(upc as string) as upc,
+    cast(returnInspectionQty as string) as return_inspection_qty,
+    cast(receivingQty as string) as receiving_qty,
+    cast(damagedQty as string) as damage_qty,
+    cast(holdQty as string) as hold_qty,
+    cast(csn as string) as csn,
+    cast(opSeqNo as string) as op_seq_no,
+    cast(positionNo as string) as position_no,
+    cast(CURRENT_TIMESTAMP as string) as dw_sys_load_tmstp
+
+from {{params.gcp_project_id}}.ascp.rms_all_inventory_stock_quantity_orc_v1
+where batch_id = (select batch_id from {{params.gcp_project_id}}.ascp.rms_inventory_stock_quantity_batch_control);
+
+TRUNCATE TABLE {{params.gcp_project_id}}.{{params.dbenv}}_nap_stg.inventory_stock_quantity_logical_v1_ldg;
+insert into {{params.gcp_project_id}}.{{params.dbenv}}_nap_stg.inventory_stock_quantity_logical_v1_ldg
+select * from rms_inventory_stock_quantity_csv;

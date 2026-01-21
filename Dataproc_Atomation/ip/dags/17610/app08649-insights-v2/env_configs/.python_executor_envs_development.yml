@@ -1,0 +1,22 @@
+k8s_envs:
+  ENV: development
+  TD_ENV: DEV
+  TD_HOST: tdnapdevcop1.nordstrom.net
+  TD_VAULT_PATH: data/application/APP08649/shared/nonprod/teradata/nap/service_account
+  NR_VAULT_PATH: data/application/APP08649/shared/nonprod/newrelic/ingest_license_key
+  BD_VAULT_PATH: data/application/APP08649/shared/nonprod/bigdata/service_account
+  ORA_SIM_VAULT_PATH: data/application/APP08649/shared/nonprod/oracle/sim16/service_account
+  ORA_SIM_HOST: y0319t12669.nordstrom.net
+  ORA_SIM_DB: DD1013
+  PRESTO_HOST: bigdata-starburst-presto.nonprod.bigdata.vip.nordstrom.com
+  PRESTO_CATALOG: hivecommon
+  VAULT_PATH: prod-vault.vault.vip.nordstrom.com
+  VAULT_PORT: 8200
+  S3_BUCKET: napstoreinvtry-nonprod-common-etl
+k8s_envs_secrets:
+  VAULT_ROLE_ID:
+    name: vault
+    key: roleid
+  VAULT_SECRET:
+    name: vault
+    key: secret

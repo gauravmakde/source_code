@@ -1,0 +1,104 @@
+{
+    "dag_id": "recs_funnel",
+    "dag_schedule": "0 12 * * *",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "dsa-app08142-recommendations-funnel-daily-data@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "sachin.goyal@nordstrom.com",
+    "stages": [
+        "read_write_hive_to_td",
+        "refresh_recs_dashboard"
+    ],
+    "stage_dependencies": {
+        "read_write_hive_to_td": [
+            "refresh_recs_dashboard"
+        ]
+    },
+    "sql_env_vars": {
+        "start_date": "current_date()-2",
+        "end_date": "current_date()-1"
+    },
+    "read_write_hive_to_td": {
+        "job_0_check_funnel_events": {
+            "python_executor": {
+                "module": "python/s3_file_sensor",
+                "version": "0.3.0",
+                "k8s_cpu_limit": 4,
+                "k8s_cpu_request": 3,
+                "k8s_memory_limit": "6Gi",
+                "k8s_memory_request": "2Gi",
+                "args": [
+                    "python/s3_file_sensor/main.py",
+                    "--function",
+                    "timestamp_check",
+                    "--bucket_nonprod",
+                    "",
+                    "--key_nonprod",
+                    "",
+                    "--bucket_prod",
+                    "tf-nap-prod-styling-intermediate tf-nap-prod-styling-intermediate",
+                    "--key_prod",
+                    "funnel_events/order_cancelled/_SUCCESS funnel_events/order_submitted/_SUCCESS",
+                    "--max_retry_minutes",
+                    "60"
+                ]
+            }
+        },
+        "job_1_create_td_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_REX",
+                        "scripts": [
+                            "recs_funnel/ddl/ddl_recs_funnel_ldg.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_2_load_hive_data_to_output": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "recs_funnel/recs_funnel_ldg.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_REX",
+                        "sql_table_reference": "recs_funnel_output",
+                        "data_source_name": "recs_funnel_daily_ldg"
+                    }
+                ]
+            }
+        },
+        "job_3_update_t2_table_from_landing_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_REX",
+                        "scripts": [
+                            "recs_funnel/recs_funnel.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "refresh_recs_dashboard": {
+        "job_0_refresh_tableau_workbook": {
+            "tableau_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TABLEAU_NAP__",
+                        "source_type": "workbook",
+                        "workbook_name": "NAP Recommendations by Placement & Strategy",
+                        "project_name": "Digital"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    }
+}

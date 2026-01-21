@@ -1,0 +1,42 @@
+{
+    "dag_id": "usl_rolling_52wk_calendar",
+    "dag_schedule": "0 10 * * 0",
+    "prod_email_on_failure": "dsa-app08818-universal-semantic-layer@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "ian.rasquinha@nordstrom.com",
+    "sql_env_vars": {},
+    "stages": [
+        "usl_rolling_52wk_calendar",
+        "date_fact"
+    ],
+    "stage_dependencies": {
+        "usl_rolling_52wk_calendar": "date_fact"
+    },
+    "usl_rolling_52wk_calendar": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_USL",
+                        "scripts": [
+                            "universal_semantic_layer/usl_rolling_52wk_calendar.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "date_fact": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_USL",
+                        "scripts": [
+                            "universal_semantic_layer/date_fact.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

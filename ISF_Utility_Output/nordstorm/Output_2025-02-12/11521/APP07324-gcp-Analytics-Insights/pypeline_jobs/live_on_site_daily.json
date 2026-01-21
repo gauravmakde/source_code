@@ -1,0 +1,27 @@
+{
+    "dag_id": "live_on_site_daily",
+    "dag_schedule": "30 9 * * *",
+    "prod_email_on_failure": "app08227-product-funnel@nordstrom.pagerduty.com, Meghan.D.Hickey@nordstrom.com, venkatesh.varada@nordstrom.com, TECH_PRICE_MD_OPT@nordstrom.com",
+    "nonprod_email_on_failure": "Meghan.D.Hickey@nordstrom.com, venkatesh.varada@nordstrom.com",
+    "stages": [
+        "run_terdata_sql_stg_0"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-5",
+        "end_date": "current_date()"
+    },
+    "run_terdata_sql_stg_0": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MER",
+                        "scripts": [
+                            "live_on_site_daily/live_on_site_daily.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

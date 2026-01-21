@@ -1,0 +1,106 @@
+{
+    "dag_id": "nap_to_allocation_onorder_extracts_weekly",
+    "dag_schedule": "30 02 * * 0",
+    "timezone": "US/Pacific",
+    "dependencies": {
+        "upstream": {
+            "other_app_id": {
+                "dags": [
+                    {
+                        "external_dag_id": "merch_on_order_load_otb_run_10976_tech_nap_merch",
+                        "conn_id": "OKTA_CONN_TO_APP04070",
+                        "retries": 1,
+                        "poke_interval": 120,
+                        "timeout": 3600,
+                        "python_query_code": "upstream_dependency.py",
+                        "date_query_function_name": "upstream_dependency.date_query_function"
+                    }
+                ]
+            }
+        }
+    },
+    "stages": [
+        "nap_to_allocation"
+    ],
+    "nap_to_allocation": {
+        "export_oo_data": {
+            "tpt_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TPT_SOURCE",
+                        "text_delimiter_hexa_flag": "'Y'",
+                        "text_delimiter": "01",
+                        "quoted_flag": "N",
+                        "quoted_data": "''",
+                        "database_name": "{db_env}_NAP_USR_VWS",
+                        "table_name": "MERCH_ON_ORDER_FACT_VW",
+                        "s3_file_path": "s3://{tpt_bucket_name}/table_extracts/merch_on_order_fact/merch_on_order_fact.csv",
+                        "sql_file_name": "merch_on_order_fact_export.sql"
+                    }
+                ],
+                "output_details": []
+            }
+        },
+        "oo_fp_extracts": {
+            "spark_engine": {
+                "spark_run_mode": "high",
+                "scripts": [
+                    "nap_to_allocation_oo_fp_extracts.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_NAP_USR_VIEWS",
+                        "sql_table_reference": "day_cal_454_dim",
+                        "data_source_name": "DAY_CAL_454_DIM"
+                    },
+                    {
+                        "conn_name": "TERADATA_NAP_USR_VIEWS",
+                        "sql_table_reference": "store_dim",
+                        "data_source_name": "STORE_DIM"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "ALLOCATION_OO_FP_EXTRACTS_TAB",
+                        "sql_table_reference": "oo_fp_tab"
+                    },
+                    {
+                        "conn_name": "ALLOCATION_OO_FP_EXTRACTS_AUDIT",
+                        "sql_table_reference": "oo_fp_audit"
+                    }
+                ]
+            }
+        },
+        "oo_op_extracts": {
+            "spark_engine": {
+                "spark_run_mode": "high",
+                "pause_idle_cluster_termination": "after_app",
+                "scripts": [
+                    "nap_to_allocation_oo_op_extracts.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_NAP_USR_VIEWS",
+                        "sql_table_reference": "day_cal_454_dim",
+                        "data_source_name": "DAY_CAL_454_DIM"
+                    },
+                    {
+                        "conn_name": "TERADATA_NAP_USR_VIEWS",
+                        "sql_table_reference": "store_dim",
+                        "data_source_name": "STORE_DIM"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "ALLOCATION_OO_OP_EXTRACTS_TAB",
+                        "sql_table_reference": "oo_op_tab"
+                    },
+                    {
+                        "conn_name": "ALLOCATION_OO_OP_EXTRACTS_AUDIT",
+                        "sql_table_reference": "oo_op_audit"
+                    }
+                ]
+            }
+        }
+    }
+}

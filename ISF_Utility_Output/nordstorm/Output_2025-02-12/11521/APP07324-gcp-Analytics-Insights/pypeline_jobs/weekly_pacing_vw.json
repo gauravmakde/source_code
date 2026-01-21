@@ -1,0 +1,23 @@
+{
+  "dag_id": "weekly_pacing_vw",
+  "prod_email_on_failure": "app09044-kpi-scorecard@nordstrom.pagerduty.com",
+  "nonprod_email_on_failure":"isha.rankawat@nordstrom.com",
+  "stages": [
+    "create_view"
+  ],
+  "create_view": {
+    "job_1_create_t2_view": {
+      "teradata_engine":{
+        "input_details":[
+          {
+            "conn_name":"TERADATA_SOURCE_KPI",
+            "scripts":[
+              "rmi/weekly_pacing_vw.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+

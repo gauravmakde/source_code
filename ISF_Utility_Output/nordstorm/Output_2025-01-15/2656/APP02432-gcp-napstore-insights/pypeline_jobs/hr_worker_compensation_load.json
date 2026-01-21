@@ -1,0 +1,52 @@
+{
+  "dag_id": "hr_worker_compensation_load",
+  "dag_schedule": "30 2,8,14,20 * * *",
+  "stages": [
+    "hr_worker_compensation"
+  ],
+  "hr_worker_compensation": {
+    "load_orc_td_stg": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "hr_worker_compensation_load_orc_and_teradata_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__KAFKA_CONN__",
+            "sql_table_reference": "kafka_linear_worker_compensation_analytical_avro",
+            "data_source_name": "linear-worker-compensation-analytical-avro"
+          },
+          {
+            "conn_name": "__HR_WORKER_COMPENSATION_S3_AVRO_CONN__",
+            "sql_table_reference": "out_of_order_worker_compensation_analytical_avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__HR_WORKER_COMPENSATION_S3_ORC_SINK__",
+            "sql_table_reference": "hr_worker_compensation_orc_output"
+          },
+          {
+            "conn_name": "__TERADATA_NAP_HR_WAGE_RATE_STG__",
+            "sql_table_reference": "hr_worker_compensation_ldg",
+            "data_source_name": "EMPLOYEE_PAY_RATE_LDG"
+          }
+        ]
+      }
+    },
+    "load_td_stg_to_dims": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__NEW_VAULT_TERADATA_NAP_HR_WAGE_RATE_STG__",
+            "scripts": [
+              "hr_worker_compensation_load_teradata_stg_to_dim.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+

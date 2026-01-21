@@ -1,0 +1,23 @@
+[
+    {
+        "catalog_name": "emerald",
+        "warehouse": "gs://conversionfactory/VaibhavThorat/Warehouse",
+        "gcp_project": "dmgcp-del-160",
+        "gcp_location": "us-east4",
+        "databases": ["ambit_us_bronze","ambit_us_bronze","ambit_us_bronze","aptools_us_bronze","aptools_us_bronze","arclight_us_bronze","arclight_us_bronze","atg_us_bronze","brainstorm_logs_us_bronze","brbac_us_bronze","brbac_us_bronze","caf_us_bronze","caf_us_gold","capmp_us_bronze","cmn_network_event_data_us_bronze","cmt_us_bronze","commercial_mobility_platform_us_bronze","common_hotspot_us_bronze","comscore_us_bronze","csa_us_bronze","csa_us_bronze","csoc_analytics_us_bronze","databus_us_bronze","databus_us_bronze","dgplat_cs_us_bronze","dgplat_cs_us_bronze","disney_plus_session_qoe_us_bronze","e2e_nofip_no_pii_us_bronze","e2e_nofip_no_pii_us_bronze","e2e_nofip_pii_us_bronze","emerald_cache_us_bronze","engines_us_bronze","exedenetflow_us_bronze","exedenetflow_mgmt_us_bronze","firewall_blocks_us_bronze","fmcs_us_bronze","fmcs_us_bronze","gadberry_us_bronze","gem_data_analytics_us_bronze","gem_data_analytics_us_bronze","gem_data_analytics_us_bronze","giapps_jira_archive_us_bronze","giapps_jira_archive_us_bronze","giapps_jira_archive_nonprod_us_bronze","gmb_us_bronze","gmb_up_us_bronze","gms_us_bronze","hybrid_us_bronze","information_schema_us_bronze","ipfix_vs3_us_bronze","jira_datalake_ithelp_us_bronze","kasat_us_bronze","lyoung_us_bronze","marketing_us_residential_us_bronze","merkle_us_bronze","merkle_us_gold","mit_us_bronze","mit_syslog_firehose_us_bronze","mm_lb_us_bronze","mobility_us_bronze","mobility_analytics_us_bronze","mprocera_us_bronze","network_ops_us_bronze","network_ops_us_bronze","network_ops_us_bronze","nmsadmin_us_bronze","nsaunders_us_bronze","ops_analytics_us_bronze","perf_us_bronze","perf_us_gold","pixel_us_bronze","planet_us_bronze","procera_brazil_us_bronze","procera_brazil_us_gold","provision_us_bronze","provision_us_gold","rdsotp_us_bronze","reports_us_bronze","rte_us_bronze","run_dmc_us_bronze","san_us_bronze","sandvine_us_bronze","sandvine_us_gold","scn_data_science_us_bronze","scn_data_science_nda_us_bronze","scn_data_science_us_bronze","smac_us_bronze","smac_us_gold","smac_us_bronze","smts_us_bronze","spdb_us_bronze","statics_us_bronze","statpush_us_bronze","statpush_us_gold","sub360_us_bronze","threatintel_us_bronze","tpe_us_bronze","trackos_us_bronze","udm_us_bronze","us_res_gis_enrichment_us_bronze","v3g_data_us_bronze","v3g_data_raw_us_bronze","vail_us_bronze","vasn_us_bronze","vault_audit_gen_us_bronze","vcds_us_bronze","vcds_us_gold","vcds_us_bronze","vega_personalization_err_us_bronze","vega_personalization_uae_us_bronze","vega_personalization_uae_us_bronze","vega_personalization_uae_us_bronze","video_qoe_us_bronze","video_qoe_us_bronze","video_qoe_us_bronze","vpe_us_bronze","vwa_us_bronze","whistleout_us_bronze","whiteglove_us_bronze"]
+    },
+    {
+        "catalog_name": "lapis",
+        "warehouse": "gs://conversionfactory/VaibhavThorat/Warehouse",
+        "gcp_project": "dmgcp-del-160",
+        "gcp_location": "us-east4",
+        "databases": ["brbac_eu_bronze","caf_eu_bronze","csa_eu_bronze","csa_eu_bronze","gem_data_analytics_eu_bronze","gfb_kasat_fixed_eu_bronze","information_schema_eu_bronze","ipfix_residential_agg_eu_bronze","ipfix_vs3_eu_bronze","ka_sat_decimators_eu_bronze","mobility_eu_bronze","mprocera_eu_bronze","smts_eu_bronze","spdb_eu_bronze","statpush_eu_bronze","stream_residential_eu_bronze","test_eu_bronze","threatintel_eu_bronze","tpe_eu_bronze","v3g_data_raw_eu_bronze","vasn_eu_bronze"]
+    },
+    {
+        "catalog_name": "SUB360_SUB360",
+        "warehouse": "gs://conversionfactory/VaibhavThorat/Warehouse",
+        "gcp_project": "dmgcp-del-160",
+        "gcp_location": "us-east4",
+        "databases": ["bep_ods_us_bronze","rpt_us_bronze"]
+    }
+]

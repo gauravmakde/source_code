@@ -1,0 +1,41 @@
+{
+    "dag_id": "data_control_rev400_source_sdm_return",
+    "dag_schedule": "00 05 * * *",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "TECH_ISF_DAS_OCTAVS@nordstrom.com",
+    "nonprod_email_on_failure": "shubhambhojraj.patil@nordstrom.com",
+    "stages": [
+        "generate_rev400_return_report"
+    ],
+    "sql_env_vars": {
+        "curr_date": "current_date()",
+        "return_date": "current_date()-60",
+        "source_events_date": "60"
+    },
+    "generate_rev400_return_report": {
+        "job": {
+            "spark_engine": {
+                "spark_run_mode": "high",
+                "scripts": [
+                    "generate_rev400_return_report.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "S3_PARQUET_SDM_SOURCE_SUCCESS",
+                        "sql_table_reference": "temp_frt_success_topic"
+                    },
+                    {
+                        "conn_name": "S3_PARQUET_SDM_SOURCE_FAILURE",
+                        "sql_table_reference": "temp_frt_failure_topic"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "REV400_OUTPUT",
+                        "sql_table_reference": "RETURN"
+                    }
+                ]
+            }
+        }
+    }
+}

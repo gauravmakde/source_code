@@ -1,0 +1,173 @@
+{
+  "dag_id": "inventory_navi_store_transfer_lifecycle",
+  "dag_schedule": "10 9 * * *",
+  "prod_email_on_failure": "nap-sco-high-pri@nordstrom.pagerduty.com",
+  "nonprod_email_on_failure": "",
+  "stages": [
+    "job_10",
+    "job_15",
+    "job_20",
+    "job_30",
+    "job_40",
+    "job_50",
+    "job_60",
+    "job_70"
+  ],
+  "stage_dependencies": {
+    "job_10": "job_15",
+    "job_15": ["job_20","job_30","job_40"],
+    "job_20":"job_50",
+    "job_30":"job_50",
+    "job_40":"job_50",
+    "job_50":"job_60",
+    "job_60":"job_70"
+  },
+  "job_10": {
+    "td_batch_start": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_FCT__",
+            "scripts": [
+              "inventory_navi_store_transfer_lifecycle/start_batch.sql"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "job_15": {
+    "clear_stg": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "scripts": [
+              "inventory_navi_store_transfer_lifecycle/clear_stg.sql"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "job_20": {
+    "load_created_event_td_stg": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "inventory_navi_store_transfer_lifecycle/kafka_avro_to_td_stg_created_event.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__KAFKA_STORE_TRANSFER_CREATED__",
+            "sql_table_reference": "kafkay_store_transfer_created_event_avro",
+            "data_source_name": "inventory-store-transfer-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "store_inventory_transfer_ldg_table" ,
+            "data_source_name": "INVENTORY_NAVI_STORE_TRANSFER_LDG"
+          }
+        ]
+      }
+    }
+  },
+  "job_30": {
+    "load_shipped_event_td_stg": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "inventory_navi_store_transfer_lifecycle/kafka_avro_to_td_stg_shipped_event.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__KAFKA_STORE_TRANSFER_SHIPPED__",
+            "sql_table_reference": "kafka_store_transfer_shipped_event_avro",
+            "data_source_name": "inventory-store-transfer-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "store_inventory_transfer_ldg_table" ,
+            "data_source_name": "INVENTORY_NAVI_STORE_TRANSFER_LDG"
+          }
+        ]
+      }
+    }
+  },
+  "job_40": {
+    "load_request_completed_event_td_stg": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "inventory_navi_store_transfer_lifecycle/kafka_avro_to_td_stg_request_completed_event.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__KAFKA_STORE_TRANSFER_REQUEST_COMPLETED__",
+            "sql_table_reference": "kafka_store_transfer_request_completed_event_avro",
+            "data_source_name": "inventory-store-transfer-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "store_inventory_transfer_completed_ldg_table" ,
+            "data_source_name": "INVENTORY_NAVI_STORE_TRANSFER_COMPLETED_LDG"
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "store_inventory_transfer_expired_item_ldg_table" ,
+            "data_source_name": "INVENTORY_NAVI_STORE_TRANSFER_EXPIRED_ITEM_LDG"
+          }
+        ]
+      }
+    }
+  },
+  "job_50": {
+    "td_stg_to_fact": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_FCT__",
+            "scripts": [
+              "inventory_navi_store_transfer_lifecycle/td_stg_to_fact.sql"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "job_60": {
+    "td_fact_dqc": {
+      "teradata_engine": {
+        "retries": 0,
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_FCT__",
+            "scripts": [
+              "inventory_navi_store_transfer_lifecycle/td_fact_dqc.sql"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "job_70": {
+    "td_batch_end": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_FCT__",
+            "scripts": [
+              "inventory_navi_store_transfer_lifecycle/end_batch.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

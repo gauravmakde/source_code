@@ -1,0 +1,27 @@
+{
+    "dag_id": "search_session_analytical",
+    "dag_schedule": "30 16 * * *",
+    "prod_email_on_failure": "jin.liu2@nordstrom.com,RaeAnn.Boswell@nordstrom.com, dsa-app08742-session-path-expanded-events-data-pipelines@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "jin.liu2@nordstrom.com",
+    "stages": [
+        "run_hive_hive_sql"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-4",
+        "end_date": "current_date()-3"
+    },
+    "run_hive_hive_sql": {
+        "job_0": {
+            "spark_engine": {
+                "spark_run_mode": "medium_no_broadcast",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "search/search_session_analytical/search_session_analytical.sql"
+                ],
+                "input_details": [],
+                "output_details": []
+            }
+        }
+    }
+}

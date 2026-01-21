@@ -1,0 +1,52 @@
+{
+    "dag_id": "mta_email_performance",
+    "dag_schedule": "15 17 * * *",
+    "prod_email_on_failure": "dsa--app08300-email-performance-dashboard-pipeline@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "nhan.le@nordstrom.com",
+    "dependencies": {
+        "upstream": {
+            "dags": [
+                {
+                    "external_dag_id": "mkt_utm_agg_11521_ACE_ENG",
+                    "retries": 3,
+                    "poke_interval": 120,
+                    "timeout": 3600
+                }
+            ]
+        }
+    },
+    "stages": [
+        "run_terdata_sql"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-30",
+        "end_date": "current_date()-1"
+    },
+    "run_terdata_sql": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_MTA",
+                        "scripts": [
+                            "mta/mta_email_performance.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_2_refresh_tableau_workbook": {
+            "tableau_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TABLEAU_NAP__",
+                        "source_type": "workbook",
+                        "workbook_name": "4-Box Email Performance",
+                        "project_name": "Marketing - CRM/Loyalty"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    }
+}

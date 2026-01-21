@@ -1,0 +1,9 @@
+--app_config_file gs://prod-nap-dataplex-internal/app09203/isf-artifacts/app-config/emr_application_prod.json   
+--app_id APP07324  
+--target_tables_details 'mta_last_touch_ldg_output={"source_type": "S3", "format": "csv", "path": "s3://ace-etl/tpt_load/", "header": "false", "compression": "gzip", "sep": "/\u001f", "emptyValue": ""}'  
+--sql_file_location s3://analytics-insights-dags-prod/apps/etl_framework/airflow_nsk_dag_job_artifacts/prod/11521/ACE/ENG/backfill/sql/mta/backfill_mta_11521_ACE_ENG_mta_last_touch_mta_last_touch_load.sql  
+--stage_task_name backfill_mta_11521_ACE_ENG_mta_last_touch_job1_hive_to_csv  
+--offset_table '`jwn-nap-dataplex-prod-emue.onehop_etl_app_db.kafka_consumer_offset_batch_details`'
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:401438132124:secret:AI_PROD_VAULT_APPROLE_ROLE_ID-WJJbVC  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:401438132124:secret:AI_PROD_VAULT_APPROLE_SECRET_ID-NxqoEW  
+--aws_user_role_arn arn:aws:iam::401438132124:role/ae-isf-vault-prod 

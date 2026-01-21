@@ -1,0 +1,43 @@
+{
+  "dag_id": "payment_qr_code_lifecycle_teradata",
+  "dag_schedule": "0 3/4 * * *",
+  "stages": [
+    "payment_qr_code_lifecycle_kafka_to_teradata_stg_stage_0"
+  ],
+  "payment_qr_code_lifecycle_kafka_to_teradata_stg_stage_0": {
+    "kafka_to_teradata_stg_job": {
+      "spark_engine": {
+        "spark_run_mode": "medium",
+        "scripts": [
+          "sparkSql/payment_qr_code_lifecycle_kafka_to_teradata_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__KAFKA_CONFLUENT_CLOUD_OAUTH__",
+            "sql_table_reference": "kafka_payment_qr_code_lifecycle_analytical_avro",
+            "data_source_name": "customer-payments-qr-code-lifecycle-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_STG__",
+            "sql_table_reference": "payment_qr_code_lifecycle_stg",
+            "data_source_name": "PAYMENT_QR_CODE_LIFECYCLE_LDG"
+          }
+        ]
+      }
+    },
+    "teradata_stg_to_teradata_fct_job": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__PAYMENT_TERADATA_NAP_FCT__",
+            "scripts": [
+              "teradata/payment_qr_code_lifecycle_teradata_stg_to_teradata_fct.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

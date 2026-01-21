@@ -1,0 +1,88 @@
+{
+  "dag_id": "inventory_dextr_navi_store_return_to_vendor_request_completed",
+  "dag_schedule": "20 9 * * *",
+  "prod_email_on_failure": "nap-sco-high-pri@nordstrom.pagerduty.com",
+  "nonprod_email_on_failure": "",
+  "stages": [
+    "main"
+  ],
+  "main": {
+    "job_1_td_batch_start": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_FCT__",
+            "scripts": [
+              "inventory_dextr_navi_store_return_to_vendor_request_completed/start_batch.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "job_2_load_avro_td_stg": {
+      "spark_engine": {
+        "spark_run_mode": "high",
+        "scripts": [
+          "inventory_dextr_navi_store_return_to_vendor_request_completed/kafka_avro_to_td_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__KAFKA_STORE_RETURN_TO_VENDOR_REQUEST_COMPLETED__",
+            "sql_table_reference": "kafka_inventory_store_return_to_vendor_request_completed_avro",
+            "data_source_name": "inventory-store-rtv-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "inventory_dextr_navi_store_return_to_vendor_completed_ldg_table",
+            "data_source_name": "INVENTORY_DEXTR_NAVI_STORE_RETURN_TO_VENDOR_COMPLETED_LDG"
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "inventory_dextr_navi_store_return_to_vendor_expired_item_ldg_table",
+            "data_source_name": "INVENTORY_DEXTR_NAVI_STORE_RETURN_TO_VENDOR_EXPIRED_ITEM_LDG"
+          }
+        ]
+      }
+    },
+    "job_3_td_stg_to_fact": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_FCT__",
+            "scripts": [
+              "inventory_dextr_navi_store_return_to_vendor_request_completed/td_stg_to_fact.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "job_4_td_fact_dqc": {
+      "teradata_engine": {
+        "retries": 0,
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_FCT__",
+            "scripts": [
+              "inventory_dextr_navi_store_return_to_vendor_request_completed/td_fact_dqc.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "job_5_td_batch_end": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_FCT__",
+            "scripts": [
+              "inventory_dextr_navi_store_return_to_vendor_request_completed/end_batch.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+

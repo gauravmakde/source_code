@@ -1,0 +1,51 @@
+{
+  "dag_id": "item_ticket_load",
+  "dag_schedule": "0 1,17,19,20,22 * * *",
+  "prod_email_on_failure":"TECH_NAP_SUPPLYCHAIN_OUTBOUND@nordstrom.com,nap-sco-high-pri@nordstrom.pagerduty.com",
+  "nonprod_email_on_failure": "TECH_NAP_SUPPLYCHAIN_OUTBOUND@nordstrom.com",
+  "stages": [
+    "main_1"
+  ],
+  "main_1": {
+    "load_from_kafka_to_teradata_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "high",
+        "scripts": [
+          "item_ticket/item_ticket_from_kafka_to_teradata_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__ITEM_TICKET_KAFKA__",
+            "sql_table_reference": "kafka_item_ticket_input",
+            "data_source_name": "inventory-item-ticket-printed-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__ITEM_TICKET_KAFKA_TO_S3_PARQUET__",
+            "sql_table_reference": "item_ticket_parquet_output"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "item_ticket_stg_table",
+            "data_source_name": "ITEM_TICKET_PRINTED_LDG"
+          }
+        ]
+      }
+    },
+    "load_from_stg_to_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "item_ticket/item_ticket_from_stg_to_fact.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+

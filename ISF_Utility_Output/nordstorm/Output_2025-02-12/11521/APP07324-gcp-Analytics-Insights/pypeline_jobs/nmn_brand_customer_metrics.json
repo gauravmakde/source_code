@@ -1,0 +1,28 @@
+{
+    "dag_id": "nmn_brand_customer_metrics",
+    "dag_schedule": "30 18 * * 0",
+    "prod_email_on_failure": "anandkumar.patel@nordstrom.com, Angelina.Allen@nordstrom.com,t3-app08172-nordstrom-media-network-reporting-stack-email.7zuapa3p@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "anandkumar.patel@nordstrom.com",
+    "stages": [
+        "run_terdata_sql_stg_0"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()",
+        "end_date": "current_date()"
+    },
+    "run_terdata_sql_stg_0": {
+        "job_0": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_NMN",
+                        "scripts": [
+                            "nmn/nmn_brand_customer_metrics/nmn_brand_customer_metrics.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

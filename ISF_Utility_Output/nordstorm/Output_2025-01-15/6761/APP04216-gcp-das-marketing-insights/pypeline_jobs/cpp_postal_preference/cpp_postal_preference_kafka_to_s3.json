@@ -1,0 +1,70 @@
+{
+    "dag_id": "cpp_postal_preference_kafka_to_s3",
+    "dag_schedule": "00 12 * * *",
+    "dag_sla_minutes": "90",
+    "prod_email_on_failure": "nap-marketing@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "varun.miranda@nordstrom.com",
+    "stages": [
+        "load_cpp_postal_preference_object_model",
+        "extracted_and_audit_files_copy"
+    ],
+    "stage_dependencies": {
+        "load_cpp_postal_preference_object_model": [
+            "extracted_and_audit_files_copy"
+        ],
+        "extracted_and_audit_files_copy": [
+            "save_status_of_the_dag"
+        ]
+    },
+    "load_cpp_postal_preference_object_model": {
+        "kafka_to_s3": {
+            "spark_engine": {
+                "spark_run_mode": "low",
+                "scripts": [
+                    "load_cpp_postal_preference_kafka_to_s3.sql"
+                ],
+                "input_details": [
+                    {
+                        "conn_name": "KAFKA_DAS_SINK",
+                        "sql_table_reference": "kafka_source",
+                        "data_source_name": "customer-customer-communication-preferences-analytical-avro"
+                    }
+                ],
+                "output_details": [
+                    {
+                        "conn_name": "__S3_CPP_POSTAL_PREFERENCE_DATA_CSV_SINK__",
+                        "sql_table_reference": "cpp_postal_preference_data_extract"
+                    },
+                    {
+                        "conn_name": "__S3_CPP_POSTAL_PREFERENCE_AUDIT_CSV_SINK__",
+                        "sql_table_reference": "cpp_postal_preference_final_count"
+                    }
+                ]
+            }
+        }
+    },
+    "extracted_and_audit_files_copy": {
+        "to_s3_path_folders": {
+            "python_executor": {
+                "module": "python/utils",
+                "version": "1.3.18",
+                "args": [
+                    "python/utils/src/bulk_s3_copy.py",
+                    "--s3_source_bucket_env_name",
+                    "S3_MKTG_BUCKET",
+                    "--s3_target_bucket_env_name",
+                    "S3_MKTG_BUCKET",
+                    "--source_to_target_path_pair",
+                    "{'source': 'isf/data/cpp_postal_preference/cpp_postal_preference_data_extract/', 'target': 'isf/data/cpp_postal_preference/incremental/year=<year>/month=<month>/day=<day>/'}",
+                    "--source_to_target_path_pair",
+                    "{'source': 'isf/audit/cpp_postal_preference/cpp_postal_preference_final_count/', 'target': 'isf/audit/cpp_postal_preference/incremental/year=<year>/month=<month>/day=<day>/'}",
+                    "--base_date_iso_env_name",
+                    "DAG_EXECUTION_DATE"
+                ]
+            },
+            "macros": {
+                "DAG_EXECUTION_DATE": "execution_date"
+            }
+        }
+    }
+}

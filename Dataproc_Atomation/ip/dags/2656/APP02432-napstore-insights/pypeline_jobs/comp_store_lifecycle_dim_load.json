@@ -1,0 +1,62 @@
+{
+  "dag_id": "comp_store_lifecycle_dim_load",
+  "dag_schedule": "56 03 * * *",
+  "stages": [
+    "s3_json"
+  ],
+  "s3_json": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "medium",
+        "scripts": [
+          "comp_store_status_s3_to_ldg.sql"
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "org_store_comp_status_dim_stg_table",
+            "data_source_name": "COMP_STORE_STATUS_LDG"
+          }
+        ]
+      }
+    },
+    "audit_using_uat_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "scripts": [
+              "comp_store_status_data_audit.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "load_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "scripts": [
+              "comp_store_status_lifecycle_dim_load.sql"
+            ]
+          }
+        ]
+      }
+    },
+    "load_orc_table": {
+      "spark_engine": {
+        "spark_run_mode": "medium",
+        "scripts": [
+          "comp_store_status_convert_to_orc.sql"
+        ],
+        "output_details": [
+          {
+            "conn_name": "__COMP_STORE_ORC_S3__",
+            "sql_table_reference": "store_json_orc"
+          }
+        ]
+      }
+    }
+  }
+}

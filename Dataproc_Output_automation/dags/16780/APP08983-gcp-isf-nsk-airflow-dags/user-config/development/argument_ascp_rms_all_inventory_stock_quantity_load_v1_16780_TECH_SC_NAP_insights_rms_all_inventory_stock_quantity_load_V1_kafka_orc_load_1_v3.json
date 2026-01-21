@@ -1,0 +1,14 @@
+--app_config_file gs://test-data-datametica/app09392/isf-artifacts/app-config/emr_application_dev.json   
+--app_id APP08983 
+--source_tables_details 'rms_all_locations_inventory_base={"source_type": "KAFKA", "kafka_cluster_name": "meadow", "vault_connection_name": "nordsecrets/application/APP09392/meadow/onix/oauth", "kafka.sasl.mechanism": "OAUTHBEARER", "retry.backoff.ms": "500", "request.timeout.ms": "19000","data_source_name":"ascp-rms-all-locations-inventory-event-v1-avro"},rms_inventory_stock_quantity_batch_control={"source_type": "BIGQUERY", "project": "jwn-nap-user1-nonprod-zmnb", "dataset": "ascp", "table": "rms_inventory_stock_quantity_batch_control","temp_bucket": "test-data-datametica"}'
+--target_tables_details 'rms_inventory_stock_quantity={"source_type": "gs", "path": "gs://test-data-datametica/tf-nap-scinv-prod-ascp-extract-csv/errors/", "format": "csv"},rms_all_inventory_stock_quantity_orc_v1={"source_type": "BIGQUERY", "dataset": "ascp", "table": "rms_all_inventory_stock_quantity_orc_v1", "project": "jwn-nap-user1-nonprod-zmnb"}' 
+--sql_file_location gs://test-data-datametica/app09392/isf-artifacts/sql/ascp_rms_all_inventory_stock_quantity_load_v1/read_rms_inventory_stock_quantity_from_kafka_to_orc.sql  
+--stage_task_name ascp_rms_all_inventory_stock_quantity_load_v1_16780_TECH_SC_NAP_insights_rms_all_inventory_stock_quantity_load_V1_kafka_orc_load_1_v3  
+--offset_table '`jwn-nap-user1-nonprod-zmnb.onehop_etl_app_db.kafka_consumer_offset_batch_details`'   
+--consumer_group_name onix-ascp-rms-all-locations-inventory-event-v1-avro_ascp_rms_all_inventory_stock_quantity_load_v1_16780_TECH_SC_NAP_insights_rms_all_inventory_stock_quantity_load_V1_kafka_orc_load_1_v3   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_ROLE_ID-Psikfr
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:290445963451:secret:APP09392_VAULT_APPROLE_SECRET_ID-themT6
+--aws_user_role_arn arn:aws:iam::290445963451:role/APP09392_AWS_Secrets_Role
+--aws_user_role_external_id=testUser
+--gcp_project_id jwn-nap-user1-nonprod-zmnb
+

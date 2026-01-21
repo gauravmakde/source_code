@@ -1,0 +1,34 @@
+{
+    "dag_id": "aec_audience_engagement_cohorts",
+    "dag_schedule": "0 23 * * 2",
+    "prod_email_on_failure": "grant.coffey@nordstrom.com, niharika.srivastava@nordstrom.com",
+    "nonprod_email_on_failure": "niharika.srivastava@nordstrom.com, irene.ma@nordstrom.com",
+    "dependencies": {
+        "downstream": {
+            "dags": [
+                "customer_cohort_11521_ACE_ENG"
+            ]
+        }
+    },
+    "stages": [
+        "run_terdata_sql_stg_0"
+    ],
+    "sql_env_vars": {
+        "end_date": "current_date()"
+    },
+    "run_terdata_sql_stg_0": {
+        "job_0": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 7200,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_AEC",
+                        "scripts": [
+                            "audience_engagement/audience_engagement_cohorts.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

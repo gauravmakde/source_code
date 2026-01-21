@@ -1,0 +1,46 @@
+{
+    "dag_id": "ddl_optimine_summary",
+    "prod_email_on_failure": "app09044-kpi-scorecard@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure":"isha.rankawat@nordstrom.com",
+    "stages": [
+      "ddl_optimine_summary"
+    ],
+    "ddl_optimine_summary": {
+      "run_apm_ddl": {
+        "teradata_engine":{
+          "input_details":[
+            {
+              "conn_name":"TERADATA_SOURCE_KPI",
+              "scripts":[
+                "rmi/ddl/ddl_optimine_summary.sql"
+              ]
+            }
+          ]
+        }
+      },
+      "run_apm_ldg_ddl": {
+        "teradata_engine":{
+          "input_details":[
+            {
+              "conn_name":"TERADATA_SOURCE_KPI",
+              "scripts":[
+                "rmi/ddl/ddl_optimine_summary_ldg.sql"
+              ]
+            }
+          ]
+        }
+      },
+    "run_tpt_job_insert": {
+      "teradata_engine":{
+        "input_details":[
+          {
+            "conn_name":"TERADATA_SOURCE_KPI",
+            "scripts":[
+              "rmi/optimine_summary_tpt_job_insert.sql"
+            ]
+          }
+        ]
+      }
+    }
+    }
+  }

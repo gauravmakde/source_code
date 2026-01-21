@@ -1,0 +1,14 @@
+--app_config_file gs://test-data-datametica/app09392/isf-artifacts/app-config/emr_application_dev.json   
+--app_id APP08983 
+--source_tables_details 'kafka_inventory_adjustment_logical_avro={"source_type": "KAFKA", "kafka_cluster_name": "meadow", "vault_connection_name": "nordsecrets/application/APP08983/15850/nap_scinv/prod/kafka/kafka_oauth_credentials", "kafka.sasl.mechanism": "OAUTHBEARER", "retry.backoff.ms": "500", "request.timeout.ms": "19000","data_source_name":"ascp-inventory-adjustment-logical-event-avro"}' 
+--target_tables_details 'inventory_adjustment_logical_err={"source_type": "GS", "format": "csv", "path": "gs://test-data-datametica/errors/ascp_ihub_refresh_v1/"},inventory_adjustment_logical_ldg_table_csv={"source_type": "BIGQUERY", "project": "jwn-nap-user1-nonprod-zmnb", "dataset": "DEV_NAP_STG", "table": "INVENTORY_ADJUSTMENT_LOGICAL_LDG", "mode": "overwrite", "temp_bucket": "test-data-datametica"}
+,processed_data_spark_log_table={"source_type": "BIGQUERY", "project": "jwn-nap-user1-nonprod-zmnb", "dataset": "DEV_NAP_UTL", "table": "PROCESSED_DATA_SPARK_LOG", "mode": "overwrite", "temp_bucket": "test-data-datametica"}'  
+--sql_file_location gs://test-data-datametica/app09392/isf-artifacts/sql/ascp_inventory_adjustment_logical/read_inventory_adjustment_logical_from_kafka_to_teradata.sql  
+--stage_task_name ascp_inventory_adjustment_logical_16780_TECH_SC_NAP_insights_inventory_adjustment_logical_load_load_02_kafka  
+--offset_table onehop_etl_app_db.kafka_consumer_offset_batch_details   
+--consumer_group_name ascp-inventory-adjustment-logical-event-avro_ascp_inventory_adjustment_logical_16780_TECH_SC_NAP_insights_inventory_adjustment_logical_load_load_02_kafka   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:560772504729:secret:APP08983_VAULT_APPROLE_ROLE_ID-X8CJ3r  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:560772504729:secret:APP08983_VAULT_APPROLE_SECRET_ID-X8CJ3r  
+--aws_user_role_arn arn:aws:iam::560772504729:role/APP08983_Prod_ISF_spark_connection 
+--aws_user_role_external_id=testUser
+--gcp_project_id jwn-nap-user1-nonprod-zmnb

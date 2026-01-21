@@ -1,0 +1,9 @@
+--app_config_file s3://analytics-insights-dags-prod/apps/etl_framework/prod/application_config/emr_application_prod.json   
+--app_id APP07324  
+--target_tables_details 'bot_traffic_fix_output={"source_type": "TERADATA", "hostname": "tdnapprod.nordstrom.net", "port": "1025", "vault_connection_name": "nordsecrets/application/APP07324/ace/ae-isf-central/prod/mts/teradata/teradta_db_credentials", "database_name": "T2DL_DAS_MOTHERSHIP","data_source_name":"bot_traffic_fix_ldg"}'  
+--sql_file_location s3://analytics-insights-dags-prod/apps/etl_framework/airflow_nsk_dag_job_artifacts/prod/11521/ACE/ENG/sql/mothership/mothership_bot_traffic_fix_11521_ACE_ENG_read_write_s3_td_bot_traffic_fix_load.sql  
+--stage_task_name mothership_bot_traffic_fix_11521_ACE_ENG_read_write_s3_td_job_2_load_s3_data_to_output  
+--hive_offset_table onehop_etl_app_db.kafka_consumer_offset_batch_details   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:401438132124:secret:AI_PROD_VAULT_APPROLE_ROLE_ID-WJJbVC  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:401438132124:secret:AI_PROD_VAULT_APPROLE_SECRET_ID-NxqoEW  
+--aws_user_role_arn arn:aws:iam::401438132124:role/ae-isf-vault-prod 

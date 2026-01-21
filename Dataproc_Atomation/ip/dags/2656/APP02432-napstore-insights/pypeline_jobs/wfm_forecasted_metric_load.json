@@ -1,0 +1,52 @@
+{
+  "dag_id": "wfm_forecasted_metric_load",
+  "dag_schedule": "12 0,3,15,18,21 * * *",
+  "stages": [
+    "wfm_forecasted_metric_load"
+  ],
+  "wfm_forecasted_metric_load": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "high",
+        "scripts": [
+          "wfm_forecasted_metric_load_stg.sql"
+        ],
+        "input_details": [
+          {
+
+            "conn_name": "__WFM_FORECASTED_METRIC_KAFKA__",
+            "sql_table_reference": "kafka_wfm_forecasted_metric_input",
+            "data_source_name": "customer-forecasted-metric-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__WFM_FORECASTED_METRIC_KAFKA_TO_S3_ORC__",
+            "sql_table_reference": "wfm_forecasted_metric_orc_output"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_forecasted_metric_stg_table",
+            "data_source_name": "FORECASTED_METRIC_STG"
+          }
+        ]
+      }
+    },
+    "load_1_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "wfm_forecasted_metric_load_fact.sql"
+            ]
+          }
+
+        ]
+      }
+    }
+  }
+}
+
+

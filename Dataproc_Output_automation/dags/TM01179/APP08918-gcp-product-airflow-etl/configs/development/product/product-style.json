@@ -1,0 +1,154 @@
+{
+  "domain": "merch",
+  "name" : "product_style",
+  "sources" : [
+    {
+      "type" : "KAFKA",
+      "name" : "mainDataTable",
+      "description" : "Ultimate Source of data for daily incremental loads",
+      "cache" : "MEMORY_AND_DISK",
+      "enable" : true,
+      "properties" : {
+        "kafka.bootstrap.servers": "meadow.prod.us-west-2.aws.proton.nordstrom.com:9093",
+        "schemaRegistryUrl": "https://schema-registry.prod.us-west-2.aws.proton.nordstrom.com",
+        "group.id": "nordlytics_001",
+        "subscribe": "nap-product-style-object-model",
+        "headers" : "",
+        "enable.auto.commit": "false",
+        "proton_accessKey":"APP09392.YPJ4OTVDF57JWSKCU",
+        "proton_secret":"Ue8IhWG1E2zqe9tgY1J6jYBoTraSs5UUCSQWJKp7ijuRVxXwlDGcK0nnIXPegA7b1ig.3H4LuQhD6jROdwHfGVr8ivTZY4bDB.vgJCvuQUxDiABAM5dGUqJeHUdFR3Si",
+        "kafka.security.protocol": "sasl_ssl",
+        "sasl.kerberos.service.name": "kafka",
+        "kafka.sasl.mechanism": "SCRAM-SHA-512",
+        "pathPattern" : ""
+      }
+    }
+  ],
+  "dags" : [
+    {
+      "name" : "Main_dag",
+      "upstream" : ["mainDataTable"],
+      "operators" : [
+        {
+          "name": "PRODUCT_STYLE_st1",
+          "description": "Level 1 frame for PRODUCT_STYLE extract",
+          "select": [
+              "Id"
+            , "Description"
+            , "MarketCode"
+            , "SourcePublishTimestamp"
+            , "cast(to_json(LegacyRmsStyleIds) as string) as legacyrmsstyleids_"
+            , "RmsStyleGroupId"
+            , "ClassDescription"
+            , "ClassNumber"
+            , "CorporateStyleCode"
+            , "CorporateStyleDescription"
+            , "DepartmentDescription"
+            , "DepartmentNumber"
+            , "SubclassDescription"
+            , "SubclassNumber"
+            , "element_at(Genders,1) Genders"
+            , "IsNordstromLabel"
+            , "LabelId"
+            , "LabelName"
+            , "ProductAction"
+            , "ProductActionTimestamp"
+            , "SpecialTreatmentTypeCode"
+            , "TypeLevel1Description"
+            , "TypeLevel1Number"
+            , "TypeLevel2Description"
+            , "TypeLevel2Number"
+            , "element_at(AgeGroups,1) AgeGroups"
+            , "ShortDescription"
+            , "SourceCode"
+            , "ProductActionUser"
+            , "MsrpCurrencyCode"
+            , "Sizes.StandardCode as sizes_standardcode"
+            , "SourceDescription"
+            , "hangertypecode"
+            , "hangertypedescription"
+            , "explode_outer(element_at(VendorUpcs, 1).Vendors) as vendor"
+            , "element_at(SourcingCategories,1) SourcingCategories"
+            , "MsrpAmountPlainTxt"
+          ]
+		},
+        {
+          "name": "PRODUCT_STYLE_final",
+          "description": "Final data frame for PRODUCT_STYLE extract",
+          "from" : ["PRODUCT_STYLE_st1"],
+          "select": [
+              "Id Id"
+            , "Description description"
+            , "MarketCode marketcode"
+            , "SourcePublishTimestamp sourcepublishtimestamp"
+            , "legacyrmsstyleids_"
+            , "RmsStyleGroupId rmsstylegroupid"
+            , "ClassDescription classdescription"
+            , "ClassNumber classnumber"
+            , "CorporateStyleCode corporatestylecode"
+            , "CorporateStyleDescription corporatestyledescription"
+            , "DepartmentDescription departmentdescription"
+            , "DepartmentNumber departmentnumber"
+            , "SubclassDescription subclassdescription"
+            , "SubclassNumber subclassnumber"
+            , "Genders.Code genders_code"
+            , "Genders.Description genders_description"
+            , "IsNordstromLabel isnordstromlabel"
+            , "LabelId labelid"
+            , "LabelName labelname"
+            , "ProductAction productaction"
+            , "ProductActionTimestamp productactiontimestamp"
+            , "SpecialTreatmentTypeCode specialtreatmenttypecode"
+            , "TypeLevel1Description typelevel1description"
+            , "TypeLevel1Number typelevel1number"
+            , "TypeLevel2Description typelevel2description"
+            , "TypeLevel2Number typelevel2number"
+            , "AgeGroups.Code agegroups_code"
+            , "AgeGroups.Description agegroups_description"
+            , "ShortDescription shortdescription"
+            , "SourceCode sourcecode"
+            , "ProductActionUser productactionuser"
+            , "MsrpCurrencyCode as msrpcurrcycd"
+            , "sizes_standardcode"
+            , "hangertypecode"
+            , "hangertypedescription"
+            , "SourceDescription sourcedescription"
+            , "vendor.IsNpgVendor vendorupcs_vendors_isnpgvendor"
+            , "cast(vendor.IsPrimary as string) vendorupcs_vendors_isprimary"
+            , "vendor.Name vendorupcs_vendors_name"
+            , "vendor.Number vendorupcs_vendors_number"
+            , "element_at(vendor.VendorProductNumbers, 1).Code AS vendorupcs_vendors_vendorproductnumbers_code"
+			, "CASE WHEN element_at( (filter(vendor.VendorRoles, x -> x.Code == 'SUP')) , 1).Code == 'SUP' THEN 'True' ELSE 'False' END AS vendor_is_supplier"
+			, "CASE WHEN element_at( (filter(vendor.VendorRoles, x -> x.Code == 'MFR')) , 1).Code == 'MFR' THEN 'True' ELSE 'False' END AS vendor_is_manufacturer"
+            , "SourcingCategories.Code sourcingcategories_code"
+            , "MsrpAmountPlainTxt as msrpamtplaintxt"
+          ]
+		},
+        {
+          "name" : "PRODUCT_STYLE_count",
+          "description" : "Count of PRODUCT_STYLE records generated",
+          "from" : ["PRODUCT_STYLE_final"],
+          "select" : [ "count(*)" ]
+        }
+      ]
+    }
+  ],
+  "sinks" : [
+    {
+      "name" : "PRODUCT_STYLE_sink",
+      "description" : "Output PRODUCT_STYLE records (normally CSV-GZIP format)",
+      "type" : "bigquery",
+      "upstream" : "PRODUCT_STYLE_final",
+      "active" : true,
+      "properties" : {
+        "project": "jwn-nap-user1-nonprod-zmnb",
+        "dataset": "DEV_NAP_STG",
+        "table": "PRODUCT_STYLE_LDG",
+        "temp_bucket": "test-data-datametica",
+        "mode": "overwrite"
+      }
+    }
+    
+  ]
+}
+

@@ -1,0 +1,56 @@
+{
+  "spark_mode_config": {
+    "low": {
+      "spark.executor.memory": "6g",
+      "spark.executor.cores": "4",
+      "spark.driver.memory": "9g",
+      "spark.driver.cores": "2",
+      "spark.executor.instances": "6",
+      "spark_properties": {
+        "spark.sql.legacy.avro.datetimeRebaseModeInWrite":"LEGACY",
+        "spark.sql.legacy.parquet.datetimeRebaseModeInWrite":"LEGACY",
+        "spark.yarn.maxAppAttempts": "1",
+        "spark.speculation":"false",
+        "spark.airflow.run_id": "{{ ts_nodash }}"
+      }
+      },
+       "medium": {
+      "spark.executor.memory": "9g",
+      "spark.executor.cores": "4",
+      "spark.driver.memory": "12g",
+      "spark.driver.cores": "2",
+         "spark_properties":{
+           "spark.sql.legacy.avro.datetimeRebaseModeInWrite":"LEGACY",
+           "spark.sql.legacy.parquet.datetimeRebaseModeInWrite":"LEGACY",
+           "spark.yarn.maxAppAttempts": "1",
+           "spark.speculation":"false",
+           "spark.airflow.run_id": "{{ ts_nodash }}",
+           "spark.dynamicAllocation.enabled":"true",
+           "spark.dynamicAllocation.shuffleTracking.enabled":"true",
+           "spark.dynamicAllocation.minExecutors":"5",
+           "spark.dynamicAllocation.maxExecutors":"30",
+           "spark.dynamicAllocation.initialExecutors":"10",
+           "spark.dynamicAllocation.executorIdleTimeout":"240"
+         }
+    },
+       "high": {
+       "spark.executor.memory": "12g",
+       "spark.executor.cores": "4",
+       "spark.driver.memory": "15g",
+       "spark.driver.cores": "2",
+       "spark_properties": {
+         "spark.sql.legacy.avro.datetimeRebaseModeInWrite":"LEGACY",
+         "spark.sql.legacy.parquet.datetimeRebaseModeInWrite":"LEGACY",
+         "spark.yarn.maxAppAttempts": "1",
+         "spark.speculation":"false",
+         "spark.airflow.run_id": "{{ ts_nodash }}",
+         "spark.dynamicAllocation.enabled":"true",
+         "spark.dynamicAllocation.shuffleTracking.enabled":"true",
+         "spark.dynamicAllocation.minExecutors":"5",
+         "spark.dynamicAllocation.maxExecutors":"80",
+         "spark.dynamicAllocation.initialExecutors":"10",
+         "spark.dynamicAllocation.executorIdleTimeout":"240"
+       }
+    }
+  }
+}

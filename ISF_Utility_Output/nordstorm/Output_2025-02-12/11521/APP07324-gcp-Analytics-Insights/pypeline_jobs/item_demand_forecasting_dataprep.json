@@ -1,0 +1,219 @@
+{
+    "dag_id": "item_demand_forecasting_dataprep",
+    "dag_schedule": "01 11 * * 6",
+    "prod_email_on_failure": "inventory-position-fo-aaaaelugho62deqr5b24gxkiei@nordstrom.slack.com, dsasc-app08073-ip-forecast@nordstrom.pagerduty.com, laney.sears@nordstrom.com",
+    "nonprod_email_on_failure": "laney.sears@nordstrom.com",
+    "stages": [
+        "run_teradata_sql_feature1",
+        "run_teradata_sql_feature2",
+        "run_teradata_sql_feature3",
+        "run_teradata_sql_feature4"
+    ],
+    "sql_env_vars": {
+        "START_DATE": "current_date()-27",
+        "END_DATE": "current_date()-6"
+    },
+    "run_teradata_sql_feature1": {
+        "item_demand_forecasting_digital": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_IFC",
+                        "scripts": [
+                            "item_demand_forecasting/item_demand_forecasting_digital.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "item_demand_forecasting_dropship": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_IFC",
+                        "scripts": [
+                            "item_demand_forecasting/item_demand_forecasting_dropship.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "item_demand_forecasting_events": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_IFC",
+                        "scripts": [
+                            "item_demand_forecasting/item_demand_forecasting_events.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "run_teradata_sql_feature2": {
+        "item_demand_forecasting_online_inventory": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_IFC",
+                        "scripts": [
+                            "item_demand_forecasting/item_demand_forecasting_online_inventory.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "item_demand_forecasting_store_inventory": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_IFC",
+                        "scripts": [
+                            "item_demand_forecasting/item_demand_forecasting_store_inventory.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "item_demand_forecasting_price": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_IFC",
+                        "scripts": [
+                            "item_demand_forecasting/item_demand_forecasting_price.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "item_demand_forecasting_price_event": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_IFC",
+                        "scripts": [
+                            "item_demand_forecasting/item_demand_forecasting_price_event.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "run_teradata_sql_feature3": {
+        "item_demand_forecasting_po": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_IFC",
+                        "scripts": [
+                            "item_demand_forecasting/item_demand_forecasting_po.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "item_demand_forecasting_online_sales_merch": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_IFC",
+                        "scripts": [
+                            "item_demand_forecasting/item_demand_forecasting_online_sales_merch.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "item_demand_forecasting_online_sales": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_IFC",
+                        "scripts": [
+                            "item_demand_forecasting/item_demand_forecasting_online_sales.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "item_demand_forecasting_online_sales_hist": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_IFC",
+                        "scripts": [
+                            "item_demand_forecasting/item_demand_forecasting_online_sales_hist.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "item_demand_forecasting_rp": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_IFC",
+                        "scripts": [
+                            "item_demand_forecasting/item_demand_forecasting_rp.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "run_teradata_sql_feature4": {
+        "item_demand_forecasting_store_sales_merch": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_IFC",
+                        "scripts": [
+                            "item_demand_forecasting/item_demand_forecasting_store_sales_merch.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "item_demand_forecasting_store_sales": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_IFC",
+                        "scripts": [
+                            "item_demand_forecasting/item_demand_forecasting_store_sales.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "item_demand_forecasting_store_sales_hist": {
+            "teradata_engine": {
+                "sensor_timeout_seconds": 3600,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_IFC",
+                        "scripts": [
+                            "item_demand_forecasting/item_demand_forecasting_store_sales_hist.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

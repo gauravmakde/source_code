@@ -1,0 +1,36 @@
+- subject: CUSTOMER_OBJECT
+  metric_name: napdw.customer_object.src_count
+  sql: "SELECT UPPER(CAST(job_name AS STRING)) AS job_name, COALESCE(src_metric,0) AS src_count
+        FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        WHERE
+            subj_area = 'CUSTOMER_OBJ'
+            AND job_name IN ('CUSTOMER_OBJ_PROGRAM_LDG_TO_DIM',
+                             'CUSTOMER_OBJ_EMAIL_LDG_TO_DIM',
+                             'CUSTOMER_OBJ_TELEPHONE_LDG_TO_DIM',
+                             'CUSTOMER_OBJ_POSTAL_ADDRESS_LDG_TO_DIM',
+                             'CUSTOMER_OBJ_MERGE_ALIAS_LDG_TO_DIM',
+                             'CUSTOMER_OBJ_PAYMENT_METHOD_LDG_TO_DIM',
+                             'CUSTOMER_OBJ_MASTER_LDG_TO_DIM')
+        QUALIFY ROW_NUMBER() OVER (PARTITION BY job_name ORDER BY dw_sys_load_tmstp DESC) = 1"
+  metric_value_position: 1
+  tags:
+    - job_name: 0
+
+- subject: CUSTOMER_OBJECT
+  metric_name: napdw.customer_object.tgt_count
+  sql: "SELECT UPPER(CAST(job_name AS STRING)) AS job_name, COALESCE(tgt_metric,0) AS tgt_count
+        FROM {DBENV}_NAP_BASE_VWS.DQ_AUDIT_LOG
+        WHERE
+            subj_area = 'CUSTOMER_OBJ'
+            AND job_name IN ('CUSTOMER_OBJ_PROGRAM_LDG_TO_DIM',
+                             'CUSTOMER_OBJ_EMAIL_LDG_TO_DIM',
+                             'CUSTOMER_OBJ_TELEPHONE_LDG_TO_DIM',
+                             'CUSTOMER_OBJ_POSTAL_ADDRESS_LDG_TO_DIM',
+                             'CUSTOMER_OBJ_MERGE_ALIAS_LDG_TO_DIM',
+                             'CUSTOMER_OBJ_PAYMENT_METHOD_LDG_TO_DIM',
+                             'CUSTOMER_OBJ_MASTER_LDG_TO_DIM')
+        QUALIFY ROW_NUMBER() OVER (PARTITION BY job_name ORDER BY dw_sys_load_tmstp DESC) = 1"
+  metric_value_position: 1
+  tags:
+    - job_name: 0
+

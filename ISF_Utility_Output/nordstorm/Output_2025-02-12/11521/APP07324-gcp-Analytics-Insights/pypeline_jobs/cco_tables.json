@@ -1,0 +1,131 @@
+{
+    "dag_id": "cco_tables",
+    "dag_schedule": "00 23 * * 6",
+    "dag_sla_minutes": "300",
+    "dag_retries": "0",
+    "prod_email_on_failure": "TECH_DAS_Customer@nordstrom.com,nap-acp@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "dummy@n.com",
+    "dependencies": {
+        "upstream": {
+            "dags": [
+                {
+                    "external_dag_id": "sales_and_returns_fact_base_11521_ACE_ENG",
+                    "execution_delta": "timedelta(hours=12)",
+                    "retries": "0",
+                    "poke_interval": 120,
+                    "timeout": 120
+                }
+            ]
+        }
+    },
+    "stages": [
+        "run_cco"
+    ],
+    "run_cco": {
+        "job_1_cco_line_items": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "sensor_timeout_seconds": 7200,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CCO",
+                        "scripts": [
+                            "cco_refresh/cco_line_items_weekly.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_2_cco_buyer_flow": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "sensor_timeout_seconds": 5400,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CCO",
+                        "scripts": [
+                            "cco_refresh/cco_buyer_flow.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_3_cco_buyer_flow_fy": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "sensor_timeout_seconds": 5400,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CCO",
+                        "scripts": [
+                            "cco_refresh/cco_buyer_flow_fy.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_4_cco_customer_level_attributes": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "sensor_timeout_seconds": 5400,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CCO",
+                        "scripts": [
+                            "cco_refresh/cco_customer_level_attributes.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_5_cco_customer_level_attributes_fy": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "sensor_timeout_seconds": 5400,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CCO",
+                        "scripts": [
+                            "cco_refresh/cco_customer_level_attributes_fy.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_6_cco_cust_chan_yr_attributes": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "sensor_timeout_seconds": 5400,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CCO",
+                        "scripts": [
+                            "cco_refresh/cco_cust_chan_yr_attributes.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_7_cco_cust_chan_yr_attributes_fy": {
+            "teradata_engine": {
+                "retries": "0",
+                "pod_retries": "0",
+                "sensor_timeout_seconds": 5400,
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_CCO",
+                        "scripts": [
+                            "cco_refresh/cco_cust_chan_yr_attributes_fy.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,34 @@
+CALL SYS_MGMT.DROP_IF_EXISTS_SP ('{environment_schema}', 'PRICE_TYPE_PLANNING', OUT_RETURN_MSG);
+CREATE MULTISET TABLE {environment_schema}.PRICE_TYPE_PLANNING
+    ,FALLBACK
+	,NO BEFORE JOURNAL
+	,NO AFTER JOURNAL
+	,CHECKSUM = DEFAULT 
+	,DEFAULT MERGEBLOCKRATIO 
+(  
+DEPARTMENT_NUM                    INTEGER NOT NULL
+,DEPARTMENT_DESC                  VARCHAR(100) 
+,DIVISION_NUM                     BIGINT 
+,DIVISION_DESC                    VARCHAR(100)
+,SUBDIVISION_NUM                  INTEGER
+,SUBDIVISION_DESC                 VARCHAR(100)
+,YEAR_IDNT                        INTEGER
+,HALF_IDNT                        INTEGER
+,QUARTER_IDNT                     INTEGER
+,MONTH_IDNT                       INTEGER
+,WEEK_IDNT                        INTEGER NOT NULL
+,HALF_LABEL                       VARCHAR(25)
+,QUARTER_LABEL                    VARCHAR(25)
+,MONTH_LABEL                      VARCHAR(25) 
+,WEEK_LABEL                       VARCHAR(25)
+,WEEK_END_DAY_DATE 				  DATE FORMAT 'YYYY-MM-DD'
+,CHANNEL_NUM                      INTEGER NOT NULL
+,PRICE_TYPE                       VARCHAR(15) CHARACTER SET UNICODE NOT CASESPECIFIC NOT NULL 
+,PLAN_VERSION                     VARCHAR(3) CHARACTER SET UNICODE NOT CASESPECIFIC NOT NULL 
+,Net_Sales_R                      DECIMAL(12, 2)
+,Net_Sales_C                      DECIMAL(12, 2)
+,Net_Sales_U                      DECIMAL(12, 2)
+)
+PRIMARY INDEX(DEPARTMENT_NUM, CHANNEL_NUM, WEEK_IDNT, PRICE_TYPE, PLAN_VERSION);
+
+GRANT SELECT ON {environment_schema}.PRICE_TYPE_PLANNING TO PUBLIC;

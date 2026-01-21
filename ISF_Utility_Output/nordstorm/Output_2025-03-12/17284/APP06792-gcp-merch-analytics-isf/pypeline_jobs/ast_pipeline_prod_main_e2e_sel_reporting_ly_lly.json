@@ -1,0 +1,27 @@
+{
+    "dag_id": "merch_main_e2e_sel_reporting_ly_lly",
+    "dag_schedule": "50 15 * * Sun",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "TECH_ACE_AST_ISF_ALERTS@nordstrom.com, dsa-app08213-merch-e2e-selection-planning-data@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "TECH_ACE_AST_ISF_ALERTS@nordstrom.com",
+    "stages": [
+        "run_teradata_sql_stg_0"
+    ],
+    "sql_env_vars": {
+        "environment_schema": "t2dl_das_selection"
+    },
+    "run_teradata_sql_stg_0": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_SEL_BATCH__",
+                        "scripts": [
+                            "e2e_selection_dash/ast_pipeline_prod_main_e2e_plan_reporting_ly_lly.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

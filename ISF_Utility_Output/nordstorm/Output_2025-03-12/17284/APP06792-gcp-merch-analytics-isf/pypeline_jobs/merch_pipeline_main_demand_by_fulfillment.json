@@ -1,0 +1,27 @@
+{
+    "dag_id": "merch_main_demand_by_fulfillment",
+    "dag_schedule": "00 18 * * SUN",
+    "timezone": "US/Pacific",
+    "prod_email_on_failure": "ace.promo@Nordstrom.com, dsa-app08591-demand-by-fulfillment-type-dashboard@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "ace.promo@Nordstrom.com",
+    "stages": [
+        "run_teradata_sql_stg_0"
+    ],
+    "sql_env_vars": {
+        "environment_schema": "T2DL_DAS_ACE_MFP"
+    },
+    "run_teradata_sql_stg_0": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TERADATA_T2DL_NAP_SEL_BATCH__",
+                        "scripts": [
+                            "demand_by_fulfillment/merch_pipeline_main_demand_by_fulfillment.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

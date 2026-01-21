@@ -1,0 +1,66 @@
+{
+  "dag_id": "wfm_employee_availability_load",
+  "dag_schedule": "0 16 * * *",
+  "stages": [
+    "wfm_employee_availability"
+  ],
+  "wfm_employee_availability": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "low",
+        "scripts": [
+          "wfm_employee_availability_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__WFM_EMPLOYEE_AVAILABILITY_KAFKA__",
+            "sql_table_reference": "kafka_wfm_employee_availability_input",
+            "data_source_name": "customer-employee-availability-analytical-avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__WFM_EMPLOYEE_AVAILABILITY_KAFKA_TO_S3_ORC__",
+            "sql_table_reference": "wfm_employee_availability_orc_output"
+
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_employee_availability_stg_table" ,
+            "data_source_name": "EMPLOYEE_AVAILABILITY_STG"
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_employee_availability_details_stg_table" ,
+            "data_source_name": "EMPLOYEE_AVAILABILITY_DETAILS_STG"
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_employee_fixed_shift_details_stg_table" ,
+            "data_source_name": "EMPLOYEE_FIXED_SHIFT_DETAILS_STG"
+          },
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "wfm_employee_fixed_shift_job_segment_details_stg_table" ,
+            "data_source_name": "EMPLOYEE_FIXED_SHIFT_JOB_SEGMENT_DETAILS_STG"
+          }
+
+        ]
+      }
+    },
+    "load_1_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "wfm_employee_availability_load_fact.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+
+

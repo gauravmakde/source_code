@@ -1,0 +1,107 @@
+{
+    "dag_id": "account_sessions_fact",
+    "dag_schedule": "00 18 * * *",
+    "nonprod_email_on_failure": "jin.liu2@nordstrom.com",
+    "prod_email_on_failure": "dsa-app08844-account-session-and-customer-access-management@nordstrom.pagerduty.com",
+    "stages": [
+        "run_acf_hive_s3_td_sql",
+        "refresh_account_dashboard",
+        "refresh_cam_dashboard"
+    ],
+    "stage_dependencies": {
+        "run_acf_hive_s3_td_sql": [
+            "refresh_account_dashboard",
+            "refresh_cam_dashboard"
+        ]
+    },
+    "sql_env_vars": {
+        "start_date": "current_date()-4",
+        "end_date": "current_date()-2"
+    },
+    "run_acf_hive_s3_td_sql": {
+        "job_0": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_SSN",
+                        "scripts": [
+                            "sessions/account_session_status.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_1": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_SSN",
+                        "scripts": [
+                            "sessions/ddl/ddl_account_session_events_ldg.sql"
+                        ]
+                    }
+                ]
+            }
+        },
+        "job_2": {
+            "spark_engine": {
+                "spark_run_mode": "medium",
+                "retries": "0",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "sessions/account_session_events_ldg.sql"
+                ],
+                "input_details": [],
+                "output_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_SSN",
+                        "sql_table_reference": "account_session_events_ldg_output",
+                        "data_source_name": "account_session_events_ldg"
+                    }
+                ]
+            }
+        },
+        "job_3": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_SSN",
+                        "scripts": [
+                            "sessions/account_sessions_fact.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "refresh_cam_dashboard": {
+        "job_0": {
+            "tableau_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TABLEAU_NAP__",
+                        "source_type": "workbook",
+                        "workbook_name": "Customer Access Management",
+                        "project_name": "Digital"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    },
+    "refresh_account_dashboard": {
+        "job_0": {
+            "tableau_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "__TABLEAU_NAP__",
+                        "source_type": "workbook",
+                        "workbook_name": "Account Experiences",
+                        "project_name": "Digital"
+                    }
+                ],
+                "output_details": []
+            }
+        }
+    }
+}

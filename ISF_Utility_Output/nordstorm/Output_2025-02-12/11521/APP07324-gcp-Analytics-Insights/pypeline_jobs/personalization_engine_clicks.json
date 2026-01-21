@@ -1,0 +1,26 @@
+{
+    "dag_id": "personalization_engine_clicks",
+    "dag_schedule": "0 23 * * *",
+    "prod_email_on_failure": "kunal.sonalkar@nordstrom.com",
+    "nonprod_email_on_failure": "kunal.sonalkar@nordstrom.com",
+    "stages": [
+        "run_hive_hive_search_session_performance"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-1",
+        "end_date": "current_date()-1"
+    },
+    "run_hive_hive_search_session_performance": {
+        "job_0": {
+            "spark_engine": {
+                "spark_run_mode": "low",
+                "pause_idle_cluster_termination": "before_app",
+                "scripts": [
+                    "personalization_engine/personalization_engine_clicks.sql"
+                ],
+                "input_details": [],
+                "output_details": []
+            }
+        }
+    }
+}

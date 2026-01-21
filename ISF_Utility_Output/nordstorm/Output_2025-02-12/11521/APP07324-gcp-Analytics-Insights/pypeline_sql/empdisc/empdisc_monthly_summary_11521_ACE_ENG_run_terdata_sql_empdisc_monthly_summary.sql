@@ -1,0 +1,142 @@
+SET QUERY_BAND = 'App_ID=APP02602;
+     DAG_ID=empdisc_monthly_summary_11521_ACE_ENG;
+     Task_Name=empdisc_monthly_summary;'
+     FOR SESSION VOLATILE;
+
+/*
+T2/Table Name: T2DL_DAS_TRUST_EMP.empdisc_monthly_summary
+Team/Owner: Rujira Achawanantakun (rujira.achawanantakun@nordstrom.com)
+Date Created/Modified: 4/2/2024
+
+Note:
+-- Purpose of the table: to capture item level transaction associated to using
+employee discount at item level
+-- Update Cadence: Daily
+*/
+
+-- create a table to store queried data
+create multiset volatile table data_table as (
+  select e.year_num
+    ,e.month_num
+    ,e.month_short_desc
+    ,e.data_source_code
+    ,e.line_item_merch_nonmerch_ind as merch_nonmerch_ind
+    ,e.ring_channel
+    --total discount
+    ,sum(e.employee_discount_usd_amt) total_discount_amt
+    ,count(distinct e.emp_number) total_emp_count
+    ,count(distinct e.global_tran_id) total_tran_count
+    --invalid employee id
+    ,sum(CASE WHEN e.e_worker_number IS NULL THEN e.employee_discount_usd_amt ELSE 0 END) invalid_emp_id_amt
+    ,count(distinct CASE WHEN e.e_worker_number IS NULL THEN e.emp_number ELSE NULL END) invalid_emp_id_emp_count
+    ,count(distinct CASE WHEN e.e_worker_number IS NULL THEN e.global_tran_id ELSE NULL END) invalid_emp_id_tran_count
+    --valid discount used by active or retire employee throughout a year
+    ,sum(CASE WHEN e.e_worker_number IS NOT NULL
+        AND (e.e_discount_status = 'ACTIVE' or e.e_discount_status = 'RETIREE')
+        AND (e.use_disc_pct <= e.e_discount_percent
+            OR e.scaled_event_name IS NOT NULL --item is on sale
+            OR e.prod_event_num IS NOT NULL) --special event
+        THEN e.employee_discount_usd_amt ELSE 0 END) valid_discount_pct_amt
+    ,count(distinct CASE WHEN e.e_worker_number IS NOT NULL
+        AND (e.e_discount_status = 'ACTIVE' or e.e_discount_status = 'RETIREE')
+        AND (e.use_disc_pct <= e.e_discount_percent
+            OR  e.scaled_event_name IS NOT NULL --item is on sale
+            OR e.prod_event_num IS NOT NULL) --special event
+        THEN e.emp_number ELSE NULL END) valid_discount_pct_emp_count
+    ,count(distinct CASE WHEN e.e_worker_number IS NOT NULL
+        AND (e.e_discount_status = 'ACTIVE' or e.e_discount_status = 'RETIREE')
+        AND (e.use_disc_pct <= e.e_discount_percent
+            OR  e.scaled_event_name IS NOT NULL --item is on sale
+            OR e.prod_event_num IS NOT NULL) --special event
+        THEN e.global_tran_id ELSE NULL END) valid_discount_pct_tran_count
+    --invalid discount used by active or retire employees, who use higher discount pct that what they are eligible for and outside special event period
+    ,sum(CASE WHEN e.e_worker_number IS NOT NULL
+        AND (e.e_discount_status = 'ACTIVE' or e.e_discount_status = 'RETIREE')
+        AND e.use_disc_pct > e.e_discount_percent
+        AND e.scaled_event_name IS NULL
+        AND e.prod_event_num IS NULL
+        THEN e.employee_discount_usd_amt ELSE 0 END) misuse_discount_pct_amt
+    ,count(distinct CASE WHEN e.e_worker_number IS NOT NULL
+        AND (e.e_discount_status = 'ACTIVE' or e.e_discount_status = 'RETIREE')
+        AND e.use_disc_pct > e.e_discount_percent
+        AND e.scaled_event_name IS NULL --item is not on sale
+        AND e.prod_event_num IS NULL --not buy during any special event
+        THEN e.emp_number ELSE NULL END) misuse_discount_pct_emp_count
+    ,count(distinct CASE WHEN e.e_worker_number IS NOT NULL
+        AND (e.e_discount_status = 'ACTIVE' or e.e_discount_status = 'RETIREE')
+        AND e.use_disc_pct > e.e_discount_percent
+        AND e.scaled_event_name IS NULL --item is not on sale
+        AND e.prod_event_num IS NULL --not buy during any special event
+        THEN e.global_tran_id ELSE NULL END) misuse_discount_pct_tran_count
+    --invalid discount used by terminated or ineligible employee, who are not eligible for getting discount
+    ,sum(CASE WHEN e.e_worker_number IS NOT NULL
+        AND (e.e_discount_status = 'TERMINATED' or e.e_discount_status = 'INELIGIBLE')
+        THEN e.employee_discount_usd_amt ELSE 0 END) ineligible_discount_amt
+    ,count(distinct CASE WHEN e.e_worker_number IS NOT NULL
+        AND (e.e_discount_status = 'TERMINATED' or e.e_discount_status = 'INELIGIBLE')
+        THEN e.emp_number ELSE NULL END) ineligible_discount_emp_count
+    ,count(distinct CASE WHEN e.e_worker_number IS NOT NULL
+        AND (e.e_discount_status = 'TERMINATED' or e.e_discount_status = 'INELIGIBLE')
+        THEN e.global_tran_id ELSE NULL END) ineligible_discount_tran_count
+    --unverified cases: discount_status is unknown
+    ,sum(CASE WHEN e.e_worker_number IS NOT NULL
+        AND e.e_discount_status IS NULL
+        AND e.use_disc_pct > 33
+        AND e.scaled_event_name IS NULL --item is not on sale
+        AND e.prod_event_num IS NULL --not buy during any special event
+        THEN e.employee_discount_usd_amt ELSE 0 END) unverified_discount_gt33_amt
+    ,count(distinct CASE WHEN e.e_worker_number IS NOT NULL
+        AND e.e_discount_status IS NULL
+        AND e.use_disc_pct > 33
+        AND e.scaled_event_name IS NULL --item is not on sale
+        AND e.prod_event_num IS NULL --not buy during any special event
+        THEN e.emp_number ELSE NULL END) unverified_discount_gt33_emp_count
+    ,count(distinct CASE WHEN e.e_worker_number IS NOT NULL
+        AND e.e_discount_status IS NULL
+        AND e.use_disc_pct > 33
+        AND e.scaled_event_name IS NULL --item is not on sale
+        AND e.prod_event_num IS NULL --not buy during any special event
+        THEN e.global_tran_id ELSE NULL END) unverified_discount_gt33_tran_count
+    --compute ineligible discount amount
+    ,(total_discount_amt - valid_discount_pct_amt) compute_ineligible_discount_amt
+    ,CURRENT_TIMESTAMP as dw_sys_load_tmstp
+  FROM T2DL_DAS_TRUST_EMP.empdisc_pct_item_trans e
+  WHERE  e.month_short_desc = TO_CHAR(current_date()-1, 'MON')
+    and e.year_num = EXTRACT(YEAR FROM current_date()-1)
+    and NOT EXISTS (SELECT 1
+                    FROM T2DL_DAS_TRUST_EMP.empdisc_monthly_summary t
+                    WHERE t.year_num = e.year_num
+                      and t.month_num = t.month_num
+                      and t.month_short_desc = e.month_short_desc
+                      and t.data_source_code = e.data_source_code
+                      and t.merch_nonmerch_ind = e.line_item_merch_nonmerch_ind
+                      and t.ring_channel = e.ring_channel
+                   )
+  GROUP BY 1,2,3,4,5,6
+) with data primary index(year_num, month_num, month_short_desc, data_source_code, merch_nonmerch_ind, ring_channel) on commit preserve rows;
+;
+
+--delete the latest record in the table before inserting the update data into the table
+DELETE FROM T2DL_DAS_TRUST_EMP.empdisc_monthly_summary e
+WHERE e.month_short_desc = TO_CHAR(current_date()-1, 'MON')
+    AND e.year_num = EXTRACT(YEAR FROM current_date()-1)
+;
+
+-- insert the data into the table
+INSERT INTO T2DL_DAS_TRUST_EMP.empdisc_monthly_summary
+SELECT *
+FROM data_table
+;
+
+COLLECT STATISTICS  COLUMN (emp_number),
+                    COLUMN (year_num),
+                    COLUMN (month_num),
+                    COLUMN (data_source_code),
+                    COLUMN (merch_nonmerch_ind),
+                    COLUMN (ring_channel),
+on T2DL_DAS_TRUST_EMP.empdisc_monthly_summary;
+
+/*
+SQL script must end with statement to turn off QUERY_BAND
+*/
+SET QUERY_BAND = NONE FOR SESSION;

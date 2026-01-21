@@ -1,0 +1,44 @@
+{
+  "dag_id": "retailnext_load",
+  "dag_schedule": "30 11 * * *",
+  "stages": [
+    "retailnext_load"
+  ],
+  "retailnext_load": {
+    "load_0_stg_table": {
+      "spark_engine": {
+        "spark_run_mode": "medium",
+        "scripts": [
+          "retailnext_load_stg.sql"
+        ],
+        "input_details": [
+          {
+            "conn_name": "__RETAILNEXT_KAFKA__",
+            "sql_table_reference": "kafka_retailnext_input",
+            "data_source_name": "store_traffic_measurement_avro"
+          }
+        ],
+        "output_details": [
+          {
+            "conn_name": "__TERADATA_NAP_STG__",
+            "sql_table_reference": "retailnext_stg_table" ,
+            "data_source_name": "STORE_TRAFFIC_STG"
+          }
+        ]
+      }
+    },
+    "load_1_fct_table": {
+      "teradata_engine": {
+        "input_details": [
+          {
+            "conn_name": "__TERADATA_NAP__",
+            "scripts": [
+              "retailnext_load_fct.sql"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+

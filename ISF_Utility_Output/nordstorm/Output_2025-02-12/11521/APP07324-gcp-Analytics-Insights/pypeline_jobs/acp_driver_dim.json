@@ -1,0 +1,30 @@
+{
+    "dag_id": "acp_driver_dim",
+    "dag_schedule": "0 11 * * *",
+    "prod_email_on_failure": "dsa-app08818-universal-semantic-layer@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "rebecca.liao@nordstrom.com",
+    "dependencies": {
+        "downstream": {
+            "dags": [
+                "customer_acquisition_dim_11521_ACE_ENG"
+            ]
+        }
+    },
+    "stages": [
+        "run_terdata_sql"
+    ],
+    "run_terdata_sql": {
+        "job_1_run_sql_to_update_t2_table": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_USL",
+                        "scripts": [
+                            "universal_semantic_layer/acp_driver_dim.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

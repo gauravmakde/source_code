@@ -1,0 +1,12 @@
+--app_config_file gs://prod-nap-dataplex-internal/app09203/isf-artifacts/app-config/emr_application_prod.json   
+--app_id APP02432 
+--source_tables_details 'kafka_wfm_employee_borrowing_assignment_input={"source_type": "KAFKA", "kafka_cluster_name": "meadow", "vault_connection_name": "nordsecrets/application/APP02432/2656/napstore/APP02432-napstore-insights/prod/kafka/proton_key", "schema_name": "linear-employee-borrowing-assignment-analytical-avro","data_source_name":"linear-employee-borrowing-assignment-analytical-avro"}' 
+--target_tables_details 'wfm_employee_borrowing_assignment_orc_output={"source_type": "S3", "format": "orc", "path": "s3://nap-prod-employee-borrowing-assignment-object/employee-borrowing-assignment-object-orc"},wfm_employee_borrowing_assignment_stg_table={"source_type": "BIGQUERY", "dataset": "PRD_NAP_STG", "table": "EMPLOYEE_BORROWING_ASSIGNMENT_STG", "project": "jwn-nap-dataplex-prod-emue", "mode": "overwrite", "temp_bucket": "prod-nap-cus-sell-spark-temp"}'  
+--sql_file_location gs://prod-nap-cus-sell-internal/app02432/isf-artifacts/wfm_employee_borrowing_assignment_load_stg.sql    
+--stage_task_name wfm_employee_borrowing_assignment_load_2656_napstore_insights_wfm_employee_borrowing_assignment_0_load_0_stg_table  
+--offset_table '`jwn-nap-dataplex-prod-emue.onehop_etl_app_db.kafka_consumer_offset_batch_details`'
+--consumer_group_name gcp-linear-employee-borrowing-assignment-analytical-avro_wfm_employee_borrowing_assignment_load_2656_napstore_insights_wfm_employee_borrowing_assignment_0_load_0_stg_table   
+--aws_secret_manager_vault_roleid_arn arn:aws:secretsmanager:us-west-2:122990593628:secret:APP02432_VAULT_APPROLE_ROLE_ID-LVcHl8  
+--aws_secret_manager_vault_secretid_arn arn:aws:secretsmanager:us-west-2:122990593628:secret:APP02432_VAULT_APPROLE_SECRET_ID-MO0zqw  
+--aws_user_role_arn arn:aws:iam::122990593628:role/APP02432_AWS_Secrets_Role 
+--gcp_project_id jwn-nap-cus-sell-prod-9xr5

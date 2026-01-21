@@ -1,0 +1,27 @@
+{
+    "dag_id": "nordstrom_on_digital_styling",
+    "dag_schedule": "0 14 * * *",
+    "prod_email_on_failure": "dsa-app07324-nordstrom-on-digital-daily@nordstrom.pagerduty.com",
+    "nonprod_email_on_failure": "agatha.mak@nordstrom.com",
+    "stages": [
+        "on_digital_styling_stage"
+    ],
+    "sql_env_vars": {
+        "start_date": "current_date()-100",
+        "end_date": "current_date()-1"
+    },
+    "on_digital_styling_stage": {
+        "job_1_run_tdsql": {
+            "teradata_engine": {
+                "input_details": [
+                    {
+                        "conn_name": "TERADATA_SOURCE_RMT",
+                        "scripts": [
+                            "nordstrom_on/nordstrom_on_digital_daily.sql"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

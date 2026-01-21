@@ -1,0 +1,12 @@
+SET QUERY_BAND = 'App_ID=app08001;DAG_ID=clearance_reset_10976_tech_nap_merch;Task_Name=job_3_ldg_to_fact;'
+FOR SESSION VOLATILE;
+
+ET;
+
+COLLECT STATISTICS COLUMN(rms_sku_num), COLUMN(rms_style_num), COLUMN(color_num) ON PRD_NAP_FCT.CLEARANCE_MARKDOWN_RESET_FACT;
+
+ET;
+
+SET QUERY_BAND = NONE FOR SESSION;
+
+ET;
