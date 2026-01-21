@@ -1,0 +1,12 @@
+﻿SELECT * FROM PRD_NAP_HR_UTL.tpt_control_tbl;
+
+5 Rows returned. DBS time = 00:00:01
+
+BLOB/CLOB files written to: C:\Users\x0tf\Documents
+
+job_name,database_name,object_name,object_type,batchusername,truncateindicator,errorlimit,textdelimiter_hexa_flag,textdelimiter,AcceptExcessColumns,AcceptMissingColumns,QuotedData,OpenQuoteMark,s3bucket,s3prefix,s3singlepartfile,s3connectioncount,collist_indicator_flag,collist,rcd_load_tmstp,rcd_update_tmstp,HeaderRcdIndicator,AllFilesHeaderRcdIndicator,APP_ID,DAG_ID,TASK_NAME
+HR_WORKER_BLA_TO_LD,PRD_NAP_HR_STG,HR_WORKER_BLA_LDG,T,SCH_NAP_HR_BATCH,Y,  1000,N,|,N  ,N  ,N,?,?,?,?,20,N,?,2/27/2020 08:51:43.200000,2/27/2020 08:51:43.200000,N,N,?,?,?
+HR_WORKER_HIST_TO_LD,PRD_NAP_HR_STG,HR_WORKER_LDG_HIST,T,SCH_NAP_HR_BATCH,Y,  1000,Y,e2909f,N  ,Y  ,Y,"  ,?,?,?,20,N,?,9/21/2020 12:11:08.040000,9/21/2020 12:11:08.040000,N,N,?,?,?
+HR_TIMEBLOCK_TO_LD,PRD_NAP_HR_STG,HR_TIMEBLOCK_LDG,T,SCH_NAP_HR_BATCH,Y,  1000,Y,e2909f,N  ,Y  ,Y,"  ,?,?,?,20,N,?,2/27/2020 08:51:43.760000,2/27/2020 08:51:43.760000,N,N,?,?,?
+HR_CALCULATED_TIMEBLOCK_TO_LD,PRD_NAP_HR_STG,HR_CALCULATED_TIMEBLOCK_LDG,T,SCH_NAP_HR_BATCH,Y,  1000,Y,e2909f,N  ,Y  ,Y,"  ,?,?,?,20,N,?,2/27/2020 08:51:44.280000,2/27/2020 08:51:44.280000,N,N,?,?,?
+HR_WORKER_TO_LD,PRD_NAP_HR_STG,HR_WORKER_LDG,T,SCH_NAP_HR_BATCH,Y,  1000,Y,e2909f,N  ,Y  ,Y,"  ,?,?,?,20,N,?,2/27/2020 08:51:42.810000,2/27/2020 08:51:42.810000,N,N,?,?,?

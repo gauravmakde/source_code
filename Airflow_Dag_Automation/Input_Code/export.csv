@@ -1,0 +1,125 @@
+Project Name,AppId,Security Group,Project Type,Engineering Manager,Support Group (For Non-Tech Teams),Request/Task,GCP Project,Service Accounts,GoogleManagedSAMetastoreAccess,Bucket Creationin Dataplex Projects,NONPRODBuckets,PROD Buckets,NONPROD Subnet,Prod Subnet,Role-binding to bucketsvia Dataplex
+nap-mktg,APP04216,DAS_Marketing_SG,User,Reneesh Bhaskaran,,SCTASK0001452640,"jwn-nap-mktg-nonprod-x67i
+jwn-nap-mktg-prod-kzm1","app04216-phs-sa@jwn-nap-mktg-nonprod-x67i.iam.gserviceaccount.com
+app04216-nap-mktg-sa@jwn-nap-mktg-nonprod-x67i.iam.gserviceaccount.com
+
+
+app04216-nap-mktg-sa@jwn-nap-mktg-prod-kzm1.iam.gserviceaccount.com","Y
+Access Granted (Prod/ Nonprod)",Y,"dev-nap-mktg-internal
+dev-nap-mktg-temp","prod-nap-mktg-internal
+prod-nap-mktg-temp",projects/jwn-dataprocvpc-nonprod-2lds/regions/us-west1/subnetworks/nap-mktg-01,projects/jwn-dataprocvpc-prod-k36t/regions/us-west1/subnetworks/nap-mktg-01,
+nap-product,APP08918,TECH_das_product,User,Kalah Brown,,SCTASK0001452640,"jwn-nap-product-nonprod-98ed
+jwn-nap-product-prod-t6fw","app08918-phs-sa@jwn-nap-product-nonprod-98ed.iam.gserviceaccount.com
+app08918-nap-product-sa@jwn-nap-product-nonprod-98ed.iam.gserviceaccount.com
+
+
+app08918-nap-product-sa@jwn-nap-product-prod-t6fw.iam.gserviceaccount.com","Y
+Access Granted (Prod/ Nonprod)",Y,"dev-nap-product-internal
+dev-nap-product-temp","prod-nap-product-internal
+prod-nap-product-temp",projects/jwn-dataprocvpc-nonprod-2lds/regions/us-west1/subnetworks/nap-product-01,projects/jwn-dataprocvpc-prod-k36t/regions/us-west1/subnetworks/nap-product-01,
+nap-merch,APP04070,TECH_AWS_MERCH_NAP_PROD,User,Audrey Shen,,SCTASK0001439755,"jwn-nap-merch-nonprod-2tzz
+jwn-nap-merch-prod-1o06","app04070-nap-merch-sa@jwn-nap-merch-nonprod-2tzz.iam.gserviceaccount.com
+app04070-nap-merch-sa@jwn-nap-merch-prod-1o06.iam.gserviceaccount.com","Y
+Access Granted (Prod/ Nonprod)",Y,dev-nap-merch-internal,prod-nap-merch-internal,projects/jwn-dataprocvpc-nonprod-2lds/regions/us-west1/subnetworks/nap-merch-01,projects/jwn-dataprocvpc-prod-k36t/regions/us-west1/subnetworks/nap-merch-01,
+nap-cus-styl,APP05039,TECH_NAP_CUSTOMER_STYLING,User,Carolyn Stobbe,,SCTASK0001439755,"jwn-nap-cus-styl-nonprod-5evd
+jwn-nap-cus-styl-prod-tw5o","app05039-nap-cus-styl-sa@jwn-nap-cus-styl-nonprod-5evd.iam.gserviceaccount.com
+Nonprod sa un-necessary role assigned - Dataproc Executor
+app05039-nap-cus-styl-sa@jwn-nap-cus-styl-prod-tw5o.iam.gserviceaccount.com","Y
+Access Granted (Prod/ Nonprod)",Y,dev-nap-cus-styl-internal,prod-nap-cus-styl-internal,projects/jwn-dataprocvpc-nonprod-2lds/regions/us-west1/subnetworks/nap-cus-styl-02,projects/jwn-dataprocvpc-prod-k36t/regions/us-west1/subnetworks/nap-cus-styl-02,
+nap-sc-ob,APP02560,TECH_NAP_SC_OUTBOUND,User,KRANTHI LATTUPALLI,,SCTASK0001439755,"jwn-nap-sc-ob-nonprod-95w9
+jwn-nap-sc-ob-prod-ii3q","app02560-nap-sc-ob-sa@jwn-nap-sc-ob-nonprod-95w9.iam.gserviceaccount.com
+app02560-nap-sc-ob-sa@jwn-nap-sc-ob-prod-ii3q.iam.gserviceaccount.com","Y
+Access Granted (Prod/ Nonprod)",Y,"dev-nap-sc-ob-internal
+dev-nap-sc-ob-spark-temp","prod-nap-sc-ob-internal
+prod-nap-sc-ob-spark-temp",projects/jwn-dataprocvpc-nonprod-2lds/regions/us-west1/subnetworks/nap-sc-ob-01,projects/jwn-dataprocvpc-prod-k36t/regions/us-west1/subnetworks/nap-sc-ob-01,
+dsa-mrch-prm,APP06792,ACE.PROMO_support,Analytic with Dataproc Serverless,Tanner Moxcey,,SCTASK0001439755,"jwn-dsa-mrch-prm-nonprod-xtn6
+jwn-dsa-mrch-prm-prod-zp5s","app06792-dsa-mrch-prm-sa@jwn-dsa-mrch-prm-nonprod-xtn6.iam.gserviceaccount.com
+app06792-dsa-mrch-prm-sa@jwn-dsa-mrch-prm-prod-zp5s.iam.gserviceaccount.com","Y
+Access Granted (Prod/ Nonprod)",Y,dev-dsa-mrch-prm-internal,prod-dsa-mrch-prm-internal,projects/jwn-dataprocvpc-nonprod-2lds/regions/us-west1/subnetworks/dsa-mrch-prm-01,projects/jwn-dataprocvpc-prod-k36t/regions/us-west1/subnetworks/dsa-mrch-prm-01,
+nap-sc-inflo,APP08983,TECH_NAP_SC_INVENTORY_FLOW,User,Nandita Bhadran,,SCTASK0001439755,"jwn-nap-sc-inflo-nonprod-cp74
+jwn-nap-sc-inflo-prod-25gn","app08983-nap-sc-inflo-sa@jwn-nap-sc-inflo-nonprod-cp74.iam.gserviceaccount.com
+app08983-sc-inventory-flow-sa@jwn-nap-sc-inflo-nonprod-cp74.iam.gserviceaccount.com
+
+
+app08983-nap-sc-inflo-sa@jwn-nap-sc-inflo-prod-25gn.iam.gserviceaccount.com","Y
+Access Granted (Prod/ Nonprod)",Y,"dev-nap-sc-inflo-internal
+dev-nap-sc-inflo-spark-temp","prod-nap-sc-inflo-internal
+prod-nap-sc-inflo-spark-temp",projects/jwn-dataprocvpc-nonprod-2lds/regions/us-west1/subnetworks/nap-sc-inflo-01,projects/jwn-dataprocvpc-prod-k36t/regions/us-west1/subnetworks/nap-sc-inflo-01,
+nap-cus-sell,APP02432,tech_customer_selling,User,Scott Malmquist,,SCTASK0001439755,"jwn-nap-cus-sell-nonprod-i4w9
+jwn-nap-cus-sell-prod-9xr5","app02432-nap-cus-sell-sa@jwn-nap-cus-sell-nonprod-i4w9.iam.gserviceaccount.com
+app02432-nap-cus-sell-sa@jwn-nap-cus-sell-prod-9xr5.iam.gserviceaccount.com","Y
+Access Granted (Prod/ Nonprod)",Y,"dev-nap-cus-sell-internal
+dev-nap-cus-sell-spark-temp","prod-nap-cus-sell-internal
+prod-nap-cus-sell-spark-temp",projects/jwn-dataprocvpc-nonprod-2lds/regions/us-west1/subnetworks/nap-cus-sell-01,projects/jwn-dataprocvpc-prod-k36t/regions/us-west1/subnetworks/nap-cus-sell-01,
+nap-customer,APP07575,TECH_DAS_Customer_AWS_Support_SG,User,Somesh Dubey,,SCTASK0001439755,"jwn-nap-customer-nonprod-tmrz
+jwn-nap-customer-prod-xbm2","app07575-nap-customer-sa@jwn-nap-customer-nonprod-tmrz.iam.gserviceaccount.com
+app07575-nap-customer-sa@jwn-nap-customer-prod-xbm2.iam.gserviceaccount.com","Y
+Access Granted (Prod/ Nonprod)",Y,"dev-nap-customer-internal
+dev-nap-customer-secure
+dev-nap-customer-temp","prod-nap-customer-internal
+prod-nap-customer-secure
+prod-nap-customer-temp",projects/jwn-dataprocvpc-nonprod-2lds/regions/us-west1/subnetworks/nap-customer-01,projects/jwn-dataprocvpc-prod-k36t/regions/us-west1/subnetworks/nap-customer-01,
+nap-crd-pmts,APP08314,TECH_NAP_CREDIT_PAYMENTS,User,Darin Matson,,SCTASK0001439755,"jwn-nap-crd-pmts-nonprod-en2y
+jwn-nap-crd-pmts-prod-n09e","app08314-nap-crd-pmts-sa@jwn-nap-crd-pmts-nonprod-en2y.iam.gserviceaccount.com
+app08314-nap-crd-pmts-sa@jwn-nap-crd-pmts-prod-n09e.iam.gserviceaccount.com","Y
+Access Granted (Prod/ Nonprod)",Y,"dev-nap-crd-pmts-internal
+dev-nap-crd-pmts-secure","prod-nap-crd-pmts-internal
+prod-nap-crd-pmts-secure",projects/jwn-dataprocvpc-nonprod-2lds/regions/us-west1/subnetworks/nap-crd-pmts-01,projects/jwn-dataprocvpc-prod-k36t/regions/us-west1/subnetworks/nap-crd-pmts-01,
+tech-mdp,APP04210,TECH_MDP_GCP,User,Ujjwal Sharma,,SCTASK0001452640,"jwn-tech-mdp-nonprod-o0a7
+jwn-tech-mdp-prod-wpko","app04210-tech-mdp-sa@jwn-tech-mdp-nonprod-o0a7.iam.gserviceaccount.com
+app04210-tech-mdp-sa@jwn-tech-mdp-prod-wpko.iam.gserviceaccount.com","Y
+Access Granted (Prod/ Nonprod)",Y,dev-tech-mdp-internal,prod-tech-mdp-internal,,,
+nap-sc-ib,APP07999,TECH_NAP_SC_ORDERING_INBOUND,User,KRANTHI LATTUPALLI,,SCTASK0001453228 (created at same time as sprint 2),"jwn-nap-sc-ib-nonprod-30cr
+jwn-nap-sc-ib-prod-67ym","app07999-nap-sc-ib-sa@jwn-nap-sc-ib-nonprod-30cr.iam.gserviceaccount.com
+app07999-nap-sc-ib-sa@jwn-nap-sc-ib-prod-67ym.iam.gserviceaccount.com",Y,Y,dev-nap-sc-ib-internal,prod-nap-sc-ib-internal,projects/jwn-dataprocvpc-nonprod-2lds/regions/us-west1/subnetworks/nap-sc-ib-01,projects/jwn-dataprocvpc-prod-k36t/regions/us-west1/subnetworks/nap-sc-ib-01,
+nap-ent-ops,"APP09518
+APP08619",TECH_Enterprise_Operations_Security,User,Chris Bell,,"nonprod - REQ0001979667
+prod - 
+REQ0001979668","jwn-nap-ent-ops-nonprod-0kg7
+jwn-nap-ent-ops-prod-2b5b","app09518-nap-ent-ops-sa@jwn-nap-ent-ops-nonprod-0kg7.iam.gserviceaccount.com
+app09518-nap-ent-ops-sa@jwn-nap-ent-ops-prod-2b5b.iam.gserviceaccount.com
+app08619-nap-ent-ops-sa@jwn-nap-ent-ops-nonprod-0kg7.iam.gserviceaccount.com
+app08619-nap-ent-ops-sa@jwn-nap-ent-ops-prod-2b5b.iam.gserviceaccount.com",,,,,projects/jwn-dataprocvpc-nonprod-2lds/regions/us-west1/subnetworks/nap-ent-ops-01,projects/jwn-dataprocvpc-prod-k36t/regions/us-west1/subnetworks/nap-ent-ops-01,
+nap-wh-ops,APP02592,TECH_NAP_SC_WH_INV_SUPPORT,User,Prasad Sundaramoorthy,,"nonprod -
+REQ0001979672prod - 
+REQ0001979673","jwn-nap-wh-ops-nonprod-90vy
+jwn-nap-wh-ops-prod-4ylu","app02592-nap-wh-ops-sa@jwn-nap-wh-ops-nonprod-90vy.iam.gserviceaccount.com
+app02592-nap-wh-ops-sa@jwn-nap-wh-ops-prod-4ylu.iam.gserviceaccount.com",,,,,projects/jwn-dataprocvpc-nonprod-2lds/regions/us-west1/subnetworks/nap-wh-ops-01,projects/jwn-dataprocvpc-prod-k36t/regions/us-west1/subnetworks/nap-wh-ops-01,
+Merch Analytics Data Mart - Merchandising Full Price,APP00602,,,Tanner Moxcey,,,,,,,,,,,
+Merch Insights,APP07324,,,Jared Hesse,,,,,,,,,,,
+Analytics Insights,APP07324,,,Jared Hesse,,,,,,,,,,,
+MTA,APP08047,,,Jared Hesse,,,,,,,,,,,
+IP Forecast,APP08073,,,Diane Kierce,,,,,,,,,,,
+SSA,APP08134,,,Romulus D'Souza,,,,,,,,,,,
+FLS Store Traffic,APP08150,,,Corey Hilton,,,,,,,,,,,
+Rack Store Traffic,APP08151,,,Corey Hilton,,,,,,,,,,,
+Remote Sales,APP08154,,,Niharika Srivastava,,,,,,,,,,,
+Service Engagement Customer Pipeline,APP08159,,,Niharika Srivastava,,,,,,,,,,,
+NMN Campaign Recap,APP08162,,,Corina Wiles,,,,,,,,,,,
+NMN Reporting Stack,APP08172,,,Corina Wiles,,,,,,,,,,,
+MOTHERSHIP,APP08176,,,Corey Hilton,,,,,,,,,,,
+Appointments Reporting,APP08193,,,Chaya Greisman,,,,,,,,,,,
+SPV Data Pipeline,APP08205,,,Niharika Srivastava,,,,,,,,,,,
+Automated Forecasting,APP08219,,,Corey Hilton,,,,,,,,,,,
+Product Funnel,APP08227,,,Jared Hesse,,,,,,,,,,,
+CCO Cross-Plane Data Pipeline,APP08240,,,Niharika Srivastava,,,,,,,,,,,
+4-Box Email Performance Dashboard,APP08300,,,Romulus D'Souza,,,,,,,,,,,
+Individual Store Sales Model,APP08569,,,Corey Hilton,,,,,,,,,,,
+4-Box Affiliate Performance Dashboard,APP08629,,,Romulus D'Souza,,,,,,,,,,,
+E2E Finance MBR Dashboard,APP08717,,,Corey Hilton,,,,,,,,,,,
+Marketability Customer Base,APP08718,,,Romulus D'Souza,,,,,,,,,,,
+Customer Sandbox,APP08737,,,Niharika Srivastava,,,,,,,,,,,
+Marketability,APP08805,,,Romulus D'Souza,,,,,,,,,,,
+Universal Semantic Layer,APP08818,,,Niharika Srivastava,,,,,,,,,,,
+Affiliates Cost,APP08823,,,Romulus D'Souza,,,,,,,,,,,
+E2E Finance ET Scorecard,APP09037,,,Corey Hilton,,,,,,,,,,,
+F2DD Measurement,APP09085,,,Niharika Srivastava,,,,,,,,,,,
+Location Inventory Tracking and Health,APP09117,,,Emily Simanton,,,,,,,,,,,
+Digital Merch to Object,APP09142,,,Sophie Wang,,,,,,,,,,,
+MMM,APP09211,,,Romulus D'Souza,,,,,,,,,,,
+Consented Customer,APP09267,,,Chaya Greisman,,,,,,,,,,,
+Store Analytics,APP09268,,,Alli Moore,,,,,,,,,,,
+MTA Session X Customer Dashboard,APP09330,,,Romulus D'Souza,,,,,,,,,,,
+Audience Engagement Cohort (AEC) table,APP09388,,,Niharika Srivastava,,,,,,,,,,,
+Personalization Engine,APP09439,,,Fan Tu,,,,,,,,,,,
+NMN Brand Customer Metrics,APP09442,,,Corina Wiles,,,,,,,,,,,

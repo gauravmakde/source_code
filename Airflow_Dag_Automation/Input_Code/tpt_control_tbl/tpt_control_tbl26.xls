@@ -1,0 +1,11 @@
+﻿SELECT * FROM PRD_NAP_JWN_METRICS_UTL.tpt_control_tbl;
+
+4 Rows returned. DBS time = 00:00:01
+
+BLOB/CLOB files written to: C:\Users\x0tf\Documents
+
+job_name,database_name,object_name,object_type,batchusername,truncateindicator,errorlimit,textdelimiter_hexa_flag,textdelimiter,AcceptExcessColumns,AcceptMissingColumns,QuotedData,OpenQuoteMark,s3bucket,s3prefix,s3singlepartfile,s3connectioncount,collist_indicator_flag,collist,rcd_load_tmstp,rcd_update_tmstp,HeaderRcdIndicator,AllFilesHeaderRcdIndicator,APP_ID,DAG_ID,TASK_NAME
+FPA_EXTRACT_CLARITY_ALIGNED_HANE,PRD_NAP_JWN_METRICS_STG,FPA_EXTRACT_CLARITY_ALIGNED_HAN,T,SCH_NAP_JWN_METRICS_BATCH,Y,1,Y,2C,N  ,Y  ,Y,?,?,?,?,20,N,?,7/2/2024 03:22:30.050000,7/2/2024 03:22:30.050000,Y,Y,?,?,?
+FPA_Extract_LDG,PRD_NAP_JWN_METRICS_STG,FPA_Extract_LDG,T,SCH_NAP_JWN_METRICS_BATCH,Y,1,Y,2C,N  ,Y  ,Y,"  ,?,?,?,  20,N,?,2/23/2024 12:25:15.000000,2/23/2024 12:25:15.000000,Y,Y,?,?,?
+FPA_EXTRACT_LEGACY_LDG,PRD_NAP_JWN_METRICS_STG,FPA_EXTRACT_LEGACY_LDG,T,SCH_NAP_JWN_METRICS_BATCH,Y,1,Y,2C,N  ,Y  ,Y,"  ,?,?,?,  20,N,?,3/13/2024 11:16:10.730000,3/13/2024 11:16:10.730000,Y,Y,?,?,?
+FPA_EXTRACT_CLARITY_ALIGNED_LDG,PRD_NAP_JWN_METRICS_STG,FPA_EXTRACT_CLARITY_ALIGNED_LDG,T,SCH_NAP_JWN_METRICS_BATCH,Y,1,Y,2C,N  ,Y  ,Y,"  ,?,?,?,  20,N,?,3/13/2024 11:51:14.390000,3/13/2024 11:51:14.390000,Y,Y,?,?,?

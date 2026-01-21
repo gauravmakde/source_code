@@ -1,0 +1,8 @@
+﻿SELECT * FROM PRD_NAP_FIN_GL_UTL.tpt_control_tbl;
+
+1 Rows returned. DBS time = 00:00:02
+
+BLOB/CLOB files written to: C:\Users\x0tf\Documents
+
+job_name,database_name,object_name,object_type,batchusername,truncateindicator,errorlimit,textdelimiter_hexa_flag,textdelimiter,AcceptExcessColumns,AcceptMissingColumns,QuotedData,OpenQuoteMark,s3bucket,s3prefix,s3singlepartfile,s3connectioncount,collist_indicator_flag,collist,rcd_load_tmstp,rcd_update_tmstp,HeaderRcdIndicator,AllFilesHeaderRcdIndicator,APP_ID,DAG_ID,TASK_NAME
+GL_BAL_IDS_BACK_FILL,PRD_NAP_FIN_GL_STG,GL_BALANCE_BACK_FILL_IDS_LDG,T,SCH_NAP_FIN_GL_BATCH,Y,   1,Y,1F,N  ,N  ,Y,"  ,?,?,?,  20,N,?,8/14/2023 14:24:58.770000,8/14/2023 14:24:58.770000,Y,Y,?,?,?

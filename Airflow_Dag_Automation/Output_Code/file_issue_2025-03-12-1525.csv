@@ -1,0 +1,6 @@
+location,file_name,comment
+D:/Airflow_Dag_Automation/Input_Code/ISF\17284\app06792-merch-analytics-isf\pypeline_sql\assortment_common_tables,backfill_madm.py,Issue with the file
+D:/Airflow_Dag_Automation/Input_Code/ISF\17284\app06792-merch-analytics-isf\pypeline_sql\assortment_common_tables,backfill_receipts.py,Issue with the file
+D:/Airflow_Dag_Automation/Input_Code/ISF\17284\app06792-merch-analytics-isf\pypeline_sql\selection_planning,selection_planning_backfill.py,Issue with the file
+D:/Airflow_Dag_Automation/Input_Code/ISF\17284\app06792-merch-analytics-isf\utils,run_sql.py,Issue with the file
+D:/Airflow_Dag_Automation/Input_Code/ISF\17284\app06792-merch-analytics-isf\utils,SqlExecutor.py,Issue with the file

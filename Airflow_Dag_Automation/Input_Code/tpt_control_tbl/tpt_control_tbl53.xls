@@ -1,0 +1,10 @@
+﻿SELECT * FROM PRD_NAP_HR_PAYROLL_UTL.TPT_CONTROL_TBL;
+
+3 Rows returned. DBS time = 00:00:01
+
+BLOB/CLOB files written to: C:\Users\x0tf\Documents
+
+job_name,database_name,object_name,object_type,batchusername,truncateindicator,errorlimit,textdelimiter_hexa_flag,textdelimiter,AcceptExcessColumns,AcceptMissingColumns,QuotedData,OpenQuoteMark,s3bucket,s3prefix,s3singlepartfile,s3connectioncount,collist_indicator_flag,collist,rcd_load_tmstp,rcd_update_tmstp,HeaderRcdIndicator,AllFilesHeaderRcdIndicator,APP_ID,DAG_ID,TASK_NAME
+earning_deduction_code_to_description_ldg_load,PRD_NAP_HR_PAYROLL_STG,EARNING_DEDUCTION_CODE_TO_DESCRIPTION_LDG,T,SCH_NAP_HR_PAYROLL_BATCH_DEV,Y,   1,N,,,Y  ,Y  ,Y,"  ,?,?,?,20,N,?,1/13/2023 00:17:46.550000,1/13/2023 00:17:46.550000,N,N,?,?,?
+earning_deduction_code_to_group_ldg_load,PRD_NAP_HR_PAYROLL_STG,EARNING_DEDUCTION_CODE_TO_GROUP_LDG,T,SCH_NAP_HR_PAYROLL_BATCH_DEV,Y,   1,N,,,Y  ,Y  ,Y,"  ,?,?,?,20,N,?,1/13/2023 00:17:46.660000,1/13/2023 00:17:46.660000,N,N,?,?,?
+employee_payroll_issued_ldg_load,PRD_NAP_HR_PAYROLL_STG,EMPLOYEE_PAYROLL_ISSUED_LDG,T,SCH_NAP_HR_PAYROLL_BATCH_DEV,Y,   1,N,,,Y  ,Y  ,Y,"  ,?,?,?,20,N,?,1/13/2023 00:17:46.720000,1/13/2023 00:17:46.720000,N,N,?,?,?

@@ -1,0 +1,10 @@
+﻿SELECT * FROM T2DL_DAS_MTA.TPT_CONTROL_TBL;
+
+3 Rows returned. DBS time = 00:00:02
+
+BLOB/CLOB files written to: C:\Users\x0tf\Documents
+
+job_name,database_name,object_name,object_type,batchusername,truncateindicator,errorlimit,textdelimiter_hexa_flag,textdelimiter,AcceptExcessColumns,AcceptMissingColumns,QuotedData,OpenQuoteMark,s3bucket,s3prefix,s3singlepartfile,s3connectioncount,collist_indicator_flag,collist,rcd_load_tmstp,rcd_update_tmstp,HeaderRcdIndicator,AllFilesHeaderRcdIndicator,APP_ID,DAG_ID,TASK_NAME
+mta_mta_acp_scoring_fact_ldg,T2DL_DAS_MTA,mta_acp_scoring_fact_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,7/10/2024 05:42:19.630000,7/10/2024 05:42:19.630000,N,N,?,?,?
+mta_mta_last_touch_ldg,T2DL_DAS_MTA,mta_last_touch_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,7/10/2024 05:42:16.920000,7/10/2024 05:42:16.920000,N,N,?,?,?
+ssa_mkt_attr_fact_ldg,T2DL_DAS_MTA,ssa_mkt_attr_fact_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,9/14/2023 09:16:59.630000,9/14/2023 09:16:59.630000,N,N,?,?,?

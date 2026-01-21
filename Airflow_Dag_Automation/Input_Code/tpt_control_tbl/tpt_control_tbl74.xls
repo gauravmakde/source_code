@@ -1,0 +1,9 @@
+﻿SELECT * FROM T2DL_DAS_NMN.TPT_CONTROL_TBL;
+
+2 Rows returned. DBS time = 00:00:01
+
+BLOB/CLOB files written to: C:\Users\x0tf\Documents
+
+job_name,database_name,object_name,object_type,batchusername,truncateindicator,errorlimit,textdelimiter_hexa_flag,textdelimiter,AcceptExcessColumns,AcceptMissingColumns,QuotedData,OpenQuoteMark,s3bucket,s3prefix,s3singlepartfile,s3connectioncount,collist_indicator_flag,collist,rcd_load_tmstp,rcd_update_tmstp,HeaderRcdIndicator,AllFilesHeaderRcdIndicator,APP_ID,DAG_ID,TASK_NAME
+google_campaign_fact_ldg,T2DL_DAS_NMN,google_campaign_fact_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,11/9/2023 11:00:46.100000,11/9/2023 11:00:46.100000,N,N,?,?,?
+google_campaign_attributed_order_fact_ldg,T2DL_DAS_NMN,google_campaign_attributed_order_fact_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,11/15/2023 16:22:45.580000,11/15/2023 16:22:45.580000,N,N,?,?,?

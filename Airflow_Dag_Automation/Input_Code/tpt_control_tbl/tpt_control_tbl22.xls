@@ -1,0 +1,15 @@
+﻿SELECT * FROM T2DL_DAS_MOA_KPI.TPT_CONTROL_TBL;
+
+8 Rows returned. DBS time = 00:00:01
+
+BLOB/CLOB files written to: C:\Users\x0tf\Documents
+
+job_name,database_name,object_name,object_type,batchusername,truncateindicator,errorlimit,textdelimiter_hexa_flag,textdelimiter,AcceptExcessColumns,AcceptMissingColumns,QuotedData,OpenQuoteMark,s3bucket,s3prefix,s3singlepartfile,s3connectioncount,collist_indicator_flag,collist,rcd_load_tmstp,rcd_update_tmstp,HeaderRcdIndicator,AllFilesHeaderRcdIndicator,APP_ID,DAG_ID,TASK_NAME
+nmn_gl_ldg,T2DL_DAS_MOA_KPI,nmn_gl_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,12/7/2023 03:51:58.180000,12/7/2023 03:51:58.180000,N,N,?,?,?
+mmm_forecast_ldg,T2DL_DAS_MOA_KPI,mmm_forecast_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,1/11/2024 00:36:04.280000,1/11/2024 00:36:04.280000,N,N,?,?,?
+gl_sourced_ldg,T2DL_DAS_MOA_KPI,gl_sourced_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,12/7/2023 03:35:00.010000,12/7/2023 03:35:00.010000,N,N,?,?,?
+loyalty_ldg,T2DL_DAS_MOA_KPI,loyalty_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,1/11/2024 00:29:19.750000,1/11/2024 00:29:19.750000,N,N,?,?,?
+customer_plan_ldg,T2DL_DAS_MOA_KPI,customer_plan_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,12/7/2023 02:17:25.100000,12/7/2023 02:17:25.100000,N,N,?,?,?
+mmm_decomp_export_ldg,T2DL_DAS_MOA_KPI,mmm_decomp_export_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,1/11/2024 00:41:31.050000,1/11/2024 00:41:31.050000,N,N,?,?,?
+brand_health_ldg,T2DL_DAS_MOA_KPI,brand_health_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,1/11/2024 00:25:56.600000,1/11/2024 00:25:56.600000,N,N,?,?,?
+nmn_brand_ldg,T2DL_DAS_MOA_KPI,nmn_brand_ldg,T,*,Y,1,Y,1F,N  ,N  ,N,?,?,?,?,20,N,?,12/7/2023 03:48:50.830000,12/7/2023 03:48:50.830000,N,N,?,?,?
