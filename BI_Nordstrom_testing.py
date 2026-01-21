@@ -19,8 +19,6 @@ SITE_CONTENT_URL = 'AS'
 
 debug_enable = False
 
-USERNAME="onix_API"
-PASSWORD="7nnjNNDHS62jm0ouEGd5DA==:htWCU5eXo4jMcWatZgVNJ43Cphd3ybX9"
 
 
 timestr = time.strftime("%Y-%m-%d-%H%M")

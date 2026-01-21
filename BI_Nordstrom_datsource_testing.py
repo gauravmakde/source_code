@@ -14,8 +14,8 @@ if not os.path.exists(directory):
 # Constants
 BASE_URL = 'https://tableauuat.nordstrom.com/api/3.19'
 SITE_CONTENT_URL = 'OnixStaging'
-USERNAME = "onix-reports"
-PASSWORD = "VqjiSb3TSbulH+TlPXMMgg==:buK2HRfRyVoqHkwbOSuIejyRIIOS1wSN"
+USERNAME = ""
+PASSWORD = ""
 service_account_file = 'service account/SA_new_cf_nordstrom.json'
 
 # Read the service account JSON key file

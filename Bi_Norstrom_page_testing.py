@@ -31,8 +31,6 @@ RENAMED_WORKBOOK_NAME = 'BI_Upload_test.twb'
 BASE_URL = 'https://tableauuat.nordstrom.com/api/3.19'
 SITE_CONTENT_URL = 'OnixSandbox'
 
-USERNAME="onix_API"
-PASSWORD="7nnjNNDHS62jm0ouEGd5DA==:htWCU5eXo4jMcWatZgVNJ43Cphd3ybX9"
 
 #Below function to get auth token for Tableue Server
 def get_auth_token():

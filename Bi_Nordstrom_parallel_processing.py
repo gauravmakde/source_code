@@ -20,8 +20,8 @@ table_id = 'master_table_demo'  # Replace with your table name
 BASE_URL = 'https://tableauuat.nordstrom.com/api/3.19'
 SITE_CONTENT_URL = 'AS'
 
-USERNAME = "parallel_processing"
-PASSWORD = "J/zpaOA+SvqylsOm+NBu8g==:K1GNdsyVkw2bfH58hGFnQFQ5D7Z56jTU"
+USERNAME = ""
+PASSWORD = ""
 
 start_time = datetime.datetime.now()
 

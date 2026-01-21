@@ -13,8 +13,6 @@ if not os.path.exists(directory):
 BASE_URL = 'https://tableauuat.nordstrom.com/api/3.19'
 SITE_CONTENT_URL = 'OnixSandbox'
 
-USERNAME="onix_API"
-PASSWORD="7nnjNNDHS62jm0ouEGd5DA==:htWCU5eXo4jMcWatZgVNJ43Cphd3ybX9"
 
 def get_auth_token():
     url = f'{BASE_URL}/auth/signin'
